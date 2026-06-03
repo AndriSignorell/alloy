@@ -1,8 +1,8 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.901
-Date: 2026-05-21
+Version: 0.0.0.902
+Date: 2026-06-04
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
@@ -13,8 +13,11 @@ License: GPL (>= 2)
 LinkingTo: Rcpp, RcppParallel, RcppArmadillo  
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
-Suggests: VGAM
-Imports: e1071, C50, rpart, randomForest, pROC, methods, relaimpo, rpart.plot, lattice, lmtest, car, robustbase, class, NeuralNetTools, naivebayes, sandwich, AER, boot, pscl
+Suggests: VGAM, R.rsp, testthat
+Imports: e1071, C50, rpart, randomForest, pROC, methods, relaimpo, 
+         rpart.plot, lmtest, car, robustbase, class, 
+         NeuralNetTools, naivebayes, sandwich, AER, boot, pscl,
+         aurora, bedrock, glmnet, gbm
 VignetteBuilder: R.rsp
 URL: https://andrisignorell.github.io/alloy/,
             https://github.com/AndriSignorell/alloy/
