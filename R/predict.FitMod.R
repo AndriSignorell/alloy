@@ -25,35 +25,43 @@ predict.FitMod <- function(object, newdata = NULL,
                            s = "lambda.1se",
                            type = NULL,
                            ...) {
-
   output  <- match.arg(output)
   fitfn   <- object$fitfn
   is_reg  <- fitfn %in% c("lm", "lmrob", "tobit", "poisson",
-                           "quasipoisson", "gamma", "negbin", "zeroinfl")
-
+                          "quasipoisson", "gamma", "negbin", "zeroinfl")
+  
+  # Strip FitMod class to avoid infinite recursion
   obj <- object
   class(obj) <- class(obj)[class(obj) != "FitMod"]
-
-  # --- regression: pass type through if explicitly given ---
+  
+  # --- cox: risk scores by default, type overrideable ---
+  if (fitfn == "coxph") {
+    args <- list(obj, type = if (!is.null(type)) type else "risk")
+    if (!is.null(newdata)) args$newdata <- newdata
+    return(do.call(predict, c(args, list(...))))
+  }
+  
+  # --- regression ---
   if (is_reg) {
     if (is.null(newdata) && is.null(type))
       return(fitted(obj))
     args <- list(obj)
-    if (!is.null(newdata))  args$newdata <- newdata
-    if (!is.null(type))     args$type    <- type
+    if (!is.null(newdata)) args$newdata <- newdata
+    if (!is.null(type))    args$type    <- type
     return(do.call(predict, c(args, list(...))))
   }
-
-  # --- classification: type is handled internally, not passed through ---
+  
+  # --- classification ---
   .pred_prob  <- function() .predict_prob(obj, fitfn, newdata, s = s, ...)
   .pred_class <- function() .predict_class(obj, fitfn, newdata, s = s, ...)
-
   switch(output,
-    prob  = .pred_prob(),
-    class = data.frame(class = .pred_class()),
-    both  = data.frame(.pred_prob(), class = .pred_class())
+         prob  = .pred_prob(),
+         class = data.frame(class = .pred_class()),
+         both  = data.frame(.pred_prob(), class = .pred_class())
   )
 }
+
+
 
 # -------------------------------------------------------------------------
 # Internal: extract probability matrix, always as data.frame

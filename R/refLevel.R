@@ -51,7 +51,7 @@
 #' @export
 refLevel <- function(x) {
   
-  if (!inherits(x, c("lm", "glm", "lmerMod", "glmerMod", "lmrob")))
+  if (!inherits(x, c("lm", "glm", "lmerMod", "glmerMod", "lmrob", "survreg", "coxph")))
     stop("x must be a model object (lm, glm, lmer, ...)")
   
   # Build contrast list once — reused for every predictor
@@ -60,16 +60,19 @@ refLevel <- function(x) {
   # Return the reference level for a single factor variable
   refCat <- function(var) {
     ct  <- cs[[var]]
-    lvl <- levels(x$model[[var]])
     
-    # Contrast stored as a string (e.g. after options(contrasts = ...))
+    # For survreg/tobit: levels are not in model$model — get from xlevels
+    lvl <- if (!is.null(x$xlevels[[var]]))
+      x$xlevels[[var]]
+    else
+      levels(x$model[[var]])
+    
     if (is.character(ct)) {
       if (ct == "contr.treatment")
         return(lvl[1L])
       stop(sprintf("Variable '%s': unsupported contrast '%s'", var, ct))
     }
     
-    # Contrast stored as a matrix: reference row has no 1-entry
     if (is.matrix(ct)) {
       ros     <- rowSums(ct == 1)
       ref_idx <- which(ros == 0L)
@@ -83,6 +86,7 @@ refLevel <- function(x) {
     
     stop(sprintf("Variable '%s': unrecognised contrast format", var))
   }
+  
   
   # Identify all factor predictors (exclude the response variable)
   dc    <- attr(x[["terms"]], "dataClasses")

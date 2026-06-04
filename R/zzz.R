@@ -14,6 +14,8 @@
 }
 
 
+
+
 # if starting environment is somwhere needed
 # .DescToolsEnv <- new.env(parent = emptyenv())
 
@@ -27,5 +29,6 @@
 #' @importFrom bedrock setNamesX unwhich isDichotomous
 #' 
 #' @importFrom nnet multinom
+#' @importFrom AER tobit
 #'              
 NULL

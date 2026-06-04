@@ -324,6 +324,13 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
       learning_rate = 0.1
     ),
     fix_call = "xgboost"
+  ),
+  
+  coxph = list(
+    pkg      = "survival",
+    fn       = "coxph",
+    defaults = list(model = TRUE, x = TRUE),
+    fix_call = "coxph"
   )
   
   )
