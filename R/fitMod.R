@@ -196,7 +196,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   gamma = list(
     pkg      = "stats",
     fn       = "glm",
-    defaults = list(family = Gamma(link = "log")),
+    defaults = list(family = quote(Gamma(link = "log"))),
     fix_call = "glm"
   ),
   

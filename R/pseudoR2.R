@@ -198,15 +198,20 @@ pseudoR2 <- function(fit, which = "McFadden") {
 #' @noRd
 .getPredictions <- function(x, info) {
   
-  if(info$type == "glm") {
+  if (info$type == "glm") {
+    # Use fitted() and direct glm predict to avoid dispatching to
+    # predict.FitMod which returns a data.frame instead of a vector
+    obj <- x
+    class(obj) <- class(obj)[class(obj) != "FitMod"]
     return(list(
-      link = predict(x, type = "link"),
-      resp = predict(x, type = "response"),
-      y = x$y,
-      family = x$family$family,
+      link    = predict(obj, newdata = NULL, type = "link"),
+      resp    = fitted(x),
+      y       = x$y,
+      family  = x$family$family,
       linkfun = x$family$link
     ))
   }
+  
   
   if(info$type == "vglm") {
     

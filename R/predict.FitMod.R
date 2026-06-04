@@ -62,9 +62,14 @@ predict.FitMod <- function(object, newdata = NULL,
 #' @keywords internal
 .predict_prob <- function(object, fitfn, newdata, ...) {
   
+  # Remove arguments handled internally to avoid conflicts
+  dots <- list(...)
+  dots[["type"]] <- NULL
+  dots[["s"]]    <- NULL
+  
   # Default args — overridden below for models requiring explicit newdata
   args <- if (is.null(newdata)) list(object)
-             else list(object, newdata = newdata)
+  else                  list(object, newdata = newdata)
   
   # Lazy evaluation — only computed for models that need it
   args_explicit <- function()
@@ -74,34 +79,34 @@ predict.FitMod <- function(object, newdata = NULL,
                 
                 logit = ,
                 glm   = {
-                  p <- do.call(predict, c(args, list(type = "response", ...)))
+                  p <- do.call(predict, c(args, list(type = "response"), dots))
                   cbind("0" = 1 - p, "1" = p)
                 },
                 
                 multinom = {
-                  do.call(predict, c(args, list(type = "probs", ...)))
+                  do.call(predict, c(args, list(type = "probs"), dots))
                 },
                 
                 polr = {
-                  do.call(predict, c(args, list(type = "probs", ...)))
+                  do.call(predict, c(args, list(type = "probs"), dots))
                 },
                 
                 rpart = {
-                  do.call(predict, c(args, list(type = "prob", ...)))
+                  do.call(predict, c(args, list(type = "prob"), dots))
                 },
                 
                 lda = ,
                 qda = {
-                  do.call(predict, c(args, ...))$posterior
+                  do.call(predict, c(args, dots))$posterior
                 },
                 
                 svm = {
-                  p <- do.call(predict, c(args_explicit(), list(probability = TRUE, ...)))
+                  p <- do.call(predict, c(args_explicit(), list(probability = TRUE), dots))
                   attr(p, "probabilities")
                 },
                 
                 nnet = {
-                  p <- do.call(predict, c(args, list(type = "raw", ...)))
+                  p <- do.call(predict, c(args, list(type = "raw"), dots))
                   if (is.vector(p) || ncol(p) == 1L) {
                     p <- as.numeric(p)
                     cbind("0" = 1 - p, "1" = p)
@@ -111,21 +116,20 @@ predict.FitMod <- function(object, newdata = NULL,
                 },
                 
                 naiveBayes = {
-                  do.call(predict, c(args, list(type = "prob", ...)))
+                  do.call(predict, c(args, list(type = "prob"), dots))
                 },
                 
                 C5.0 = {
-                  do.call(predict, c(args_explicit(), list(type = "prob", ...)))
+                  do.call(predict, c(args_explicit(), list(type = "prob"), dots))
                 },
                 
                 randomForest = {
-                  do.call(predict, c(args_explicit(), list(type = "prob", ...)))
+                  do.call(predict, c(args_explicit(), list(type = "prob"), dots))
                 },
                 
                 lb = {
-                  do.call(predict, c(args_explicit(), list(type = "raw", ...)))
+                  do.call(predict, c(args_explicit(), list(type = "raw"), dots))
                 },
-                
                 
                 glmnet = {
                   nd <- if (is.null(newdata)) {
@@ -145,33 +149,26 @@ predict.FitMod <- function(object, newdata = NULL,
                   else model.matrix(object$formula[-2L], data = newdata)[, -1L, drop = FALSE]
                   p   <- predict(obj, nd)
                   lvl <- object$y_levels
-                  
-                  # New xgboost API returns matrix directly for multi:softprob
                   if (is.matrix(p)) {
                     colnames(p) <- lvl
                   } else if (!is.null(lvl)) {
-                    # Fallback for old flat vector format
                     p <- matrix(p, ncol = length(lvl), byrow = TRUE)
                     colnames(p) <- lvl
                   } else {
                     p <- cbind("0" = 1 - p, "1" = p)
                   }
                   as.data.frame(p)
-                },                
+                },
                 
                 stop(sprintf("No probability prediction implemented for fitfn = '%s'", fitfn))
   )
   
   mat <- as.data.frame(mat)
-  
-  # Preserve original level names — only fix truly invalid characters
-  # (spaces, slashes etc.) but keep numeric-looking names as-is
   colnames(mat) <- gsub("[^a-zA-Z0-9._|]", ".", colnames(mat))
-  
   mat <- .normalise_prob_cols(mat, object)
   mat
-  
 }
+
 
 
 # -------------------------------------------------------------------------
@@ -181,7 +178,12 @@ predict.FitMod <- function(object, newdata = NULL,
 #' @keywords internal
 .predict_class <- function(object, fitfn, newdata, ...) {
   
-  args          <- if (is.null(newdata)) list(object)
+  # Remove arguments handled internally to avoid conflicts
+  dots <- list(...)
+  dots[["type"]] <- NULL
+  dots[["s"]]    <- NULL
+  
+  args <- if (is.null(newdata)) list(object)
   else                  list(object, newdata = newdata)
   
   # Lazy evaluation — only computed for models that need it
@@ -192,37 +194,37 @@ predict.FitMod <- function(object, newdata = NULL,
                 
                 logit = ,
                 glm   = {
-                  p   <- do.call(predict, c(args, list(type = "response", ...)))
+                  p   <- do.call(predict, c(args, list(type = "response"), dots))
                   lvl <- levels(response(object))
                   factor(ifelse(p > 0.5, lvl[2L], lvl[1L]), levels = lvl)
                 },
                 
                 multinom = ,
                 polr     = {
-                  do.call(predict, c(args, list(type = "class", ...)))
+                  do.call(predict, c(args, list(type = "class"), dots))
                 },
                 
                 rpart = {
-                  do.call(predict, c(args, list(type = "class", ...)))
+                  do.call(predict, c(args, list(type = "class"), dots))
                 },
                 
                 lda = ,
                 qda = {
-                  do.call(predict, c(args, ...))$class
+                  do.call(predict, c(args, dots))$class
                 },
                 
                 svm = {
-                  do.call(predict, c(args_explicit(), ...))
+                  do.call(predict, c(args_explicit(), dots))
                 },
                 
                 C5.0 = ,
                 randomForest = ,
                 lb = {
-                  do.call(predict, c(args_explicit(), list(type = "class", ...)))
+                  do.call(predict, c(args_explicit(), list(type = "class"), dots))
                 },
                 
                 nnet = {
-                  p <- do.call(predict, c(args, list(type = "raw", ...)))
+                  p <- do.call(predict, c(args, list(type = "raw"), dots))
                   if (is.vector(p) || ncol(p) == 1L) {
                     lvl <- levels(response(object))
                     factor(ifelse(as.numeric(p) > 0.5, lvl[2L], lvl[1L]), levels = lvl)
@@ -232,7 +234,7 @@ predict.FitMod <- function(object, newdata = NULL,
                 },
                 
                 naiveBayes = {
-                  do.call(predict, c(args, list(type = "class", ...)))
+                  do.call(predict, c(args, list(type = "class"), dots))
                 },
                 
                 glmnet = {
@@ -242,7 +244,6 @@ predict.FitMod <- function(object, newdata = NULL,
                     model.matrix(object$formula[-2L], data = newdata)[, -1L, drop = FALSE]
                   }
                   p <- predict(object, newx = nd, s = "lambda.1se", type = "class")
-                  # predict.cv.glmnet returns a matrix — extract first column as character
                   as.factor(as.character(p[, 1L]))
                 },
                 
@@ -252,7 +253,6 @@ predict.FitMod <- function(object, newdata = NULL,
                   else model.matrix(object$formula[-2L], data = newdata)[, -1L, drop = FALSE]
                   p   <- predict(obj, nd)
                   lvl <- object$y_levels
-                  
                   if (is.matrix(p)) {
                     cls <- lvl[max.col(p)]
                   } else if (!is.null(lvl)) {
@@ -263,11 +263,11 @@ predict.FitMod <- function(object, newdata = NULL,
                   }
                   as.factor(cls)
                 },
-
+                
                 stop(sprintf("No class prediction implemented for fitfn = '%s'", fitfn))
   )
   
-  as.factor(cls)
+  if (is.factor(cls)) cls else as.factor(cls)
 }
 
 
