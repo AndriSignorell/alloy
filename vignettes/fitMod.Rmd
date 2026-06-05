@@ -285,8 +285,8 @@ structure is specified in the formula using `lme4` notation:
 `(1 | group)` for a random intercept, `(1 + x | group)` for random
 intercept and slope.
 
-[UCLA reference — linear mixed models](https://stats.oarc.ucla.edu/r/dae/linear-mixed-effects-models-using-r/)  
-[UCLA reference — mixed logistic regression](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
+[UCLA reference - linear mixed models](https://stats.oarc.ucla.edu/r/dae/linear-mixed-effects-models-using-r/)  
+[UCLA reference - mixed logistic regression](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
 
 ### Linear mixed model (`lmMixed`)
 
