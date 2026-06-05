@@ -91,7 +91,7 @@
 
 #' @export
 predict.FitMod <- function(object, newdata = NULL,
-                           output = c("prob", "class", "both"),
+                           output = c("prob", "class", "both", "where", "leaf"),
                            s = "lambda.1se",
                            type = NULL,
                            ...) {
@@ -122,6 +122,15 @@ predict.FitMod <- function(object, newdata = NULL,
     args <- list(obj, type = if (!is.null(type)) type else "response")
     if (!is.null(newdata)) args$newdata <- newdata
     return(do.call(predict, c(args, list(...))))
+  }
+  
+  # --- rpart: leaf/where output ---
+  if (fitfn == "rpart" && output %in% c("where", "leaf")) {
+    if (is.null(newdata))
+      return(if (output == "where") obj$where
+             else rownames(obj$frame)[obj$where])
+    else
+      return(.predict.leaves(obj, newdata = newdata, type = output))
   }
   
   # --- regression (including lme4 regression models) ---
@@ -400,6 +409,69 @@ predict.FitMod <- function(object, newdata = NULL,
 }
 
 
+# -------------------------------------------------------------------------
+# Internal: extract predicted leaf for an rpart
+# -------------------------------------------------------------------------
+
+
+#' @keywords internal
+.predict.leaves <- function(rp, newdata, type = "where") {
+  
+  if (type == "where") {
+    rp$frame$yval    <- seq_len(nrow(rp$frame))
+    should.be.leaves <- which(rp$frame[, 1L] == "<leaf>")
+  } else if (type == "leaf") {
+    rp$frame$yval    <- rownames(rp$frame)
+    should.be.leaves <- rownames(rp$frame)[rp$frame[, 1L] == "<leaf>"]
+  } else {
+    stop("type must be 'where' or 'leaf'")
+  }
+  
+  leaves           <- predict(rp, newdata = newdata, type = "vector")
+  should.be.leaves <- which(rp$frame[, 1L] == "<leaf>")
+  bad.leaves       <- leaves[!leaves %in% should.be.leaves]
+  
+  if (length(bad.leaves) == 0L)
+    return(leaves)
+  
+  u.bad.leaves <- unique(bad.leaves)
+  u.bad.nodes  <- rownames(rp$frame)[u.bad.leaves]
+  all.nodes    <- rownames(rp$frame)[rp$frame[, 1L] == "<leaf>"]
+  
+  # Find nearest leaf ancestor for misclassified observations
+  is.descendant <- function(all.leaves, node) {
+    if (length(all.leaves) == 0L) return(logical(0L))
+    all.leaves <- as.numeric(all.leaves)
+    node       <- as.numeric(node)
+    result     <- logical(length(all.leaves))
+    for (i in seq_along(all.leaves)) {
+      leaf <- all.leaves[i]
+      while (leaf > node) {
+        leaf <- trunc(leaf / 2L)
+        if (leaf == node) { result[i] <- TRUE; break }
+      }
+    }
+    result
+  }
+  
+  where.tbl <- table(rp$where)
+  names(where.tbl) <- rownames(rp$frame)[as.integer(names(where.tbl))]
+  
+  for (u in seq_along(u.bad.nodes)) {
+    desc.vec <- is.descendant(all.nodes, u.bad.nodes[u])
+    me       <- where.tbl[all.nodes][desc.vec]
+    winner   <- names(me)[me == max(me)][1L]
+    leaves[leaves == u.bad.leaves[u]] <- which(rownames(rp$frame) == winner)
+  }
+  leaves
+}
+
+
+
+# -------------------------------------------------------------------------
+# Internal: normalizing
+# -------------------------------------------------------------------------
+
 
 # Ensure newdata is set - some packages (e1071, C50) require explicit
 # newdata even for training data predictions
@@ -451,12 +523,6 @@ predict.FitMod <- function(object, newdata = NULL,
 }
 
 
-# 
-# # Helper: get optimal n.trees for gbm
-# .gbm_ntrees <- function(object) {
-#   tryCatch(
-#     gbm::gbm.perf(object, method = "cv", plot.it = FALSE),
-#     error = function(e) object$n.trees
-#   )
-# }
-# 
+
+
+

@@ -7,7 +7,7 @@
 \method{predict}{FitMod}(
   object,
   newdata = NULL,
-  output = c("prob", "class", "both"),
+  output = c("prob", "class", "both", "where", "leaf"),
   s = "lambda.1se",
   type = NULL,
   ...

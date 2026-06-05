@@ -1,4 +1,45 @@
-
+ 
+# Stand Entwicklung alloy: 
+# 
+# Package alloy – aktueller Stand (Version 0.0.0.906)
+# Kernfunktion fitMod() – einheitliches Interface für 30+ Modelltypen:
+# 
+# Regression: lm, lmrob, logit, poisson, quasipoisson, gamma, negbin, zeroinfl, tobit, polr, multinom
+# Survival: coxph, weibull, exponential, lognormal, loglogistic
+# Mixed: lmMixed, logitMixed, poissonMixed, negbinMixed, gammaMixed
+# ML: randomForest, nnet, rpart, C5.0, svm, naiveBayes, lda, qda, glmnet, xgboost
+#
+# Print-Output – Stata-ähnlich, konsistent:
+#   
+#   CIs, p-Werte, Referenzkategorie-Header
+# output = "or"/"irr"/"hr"/"tr"/"genuine"
+# vcov = "HC3" für robuste SE
+# ML-Modelle: Variable importance + Confusion matrix + Accuracy/Kappa/c-statistic
+# 
+# predict.FitMod() – einheitlich:
+#   
+# Regression: numerischer Vektor
+# Klassifikation: output = "prob"/"class"/"both" als data.frame
+# Spaltenreihenfolge immer nach Factor-Levels
+# 
+# varImp() – Cleveland Dotplot, scale = "max"/"sum"/"none"
+# Datensätze im Package: Swiss, Lahigh, Admit, Apt, Ologit, IceCream, Whas100, Fish, BioChemists, Pima, Contraception
+# Vignette fitMod.Rmd – fast fertig, Mixed Models noch einzufügen
+# Offen / nächste Schritte:
+#   
+# Vignette finalisieren (Mixed Models + ML-Output)
+# summary.FitMod implementieren
+# relImp() für Regression via relaimpo
+# Roxygen-Doku vervollständigen
+# 
+# Design-Regeln:
+#   
+# PascalCase für Datensätze (IceCream)
+# lowerCamelCase für Modellobjekte (fitLm) und Funktionen (fitMod)
+# Modeler denkt in Modellen, nicht in Funktionen ("logit" statt glm(family="binomial"))
+# Stata-ähnlicher Output
+# UCLA als Referenz für Theorie
+# 
 
 
 Rcpp::compileAttributes()
@@ -34,6 +75,7 @@ lapply(list.files("R", full.names = TRUE), function(f) {
 fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
 r <- roc(fitLogit)
 confint(r)
+
 
 #=============================================================================
 # prepare datasets
@@ -180,6 +222,9 @@ fitLogitMixed <- fitMod(use ~ age + urban + (1|district),
                         data = Contraception, fitfn = "logitMixed")
 fitLogitMixed
 predict(fitLogitMixed, output = "both")
+
+
+
 
 
 
