@@ -27,7 +27,7 @@ original formula.  This is intentional: it avoids complex formula
 reconstruction for transformed terms (\code{poly()}, \code{ns()}, etc.)
 and is consistent with the Type-II approach used in \pkg{car}.  As a
 consequence, \code{offset}, \code{subset}, and special formula terms are
-not re-evaluated in the reduced fits — they are already baked into the
+not re-evaluated in the reduced fits - they are already baked into the
 model matrix.
 
 Fits that fail to converge are silently set to \code{NA}.  Note that

@@ -23,19 +23,27 @@ Default is \code{\link[stats]{na.pass}}.}
 \code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
 \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
 \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-\code{"svm"}, \code{"naive_bayes"}, \code{"lb"}.
+\code{"svm"}, \code{"naive_bayes"}, \code{"randomForest"},
+\code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
+\code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
+\code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
+\code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
 If \code{NULL} (default) the method is chosen automatically.}
 }
 \value{
-An object of class \code{c("fitMod", <original class>)}.
+An object of class \code{c("FitMod", <original class>)}.
+For \code{xgboost} and \code{lme4} models, a list of class
+\code{c("FitMod", "FitMod.xgboost")} or
+\code{c("FitMod", "FitMod.lme4")} wrapping the original model
+object in \code{$model}.
 }
 \description{
 A unified interface for fitting a wide range of regression and
 classification models.  When \code{fitfn} is omitted the appropriate
 method is chosen automatically from the type of the response variable.
-The return value is always an object of class \code{"fitMod"} layered on
+The return value is always an object of class \code{"FitMod"} layered on
 top of the original model object, so all standard methods
-(\code{predict}, \code{summary}, \code{coef}, \ldots) continue to work.
+(\code{predict}, \code{print}, \code{coef}, \ldots) continue to work.
 }
 \examples{
 # Auto-detection
@@ -44,5 +52,8 @@ fitMod(Sepal.Length ~ ., data = iris)   # -> lm
 
 # Explicit
 fitMod(Species ~ ., data = iris, fitfn = "rpart")
+
+# Mixed models
+fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
 
 }

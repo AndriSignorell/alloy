@@ -19,8 +19,7 @@
 #'   \code{"response"} carries the name of the response variable as a
 #'   character string, or \code{NA_character_} if it cannot be determined.
 #'
-#' @seealso \code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}},
-#'   \code{\link{response_binary}} for ROC-specific validation.
+#' @seealso \code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}}
 
 #' @export
 response <- function(x, ...) {
@@ -53,6 +52,11 @@ response <- function(x, ...) {
 }
 
 
+
+
+# == internal helper functions =============================================
+
+
 #' Extract and validate a binary response from a fitted model
 #'
 #' Wrapper around \code{\link{response}} that additionally validates that
@@ -82,9 +86,6 @@ response <- function(x, ...) {
   res
 }
 
-
-
-# == internal helper functions =============================================
 
 
 # Extract response name from terms, works for any model that has x$terms

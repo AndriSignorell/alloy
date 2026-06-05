@@ -29,6 +29,5 @@ the response variable is attached as the \code{"response"} attribute of
 the return value.
 }
 \seealso{
-\code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}},
-\code{\link{response_binary}} for ROC-specific validation.
+\code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}}
 }

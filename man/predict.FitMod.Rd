@@ -21,19 +21,93 @@ fitted values on the training data are returned.}
 
 \item{output}{Character string controlling the output for classification
 models.  One of \code{"prob"} (default), \code{"class"}, or
-\code{"both"}.  Ignored for regression models.}
+\code{"both"}.  Ignored for regression and survival models.}
+
+\item{s}{For \code{fitfn = "glmnet"} only: the value of the penalty
+parameter \eqn{\lambda} at which predictions are made.  Passed to
+\code{\link[glmnet]{predict.cv.glmnet}}.  Default is
+\code{"lambda.1se"}.}
+
+\item{type}{For regression models (\code{lm}, \code{glm}, etc.): the
+\code{type} argument passed to the underlying \code{predict} method
+(e.g. \code{"response"}, \code{"link"}).  For Cox models the default
+is \code{"risk"}; for parametric survival models the default is
+\code{"response"}.  Ignored for classification models (use
+\code{output} instead).}
 
 \item{...}{Further arguments passed to the underlying predict method.}
 }
 \value{
-For regression models: a numeric vector of predicted values.
-For classification models: a \code{data.frame} with one column per
-class (if \code{output = "prob"}), a single column \code{class} (if
-\code{output = "class"}), or both combined (if \code{output = "both"}).
+\describe{
+\item{Regression models (\code{lm}, \code{lmrob}, \code{poisson},
+\code{quasipoisson}, \code{gamma}, \code{negbin}, \code{zeroinfl},
+\code{tobit})}{A named numeric vector of fitted/predicted values.}
+\item{Survival models (\code{coxph})}{A numeric vector of predicted
+risk scores (\code{type = "risk"} by default).}
+\item{Parametric survival models (\code{weibull}, \code{exponential},
+\code{lognormal}, \code{loglogistic})}{A numeric vector of predicted
+survival times (\code{type = "response"} by default).}
+\item{Classification models}{
+\describe{
+\item{\code{output = "prob"}}{A \code{data.frame} with one column
+per class containing predicted probabilities.  Column names match
+the factor levels of the response variable.}
+\item{\code{output = "class"}}{A \code{data.frame} with a single
+column \code{class} (factor) containing the predicted class.}
+\item{\code{output = "both"}}{The probability columns and the
+\code{class} column combined in one \code{data.frame}.}
+}
+}
+}
 }
 \description{
-Unified predict interface for all models fitted via \code{\link{FitMod}}.
-For regression models the predicted values are returned as a numeric
-vector.  For classification models either class probabilities, predicted
-classes, or both are returned as a \code{data.frame}.
+Unified predict interface for all models fitted via \code{\link{fitMod}}.
+For regression and survival models the predicted values are returned as a
+numeric vector.  For classification models either class probabilities,
+predicted classes, or both are returned as a \code{data.frame} with
+consistent column names across all model types.
+}
+\details{
+For classification models the column order of probability outputs is
+always aligned with the factor levels of the response variable,
+regardless of which model type is used.  This ensures that
+\code{predict(fitLogit)} and \code{predict(fitRf)} return columns in
+the same order.
+
+Models that require explicit \code{newdata} even for training-data
+predictions (e.g. \code{svm}, \code{C5.0}, \code{randomForest}) are
+handled transparently via an internal helper.
+
+For \code{fitfn = "logit"}, calling \code{predict(object)} returns a
+two-column probability \code{data.frame} (like all other classifiers).
+To obtain the linear predictor (log-odds), use
+\code{predict(object, type = "link")}.
+}
+\examples{
+# Regression
+fitLm <- fitMod(Fertility ~ ., swiss)
+head(predict(fitLm))
+
+# Binary classification - probabilities
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+head(predict(fitLogit))
+head(predict(fitLogit, output = "both"))
+
+# Multinomial classification
+fitMult <- fitMod(ice_cream ~ video + puzzle + female,
+                  IceCream, fitfn = "multinom")
+head(predict(fitMult, output = "both"))
+
+# Cox model - risk scores
+fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100, fitfn = "coxph")
+head(predict(fitCox))
+
+# Parametric survival - expected survival time
+fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
+                 fitfn = "weibull")
+head(predict(fitWei))
+
+}
+\seealso{
+\code{\link{fitMod}}, \code{\link{print.FitMod}}
 }

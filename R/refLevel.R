@@ -54,14 +54,14 @@ refLevel <- function(x) {
   if (!inherits(x, c("lm", "glm", "lmerMod", "glmerMod", "lmrob", "survreg", "coxph")))
     stop("x must be a model object (lm, glm, lmer, ...)")
   
-  # Build contrast list once — reused for every predictor
+  # Build contrast list once - reused for every predictor
   cs <- attr(model.matrix(x), "contrasts")
   
   # Return the reference level for a single factor variable
   refCat <- function(var) {
     ct  <- cs[[var]]
     
-    # For survreg/tobit: levels are not in model$model — get from xlevels
+    # For survreg/tobit: levels are not in model$model - get from xlevels
     lvl <- if (!is.null(x$xlevels[[var]]))
       x$xlevels[[var]]
     else

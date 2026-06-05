@@ -41,6 +41,7 @@
 #' @concept data-inspection
 #'
 #'
+
 #' @export
 vif <- function(fit) {
   
@@ -120,6 +121,8 @@ vif <- function(fit) {
 #' model.matrix(mod)
 #' }
 #'
+
+
 #' @method model.matrix gls
 #' @export
 model.matrix.gls <- function(object, ...) {
@@ -131,3 +134,4 @@ model.matrix.gls <- function(object, ...) {
   
   model.matrix(formula(object), data = data)
 }
+

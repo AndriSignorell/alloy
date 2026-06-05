@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/articles/special-files.html
 
 library(testthat)
-library(DescToolsX)
+library(alloy)
 
-test_check("DescToolsX")
+test_check("alloy")

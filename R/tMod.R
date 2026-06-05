@@ -82,7 +82,7 @@ tMod <- function(..., FUN = NULL, order = NA, verbose = FALSE){
   if(is.null(modname))
     modname <- rep(NA_character_, length(lmod))
   
-  # detect missing names (NA OR “”)
+  # detect missing names (NA OR "")
   missingName <- is.na(modname) | modname == ""
   
   # get call labels 

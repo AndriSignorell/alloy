@@ -1,3 +1,6 @@
+
+library(testthat)
+
 test_that("vif returns a named numeric vector for all-numeric predictors", {
   fit <- lm(mpg ~ wt + cyl, data = mtcars)
   res <- vif(fit)
@@ -45,3 +48,4 @@ test_that("vif values are close to car::vif for known fitel", {
   expect_true(all(res < 15))
   expect_true(all(res > 1))
 })
+

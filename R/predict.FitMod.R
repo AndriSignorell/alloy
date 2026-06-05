@@ -1,38 +1,113 @@
-
 #' Predict method for FitMod objects
 #'
-#' Unified predict interface for all models fitted via \code{\link{FitMod}}.
-#' For regression models the predicted values are returned as a numeric
-#' vector.  For classification models either class probabilities, predicted
-#' classes, or both are returned as a \code{data.frame}.
+#' Unified predict interface for all models fitted via \code{\link{fitMod}}.
+#' For regression and survival models the predicted values are returned as a
+#' numeric vector.  For classification models either class probabilities,
+#' predicted classes, or both are returned as a \code{data.frame} with
+#' consistent column names across all model types.
 #'
 #' @param object A fitted model of class \code{"FitMod"}.
 #' @param newdata Optional data frame of new observations.  If omitted,
 #'   fitted values on the training data are returned.
 #' @param output Character string controlling the output for classification
 #'   models.  One of \code{"prob"} (default), \code{"class"}, or
-#'   \code{"both"}.  Ignored for regression models.
+#'   \code{"both"}.  Ignored for regression and survival models.
+#' @param s For \code{fitfn = "glmnet"} only: the value of the penalty
+#'   parameter \eqn{\lambda} at which predictions are made.  Passed to
+#'   \code{\link[glmnet]{predict.cv.glmnet}}.  Default is
+#'   \code{"lambda.1se"}.
+#' @param type For regression models (\code{lm}, \code{glm}, etc.): the
+#'   \code{type} argument passed to the underlying \code{predict} method
+#'   (e.g. \code{"response"}, \code{"link"}).  For Cox models the default
+#'   is \code{"risk"}; for parametric survival models the default is
+#'   \code{"response"}.  Ignored for classification models (use
+#'   \code{output} instead).
 #' @param ... Further arguments passed to the underlying predict method.
 #'
-#' @return For regression models: a numeric vector of predicted values.
-#'   For classification models: a \code{data.frame} with one column per
-#'   class (if \code{output = "prob"}), a single column \code{class} (if
-#'   \code{output = "class"}), or both combined (if \code{output = "both"}).
+#' @return
+#' \describe{
+#'   \item{Regression models (\code{lm}, \code{lmrob}, \code{poisson},
+#'     \code{quasipoisson}, \code{gamma}, \code{negbin}, \code{zeroinfl},
+#'     \code{tobit})}{A named numeric vector of fitted/predicted values.}
+#'   \item{Survival models (\code{coxph})}{A numeric vector of predicted
+#'     risk scores (\code{type = "risk"} by default).}
+#'   \item{Parametric survival models (\code{weibull}, \code{exponential},
+#'     \code{lognormal}, \code{loglogistic})}{A numeric vector of predicted
+#'     survival times (\code{type = "response"} by default).}
+#'   \item{Classification models}{
+#'     \describe{
+#'       \item{\code{output = "prob"}}{A \code{data.frame} with one column
+#'         per class containing predicted probabilities.  Column names match
+#'         the factor levels of the response variable.}
+#'       \item{\code{output = "class"}}{A \code{data.frame} with a single
+#'         column \code{class} (factor) containing the predicted class.}
+#'       \item{\code{output = "both"}}{The probability columns and the
+#'         \code{class} column combined in one \code{data.frame}.}
+#'     }
+#'   }
+#' }
 #'
+#' @details
+#' For classification models the column order of probability outputs is
+#' always aligned with the factor levels of the response variable,
+#' regardless of which model type is used.  This ensures that
+#' \code{predict(fitLogit)} and \code{predict(fitRf)} return columns in
+#' the same order.
+#'
+#' Models that require explicit \code{newdata} even for training-data
+#' predictions (e.g. \code{svm}, \code{C5.0}, \code{randomForest}) are
+#' handled transparently via an internal helper.
+#'
+#' For \code{fitfn = "logit"}, calling \code{predict(object)} returns a
+#' two-column probability \code{data.frame} (like all other classifiers).
+#' To obtain the linear predictor (log-odds), use
+#' \code{predict(object, type = "link")}.
+#'
+#' @examples
+#' # Regression
+#' fitLm <- fitMod(Fertility ~ ., swiss)
+#' head(predict(fitLm))
+#'
+#' # Binary classification - probabilities
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' head(predict(fitLogit))
+#' head(predict(fitLogit, output = "both"))
+#'
+#' # Multinomial classification
+#' fitMult <- fitMod(ice_cream ~ video + puzzle + female,
+#'                   IceCream, fitfn = "multinom")
+#' head(predict(fitMult, output = "both"))
+#'
+#' # Cox model - risk scores
+#' fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100, fitfn = "coxph")
+#' head(predict(fitCox))
+#'
+#' # Parametric survival - expected survival time
+#' fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
+#'                  fitfn = "weibull")
+#' head(predict(fitWei))
+#'
+#' @seealso \code{\link{fitMod}}, \code{\link{print.FitMod}}
+
 #' @export
 predict.FitMod <- function(object, newdata = NULL,
                            output = c("prob", "class", "both"),
                            s = "lambda.1se",
                            type = NULL,
                            ...) {
-  output  <- match.arg(output)
-  fitfn   <- object$fitfn
-  is_reg  <- fitfn %in% c("lm", "lmrob", "tobit", "poisson",
-                          "quasipoisson", "gamma", "negbin", "zeroinfl")
+  output <- match.arg(output)
+  fitfn  <- object$fitfn
+  is_reg <- fitfn %in% c("lm", "lmrob", "tobit", "poisson",
+                         "quasipoisson", "gamma", "negbin", "zeroinfl",
+                         "lmMixed", "poissonMixed", "negbinMixed", "gammaMixed")
   
   # Strip FitMod class to avoid infinite recursion
   obj <- object
   class(obj) <- class(obj)[class(obj) != "FitMod"]
+  
+  # Unwrap S4/special wrappers
+  if (inherits(obj, "FitMod.lme4") || inherits(obj, "FitMod.xgboost"))
+    obj <- obj$model
   
   # --- cox: risk scores by default, type overrideable ---
   if (fitfn == "coxph") {
@@ -41,7 +116,15 @@ predict.FitMod <- function(object, newdata = NULL,
     return(do.call(predict, c(args, list(...))))
   }
   
-  # --- regression ---
+  # --- parametric survival ---
+  is_survreg <- fitfn %in% c("weibull", "exponential", "lognormal", "loglogistic")
+  if (is_survreg) {
+    args <- list(obj, type = if (!is.null(type)) type else "response")
+    if (!is.null(newdata)) args$newdata <- newdata
+    return(do.call(predict, c(args, list(...))))
+  }
+  
+  # --- regression (including lme4 regression models) ---
   if (is_reg) {
     if (is.null(newdata) && is.null(type))
       return(fitted(obj))
@@ -51,13 +134,32 @@ predict.FitMod <- function(object, newdata = NULL,
     return(do.call(predict, c(args, list(...))))
   }
   
+  # --- logit special case: type = "link" returns raw vector ---
+  if (fitfn == "logit" && !is.null(type) && type == "link") {
+    args <- list(obj, type = "link")
+    if (!is.null(newdata)) args$newdata <- newdata
+    return(do.call(predict, c(args, list(...))))
+  }
+  
   # --- classification ---
-  .pred_prob  <- function() .predict_prob(obj, fitfn, newdata, s = s, ...)
-  .pred_class <- function() .predict_class(obj, fitfn, newdata, s = s, ...)
+  if (!is.null(type))
+    warning("'type' is ignored for classification models in predict.FitMod; ",
+            "use 'output' to control the return format.", call. = FALSE)
+  
+
+  # für xgboost das wrapper-objekt behalten:
+  xgb_obj <- if (fitfn == "xgboost") object else obj
+  
+  .pred_prob  <- function() .predict_prob(xgb_obj, fitfn, newdata, s = s, ...)
+  .pred_class <- function() .predict_class(xgb_obj, fitfn, newdata, s = s, ...)
+
   switch(output,
-         prob  = .pred_prob(),
-         class = data.frame(class = .pred_class()),
-         both  = data.frame(.pred_prob(), class = .pred_class())
+         prob  = {
+           result <- .pred_prob()
+           if (!is.data.frame(result)) as.data.frame(result) else result
+         },
+         class = data.frame(class = .pred_class(), check.names = FALSE),
+         both  = data.frame(.pred_prob(), class = .pred_class(), check.names = FALSE)
   )
 }
 
@@ -75,11 +177,11 @@ predict.FitMod <- function(object, newdata = NULL,
   dots[["type"]] <- NULL
   dots[["s"]]    <- NULL
   
-  # Default args — overridden below for models requiring explicit newdata
+  # Default args - overridden below for models requiring explicit newdata
   args <- if (is.null(newdata)) list(object)
   else                  list(object, newdata = newdata)
   
-  # Lazy evaluation — only computed for models that need it
+  # Lazy evaluation - only computed for models that need it
   args_explicit <- function()
     list(object, newdata = .resolve_newdata(object, newdata))
   
@@ -153,8 +255,14 @@ predict.FitMod <- function(object, newdata = NULL,
                 
                 xgboost = {
                   obj <- if (inherits(object, "FitMod.xgboost")) object$model else object
-                  nd  <- if (is.null(newdata)) object$x_train
-                  else model.matrix(object$formula[-2L], data = newdata)[, -1L, drop = FALSE]
+                  nd  <- if (is.null(newdata)) {
+                    if (is.null(object$x_train))
+                      stop("x_train is NULL - the model may not have been fitted via fitMod()")
+                    object$x_train
+                  } else {
+                    model.matrix(object$formula[-2L], data = newdata)[, -1L, drop = FALSE]
+                  }
+                  
                   p   <- predict(obj, nd)
                   lvl <- object$y_levels
                   if (is.matrix(p)) {
@@ -166,6 +274,11 @@ predict.FitMod <- function(object, newdata = NULL,
                     p <- cbind("0" = 1 - p, "1" = p)
                   }
                   as.data.frame(p)
+                },
+                
+                logitMixed = {
+                  p <- do.call(predict, c(args, list(type = "response"), dots))
+                  cbind("0" = 1 - p, "1" = p)
                 },
                 
                 stop(sprintf("No probability prediction implemented for fitfn = '%s'", fitfn))
@@ -194,7 +307,7 @@ predict.FitMod <- function(object, newdata = NULL,
   args <- if (is.null(newdata)) list(object)
   else                  list(object, newdata = newdata)
   
-  # Lazy evaluation — only computed for models that need it
+  # Lazy evaluation - only computed for models that need it
   args_explicit <- function()
     list(object, newdata = .resolve_newdata(object, newdata))
   
@@ -203,7 +316,10 @@ predict.FitMod <- function(object, newdata = NULL,
                 logit = ,
                 glm   = {
                   p   <- do.call(predict, c(args, list(type = "response"), dots))
-                  lvl <- levels(response(object))
+                  # Use model response levels directly from the fitted values
+                  lvl <- levels(model.response(model.frame(object)))
+                  if (is.null(lvl))
+                    lvl <- c("0", "1")
                   factor(ifelse(p > 0.5, lvl[2L], lvl[1L]), levels = lvl)
                 },
                 
@@ -272,6 +388,11 @@ predict.FitMod <- function(object, newdata = NULL,
                   as.factor(cls)
                 },
                 
+                logitMixed = {
+                  p <- do.call(predict, c(args, list(type = "response"), dots))
+                  factor(ifelse(p > 0.5, "1", "0"), levels = c("0", "1"))
+                },
+                
                 stop(sprintf("No class prediction implemented for fitfn = '%s'", fitfn))
   )
   
@@ -280,7 +401,7 @@ predict.FitMod <- function(object, newdata = NULL,
 
 
 
-# Ensure newdata is set — some packages (e1071, C50) require explicit
+# Ensure newdata is set - some packages (e1071, C50) require explicit
 # newdata even for training data predictions
 #' @keywords internal
 .resolve_newdata <- function(object, newdata) {
@@ -330,12 +451,12 @@ predict.FitMod <- function(object, newdata = NULL,
 }
 
 
-
-# Helper: get optimal n.trees for gbm
-.gbm_ntrees <- function(object) {
-  tryCatch(
-    gbm::gbm.perf(object, method = "cv", plot.it = FALSE),
-    error = function(e) object$n.trees
-  )
-}
-
+# 
+# # Helper: get optimal n.trees for gbm
+# .gbm_ntrees <- function(object) {
+#   tryCatch(
+#     gbm::gbm.perf(object, method = "cv", plot.it = FALSE),
+#     error = function(e) object$n.trees
+#   )
+# }
+# 

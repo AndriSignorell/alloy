@@ -5,7 +5,7 @@
   xx    <- summary(x)
   coefs <- xx$coefficients
   
-  # Remove Log(scale) row — technical parameter, not a predictor
+  # Remove Log(scale) row - technical parameter, not a predictor
   coefs <- coefs[rownames(coefs) != "Log(scale)", , drop = FALSE]
   
   # Wald CIs from SE
@@ -21,7 +21,7 @@
   # Overall p-values via drop1 (Wald test)
   anova_p <- tryCatch(
     drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"],
-    error = function(e) setNames(rep(NA_real_, length(ref)), names(ref))
+    error = function(e) setNamesX(rep(NA_real_, length(ref)), names(ref))
   )
   
   # Build output matrix

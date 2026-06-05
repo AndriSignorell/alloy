@@ -1,0 +1,421 @@
+---
+title: "fitMod: A Unified Interface for Statistical Models"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{fitMod}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+  
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(alloy)
+library(nnet)      # für multinom
+library(MASS)      # für polr, glm.nb
+library(survival)  # für Surv, coxph
+library(pscl)      # für zeroinfl
+library(AER)       # für tobit
+library(lme4)      # für mixed models
+```
+
+`fitMod()` provides a unified interface for fitting and displaying a wide 
+range of statistical models. The syntax is always the same:
+  
+```r
+fitMod(formula, data, fitfn = "...")
+```
+
+For background on the statistical methods, the 
+[UCLA Statistical Methods and Data Analytics](https://stats.oarc.ucla.edu) 
+site is an excellent reference - we link to the relevant pages throughout.
+
+---
+  
+## Datasets
+  
+The following code creates all datasets used in this vignette. Run once,
+then save with `usethis::use_data()`.
+
+```r
+library(haven)
+library(foreign)
+
+# --- Lahigh: absenteeism in Los Angeles high schools ---
+Lahigh <- read.dta("https://stats.idre.ucla.edu/stat/data/lahigh.dta")
+Lahigh$gender <- relevel(Lahigh$gender, ref = "male")
+usethis::use_data(Lahigh)
+
+# --- Admit: graduate school admissions ---
+Admit <- read.csv("https://stats.idre.ucla.edu/stat/data/binary.csv")
+Admit$rank <- factor(Admit$rank)
+usethis::use_data(Admit)
+
+# --- Apt: tobit regression example ---
+Apt <- haven::read_dta(
+  "https://stats.idre.ucla.edu/stat/stata/dae/tobit.dta"
+) |> toBaseR()
+usethis::use_data(Apt)
+
+# --- Ologit: ordinal logistic regression ---
+Ologit <- haven::read_dta(
+  "https://stats.idre.ucla.edu/stat/data/ologit.dta"
+) |> toBaseR()
+usethis::use_data(Ologit)
+
+# --- IceCream: multinomial logistic regression ---
+IceCream <- haven::read_sas(
+  "https://stats.idre.ucla.edu/wp-content/uploads/2016/02/mlogit.sas7bdat"
+)
+names(IceCream) <- tolower(names(IceCream))
+IceCream$ice_cream <- relevel(
+  factor(IceCream$ice_cream,
+         labels = c("chocolate", "vanilla", "strawberry")),
+  ref = "vanilla"
+)
+usethis::use_data(IceCream)
+
+# --- Whas100: Worcester Heart Attack Study ---
+Whas100 <- haven::read_dta(
+  "https://stats.idre.ucla.edu/stat/examples/asa2/whas100.dta"
+) |> toBaseR()
+Whas100$agex <- cutAge(Whas100$age, full = FALSE)
+usethis::use_data(Whas100)
+
+# --- Fish: zero-inflated count data ---
+Fish <- read.csv("https://stats.idre.ucla.edu/stat/data/fish.csv")
+Fish <- within(Fish, {
+  nofish   <- factor(nofish)
+  livebait <- factor(livebait)
+  camper   <- factor(camper)
+})
+usethis::use_data(Fish)
+
+# --- BioChemists: biochemists publication data (from pscl) ---
+data("bioChemists", package = "pscl")
+BioChemists <- bioChemists
+usethis::use_data(BioChemists)
+```
+
+---
+  
+## 1. Continuous outcome
+  
+### Linear regression (`lm`, `lmrob`)
+  
+```{r}
+fitLm <- fitMod(Fertility ~ ., swiss)
+fitLm
+```
+
+Robust standard errors via `sandwich`:
+  
+```{r}
+fitLm |> print(vcov = "HC3")
+```
+
+Robust regression (MM-estimator):
+  
+```{r}
+fitLmrob <- fitMod(Fertility ~ ., swiss, fitfn = "lmrob")
+fitLmrob
+```
+
+### Gamma regression (`gamma`)
+
+```{r}
+fitGamma <- fitMod(Sepal.Length ~ ., iris, fitfn = "gamma")
+fitGamma
+```
+
+### Tobit regression (`tobit`)
+
+[UCLA reference](https://stats.oarc.ucla.edu/stata/dae/tobit-analysis/)
+
+```{r}
+fitTobit <- fitMod(apt ~ read + math + prog, Apt, fitfn = "tobit")
+fitTobit
+```
+
+---
+  
+## 2. Binary outcome
+  
+### Logistic regression (`logit`)
+  
+[UCLA reference](https://stats.oarc.ucla.edu/r/dae/logit-regression/)
+
+```{r}
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit
+```
+
+Odds Ratios:
+  
+```{r}
+fitLogit |> print(output = "or")
+```
+
+Robust SE:
+  
+```{r}
+fitLogit |> print(vcov = "HC3")
+fitLogit |> print(output = "or", vcov = "HC3")
+```
+
+Predicted probabilities:
+
+```{r}
+head(predict(fitLogit))
+pseudoR2(fitLogit)
+```
+
+---
+  
+## 3. Count outcome
+  
+### Poisson regression (`poisson`)
+  
+[UCLA reference](https://stats.oarc.ucla.edu/stata/output/poisson-regression/)
+
+```{r}
+fitPois <- fitMod(daysabs ~ mathnce + langnce + gender, 
+                  data = Lahigh, fitfn = "poisson")
+fitPois
+fitPois |> print(output = "irr")
+fitPois |> print(vcov = "HC0")
+```
+
+### Quasi-Poisson (`quasipoisson`)
+
+```{r}
+fitQpois <- fitMod(daysabs ~ mathnce + langnce + gender,
+                   data = Lahigh, fitfn = "quasipoisson")
+fitQpois
+```
+
+### Negative binomial (`negbin`)
+
+[UCLA reference](https://stats.oarc.ucla.edu/sas/output/negative-binomial-regression/)
+
+```{r}
+fitNegbin <- fitMod(daysabs ~ mathnce + langnce + gender,
+                    data = Lahigh, fitfn = "negbin")
+fitNegbin
+fitNegbin |> print(vcov = "HC3")
+```
+
+### Zero-inflated Poisson (`zeroinfl`)
+
+[UCLA reference](https://stats.oarc.ucla.edu/r/dae/zip/)
+
+```{r}
+fitZeroinfl <- fitMod(count ~ child + camper | persons,
+                      data = Fish, fitfn = "zeroinfl")
+fitZeroinfl
+```
+
+---
+  
+## 4. Ordered / Nominal outcome
+  
+### Ordinal logistic regression (`polr`)
+  
+[UCLA reference](https://stats.oarc.ucla.edu/r/faq/ologit-coefficients/)
+
+```{r}
+fitPolr <- fitMod(apply ~ pared, data = Ologit, fitfn = "polr")
+fitPolr
+fitPolr |> print(output = "or")
+head(predict(fitPolr, output = "both"))
+```
+
+### Multinomial logistic regression (`multinom`)
+
+[UCLA reference](https://stats.oarc.ucla.edu/stata/output/multinomial-logistic-regression/)
+
+```{r}
+fitMult <- fitMod(ice_cream ~ video + puzzle + female,
+                  data = IceCream, fitfn = "multinom")
+fitMult
+head(predict(fitMult, output = "both"))
+```
+
+---
+  
+## 5. Survival outcome
+  
+### Cox proportional hazards (`coxph`)
+  
+[UCLA reference](https://stats.oarc.ucla.edu/stata/examples/asa2/applied-survival-analysis-by-hosmer-lemeshow-and-maychapter-4-interpretation-of-a-fitted-proportional-hazards-regression-model/)
+
+```{r}
+fitCox <- fitMod(Surv(foltime, folstatus) ~ gender + agex,
+                 data = Whas100, fitfn = "coxph")
+fitCox
+head(predict(fitCox))
+```
+
+### Parametric survival models (`weibull`, `exponential`, `lognormal`, `loglogistic`)
+
+Parametric survival models use the Accelerated Failure Time (AFT) 
+framework. Coefficients are displayed as Time Ratios (`TR = exp(coef)`):
+a value greater than 1 indicates longer survival, less than 1 shorter
+survival.  The shape parameter determines the hazard function: shape > 1
+means increasing hazard, shape < 1 decreasing hazard.
+
+```{r}
+fitWeibull <- fitMod(Surv(foltime, folstatus) ~ gender + age + bmi,
+                     data = Whas100, fitfn = "weibull")
+fitWeibull
+fitWeibull |> print(output = "coef")   # log Time Ratios
+head(predict(fitWeibull))
+```
+
+---
+
+## 6. Mixed models
+
+Mixed models extend standard regression by adding random effects to
+account for clustered or longitudinal data.  The random effects
+structure is specified in the formula using `lme4` notation:
+`(1 | group)` for a random intercept, `(1 + x | group)` for random
+intercept and slope.
+
+[UCLA reference — linear mixed models](https://stats.oarc.ucla.edu/r/dae/linear-mixed-effects-models-using-r/)  
+[UCLA reference — mixed logistic regression](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
+
+### Linear mixed model (`lmMixed`)
+
+```{r}
+fitLmm <- fitMod(Reaction ~ Days + (1 | Subject),
+                 data = lme4::sleepstudy, fitfn = "lmMixed")
+fitLmm
+head(predict(fitLmm))
+```
+
+### Mixed logistic regression (`logitMixed`)
+
+[UCLA reference](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
+
+```{r}
+fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
+                        data = alloy::Contraception, fitfn = "logitMixed")
+fitLogitMixed
+fitLogitMixed |> print(output = "or")
+head(predict(fitLogitMixed, output = "both"))
+```
+
+### Mixed Poisson regression (`poissonMixed`)
+
+```{r}
+fitPoisMixed <- fitMod(incidence ~ period + (1 | herd),
+                       data = lme4::cbpp, fitfn = "poissonMixed")
+fitPoisMixed
+fitPoisMixed |> print(output = "irr")
+```
+
+### Mixed negative binomial regression (`negbinMixed`)
+
+```{r}
+fitNegbinMixed <- fitMod(incidence ~ period + (1 | herd),
+                         data = lme4::cbpp, fitfn = "negbinMixed")
+fitNegbinMixed
+```
+
+---
+  
+## 7. Machine learning
+
+All ML models use the same `predict()` interface with 
+`output = "prob"`, `"class"`, or `"both"`.
+
+```{r}
+fitSvm <- fitMod(ice_cream ~ video + puzzle + female,
+                 data = IceCream, fitfn = "svm")
+head(predict(fitSvm, output = "both"))
+```
+
+```{r}
+fitRf <- fitMod(ice_cream ~ video + puzzle + female,
+                data = IceCream, fitfn = "randomForest")
+head(predict(fitRf, output = "both"))
+```
+
+```{r}
+fitNnet <- fitMod(ice_cream ~ video + puzzle + female,
+                  data = IceCream, fitfn = "nnet")
+head(predict(fitNnet, output = "both"))
+```
+
+```{r}
+fitC5 <- fitMod(ice_cream ~ video + puzzle + female,
+                data = IceCream, fitfn = "C5.0")
+head(predict(fitC5, output = "both"))
+```
+
+```{r}
+fitNbayes <- fitMod(ice_cream ~ video + puzzle + female,
+                    data = IceCream, fitfn = "naiveBayes")
+head(predict(fitNbayes, output = "both"))
+```
+
+```{r}
+fitLda <- fitMod(ice_cream ~ video + puzzle + female,
+                 data = IceCream, fitfn = "lda")
+head(predict(fitLda, output = "both"))
+```
+
+```{r}
+fitGlmnet <- fitMod(ice_cream ~ video + puzzle + female,
+                    data = IceCream, fitfn = "glmnet")
+head(predict(fitGlmnet, output = "both"))
+```
+
+```{r}
+fitXgb <- fitMod(ice_cream ~ video + puzzle + female,
+                 data = IceCream, fitfn = "xgboost")
+head(predict(fitXgb, output = "both"))
+```
+
+```{r}
+fitRpart <- fitMod(ice_cream ~ video + puzzle + female,
+                   data = IceCream, fitfn = "rpart")
+head(predict(fitRpart, output = "both"))
+```
+
+---
+  
+## 8. Robust standard errors
+
+For `lm`, `glm`, and `lmrob` models, heteroscedasticity-consistent 
+standard errors can be requested via the `vcov` argument (powered by 
+the `sandwich` package). `"HC3"` is recommended for small samples.
+
+| Type | Description |
+|------|-------------|
+| `"HC0"` | White (1980) |
+| `"HC1"` | HC0 with df correction |
+| `"HC3"` | Recommended for small n |
+  
+```{r}
+fitLm     |> print(vcov = "HC3")
+fitPois   |> print(vcov = "HC0")
+fitNegbin |> print(vcov = "HC3")
+```
+
+---
+  
+## 9. Original model output
+
+Use `output = "genuine"` to see the original `summary()` output of 
+the underlying model object:
+  
+```{r}
+fitLm      |> print(output = "genuine")
+fitCox     |> print(output = "genuine")
+fitWeibull |> print(output = "genuine")
+```

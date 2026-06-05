@@ -1,25 +1,55 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.904
+Version: 0.0.0.905
 Date: 2026-06-04
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
 Description: Consistent user interface to the most common regression and classification algorithms, such as random forest, neural networks, C5 trees and support vector machines, complemented with a handful of auxiliary functions, such as variable importance and a tuning function for the parameters.
 Encoding: UTF-8
-Depends: R (>= 4.6.0), DescToolsX
+Depends: R (>= 4.6.0)
 License: GPL (>= 2)
 LinkingTo: Rcpp, RcppParallel, RcppArmadillo  
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
-Suggests: VGAM, R.rsp, testthat
-Imports: e1071, C50, rpart, randomForest, pROC, methods, relaimpo, 
-         rpart.plot, lmtest, car, robustbase, class, 
-         NeuralNetTools, naivebayes, sandwich, AER, boot, pscl,
-         aurora, bedrock, glmnet, gbm
-VignetteBuilder: R.rsp
+Imports:
+    stats,
+    MASS,
+    survival,
+    nnet,
+    aurora,
+    bedrock,
+    DescToolsX
+Suggests: 
+    e1071,
+    sandwich,
+    C50,
+    rpart,
+    randomForest,
+    naivebayes,
+    glmnet,
+    xgboost,
+    robustbase,
+    AER,
+    pscl,
+    rpart.plot,
+    relaimpo,
+    NeuralNetTools,
+    pROC,
+    boot,
+    VGAM,
+    MuMIn,
+    lme4,
+    haven,
+    foreign,
+    R.rsp,
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: R.rsp, knitr
 URL: https://andrisignorell.github.io/alloy/,
             https://github.com/AndriSignorell/alloy/
 BugReports: https://github.com/AndriSignorell/alloy/issues
 Config/roxygen2/version: 8.0.0
+LazyData: true

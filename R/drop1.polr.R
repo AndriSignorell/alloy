@@ -1,7 +1,7 @@
 
 #' @keywords internal
 .polr_term_names <- function(model) {
-  # polr stores thresholds in zeta, not as "(Intercept)" coefficient —
+  # polr stores thresholds in zeta, not as "(Intercept)" coefficient
   # therefore simply return term labels without intercept check
   labels(terms(model))
 }
@@ -11,7 +11,7 @@
   # Compute degrees of freedom for all terms in one pass (no recursion)
   asgn  <- attr(model.matrix(model), "assign")
   terms <- labels(terms(model))
-  setNames(
+  setNamesX(
     vapply(seq_along(terms),
            function(i) sum(asgn == i),
            integer(1L)),
@@ -44,7 +44,7 @@
 #' reconstruction for transformed terms (\code{poly()}, \code{ns()}, etc.)
 #' and is consistent with the Type-II approach used in \pkg{car}.  As a
 #' consequence, \code{offset}, \code{subset}, and special formula terms are
-#' not re-evaluated in the reduced fits — they are already baked into the
+#' not re-evaluated in the reduced fits - they are already baked into the
 #' model matrix.
 #'
 #' Fits that fail to converge are silently set to \code{NA}.  Note that
@@ -207,7 +207,7 @@
   )
   
   # --- threshold block ---
-  # confint.default does not cover zeta — derive CI from SE in summary
+  # confint.default does not cover zeta - derive CI from SE in summary
   zeta_se <- coefs[zeta_names, "Std. Error"]
   d.zeta <- data.frame(
     id       = zeta_names,
@@ -300,7 +300,9 @@
 }
 
 
-#' @export
-OddsRatio.polr <- function(x, conf.level = 0.95, digits = 3, ...) {
-  .summary_polr(x, conf.level = conf.level, output = "or")
-}
+# not needed anymore, we have output = "or"
+#' #' @export
+#' OddsRatio.polr <- function(x, conf.level = 0.95, digits = 3, ...) {
+#'   .summary_polr(x, conf.level = conf.level, output = "or")
+#' }
+

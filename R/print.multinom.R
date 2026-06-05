@@ -97,14 +97,16 @@
 }
 
 
-#' @export
-OddsRatio.multinom <- function(x, conf.level = 0.95, digits = 3, ...) {
-  xx <- .summary_multinom(x, conf.level = conf.level)
-  
-  lci_col <- grep("-lci$", names(xx$coefficients), value = TRUE)
-  cols    <- c("estimate", lci_col, "uci")
-  xx$coefficients[cols] <- exp(xx$coefficients[cols])
-  xx$results <- "OddsRatio"
-  
-  xx
-}
+
+# not needed anymore, we have output = "or"
+#' #' @export
+#' OddsRatio.multinom <- function(x, conf.level = 0.95, digits = 3, ...) {
+#'   xx <- .summary_multinom(x, conf.level = conf.level)
+#'   
+#'   lci_col <- grep("-lci$", names(xx$coefficients), value = TRUE)
+#'   cols    <- c("estimate", lci_col, "uci")
+#'   xx$coefficients[cols] <- exp(xx$coefficients[cols])
+#'   xx$results <- "OddsRatio"
+#'   
+#'   xx
+#' }

@@ -1,12 +1,14 @@
 
+
+
 #' Fit a statistical or machine-learning model with automatic method selection
 #'
 #' A unified interface for fitting a wide range of regression and
 #' classification models.  When \code{fitfn} is omitted the appropriate
 #' method is chosen automatically from the type of the response variable.
-#' The return value is always an object of class \code{"fitMod"} layered on
+#' The return value is always an object of class \code{"FitMod"} layered on
 #' top of the original model object, so all standard methods
-#' (\code{predict}, \code{summary}, \code{coef}, \ldots) continue to work.
+#' (\code{predict}, \code{print}, \code{coef}, \ldots) continue to work.
 #'
 #' @param formula A model formula.
 #' @param data A data frame containing the variables in \code{formula}.
@@ -19,10 +21,18 @@
 #'   \code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
 #'   \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
 #'   \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-#'   \code{"svm"}, \code{"naive_bayes"}, \code{"lb"}.
+#'   \code{"svm"}, \code{"naive_bayes"}, \code{"randomForest"},
+#'   \code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
+#'   \code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
+#'   \code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
+#'   \code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
 #'   If \code{NULL} (default) the method is chosen automatically.
 #'
-#' @return An object of class \code{c("fitMod", <original class>)}.
+#' @return An object of class \code{c("FitMod", <original class>)}.
+#'   For \code{xgboost} and \code{lme4} models, a list of class
+#'   \code{c("FitMod", "FitMod.xgboost")} or
+#'   \code{c("FitMod", "FitMod.lme4")} wrapping the original model
+#'   object in \code{$model}.
 #'
 #' @examples
 #' # Auto-detection
@@ -32,7 +42,9 @@
 #' # Explicit
 #' fitMod(Species ~ ., data = iris, fitfn = "rpart")
 #'
-
+#' # Mixed models
+#' fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
+#'
 #' @export
 fitMod <- function(formula, data, ..., subset, na.action = na.pass,
                    fitfn = NULL) {
@@ -48,8 +60,8 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   
   # --- auto-detect fitting function if needed ---
   if (is.null(fitfn)) {
-    resp   <- eval(formula[[2]], envir = data, enclos = parent.frame())
-    fitfn  <- .guess_fitfn(resp)
+    resp  <- eval(formula[[2]], envir = data, enclos = parent.frame())
+    fitfn <- .guess_fitfn(resp)
     message("fitMod: using fitfn = '", fitfn, "'")
   } else {
     if (!fitfn %in% names(.fitfn_registry))
@@ -68,12 +80,12 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     resp <- eval(formula[[2L]], envir = data, enclos = parent.frame())
     
     if (is.null(cl[["family"]]))
-      cl[["family"]] <- if (isDichotomous(resp))             "binomial"
-    else if (inherits(resp, "factor"))   "multinomial"
-    else if (inherits(resp, "integer"))  "poisson"
-    else                                 "gaussian"
+      cl[["family"]] <- if (isDichotomous(resp))           "binomial"
+    else if (inherits(resp, "factor")) "multinomial"
+    else if (inherits(resp, "integer")) "poisson"
+    else                               "gaussian"
     
-    # cv.glmnet has no formula interface — convert manually
+    # cv.glmnet has no formula interface - convert manually
     mf              <- model.frame(formula, data = data)
     x_train         <- model.matrix(formula[-2L], data = mf)[, -1L, drop = FALSE]
     cl[["y"]]       <- model.response(mf)
@@ -82,7 +94,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     cl[["data"]]    <- NULL
   }
   
-  
+  # --- xgboost: auto-detect objective and convert formula to x/y ---
   if (fitfn == "xgboost") {
     resp <- eval(formula[[2L]], envir = data, enclos = parent.frame())
     
@@ -96,15 +108,14 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     cl[["data"]]    <- NULL
     
     cl[["objective"]] <- cl[["objective"]] %||%
-      if (isDichotomous(resp))            "binary:logistic"
-    else if (inherits(resp, "factor"))  "multi:softprob"
+      if (isDichotomous(resp))           "binary:logistic"
+    else if (inherits(resp, "factor")) "multi:softprob"
     else if (inherits(resp, "integer")) "count:poisson"
-    else                                "reg:squarederror"
+    else                               "reg:squarederror"
     
     x_train_xgb  <- x_train
     y_levels_xgb <- if (is.factor(y_raw)) levels(y_raw) else NULL
   }
-  
   
   # --- ensure package is available ---
   .require_pkg(entry$pkg)
@@ -117,9 +128,9 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   }
   
   # --- apply registry defaults and strip fitMod-specific args ---
-  cl        <- .apply_defaults(cl, entry$defaults)
-  cl$fitfn  <- NULL
-  cl[[1L]]  <- fun
+  cl       <- .apply_defaults(cl, entry$defaults)
+  cl$fitfn <- NULL
+  cl[[1L]] <- fun
   
   # --- fit model ---
   res <- eval(cl, parent.frame())
@@ -135,6 +146,18 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
       call     = match.call()
     )
     class(res) <- c("FitMod", "FitMod.xgboost")
+    return(res)
+  }
+  
+  # --- lme4: wrap in list since S4 objects don't support $<- ---
+  if (fitfn %in% c("lmMixed", "logitMixed", "poissonMixed",
+                   "negbinMixed", "gammaMixed")) {
+    res <- list(
+      model = res,
+      fitfn = fitfn,
+      call  = match.call()
+    )
+    class(res) <- c("FitMod", "FitMod.lme4")
     return(res)
   }
   
@@ -154,6 +177,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   
   res
 }
+
 
 
 
@@ -310,7 +334,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     defaults = list(
       alpha   = 1,       # Lasso; user can override to 0 (Ridge) or 0.5 (Elastic Net)
       nfolds  = 10,
-      family  = "multinomial"  # auto-detect would be better — see below
+      family  = "multinomial"  # auto-detect would be better - see below
     ),
     fix_call = "cv.glmnet"
   ),
@@ -331,6 +355,69 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     fn       = "coxph",
     defaults = list(model = TRUE, x = TRUE),
     fix_call = "coxph"
+  ),
+  
+  weibull = list(
+    pkg      = "survival",
+    fn       = "survreg",
+    defaults = list(dist = "weibull"),
+    fix_call = "survreg"
+  ),
+  
+  exponential = list(
+    pkg      = "survival",
+    fn       = "survreg",
+    defaults = list(dist = "exponential"),
+    fix_call = "survreg"
+  ),
+  
+  lognormal = list(
+    pkg      = "survival",
+    fn       = "survreg",
+    defaults = list(dist = "lognormal"),
+    fix_call = "survreg"
+  ),
+  
+  loglogistic = list(
+    pkg      = "survival",
+    fn       = "survreg",
+    defaults = list(dist = "loglogistic"),
+    fix_call = "survreg"
+  ),
+  
+  lmMixed = list(
+    pkg      = "lme4",
+    fn       = "lmer",
+    defaults = list(),
+    fix_call = "lmer"
+  ),
+  
+  logitMixed = list(
+    pkg      = "lme4",
+    fn       = "glmer",
+    defaults = list(family = "binomial"),
+    fix_call = "glmer"
+  ),
+  
+  poissonMixed = list(
+    pkg      = "lme4",
+    fn       = "glmer",
+    defaults = list(family = "poisson"),
+    fix_call = "glmer"
+  ),
+  
+  negbinMixed = list(
+    pkg      = "lme4",
+    fn       = "glmer.nb",
+    defaults = list(),
+    fix_call = "glmer.nb"
+  ),
+  
+  gammaMixed = list(
+    pkg      = "lme4",
+    fn       = "glmer",
+    defaults = list(family = quote(Gamma(link = "log"))),
+    fix_call = "glmer"
   )
   
   )
@@ -441,6 +528,12 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     stop("object must be of class 'multinom'")
   
   test <- match.arg(test)
+  
+  # Make multinom available in the evaluation environment -
+  # required during R CMD check where nnet is not on the search path
+  multinom <- getFromNamespace("multinom", "nnet")
+  env <- environment(formula(object))
+  assign("multinom", multinom, envir = env)
   
   if (missing(scope))
     scope <- drop.scope(object)
