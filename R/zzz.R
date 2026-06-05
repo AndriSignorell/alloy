@@ -20,8 +20,8 @@
 #' @importFrom utils getFromNamespace
 #'             
 #' @importFrom graphics hist 
-#' @importFrom DescToolsX brierScore cStat assocsXY
-#' @importFrom aurora fm style strAlign
+#' @importFrom DescToolsX brierScore cStat assocsXY conf
+#' @importFrom aurora fm style strAlign plotDot
 #' @importFrom bedrock setNamesX unwhich isDichotomous appendX nDec
 #' 
 #' @importFrom MASS polr glm.nb lda qda

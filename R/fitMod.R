@@ -170,6 +170,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   if (fitfn == "glmnet") {
     res[["formula"]] <- formula
     res[["x_train"]] <- x_train
+    res[["call"]]    <- match.call()
   }
   
   # --- post-process ---
@@ -289,7 +290,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   randomForest = list(
     pkg      = "randomForest",
     fn       = "randomForest",
-    defaults = list(na.action = na.omit),
+    defaults = list(),
     fix_call = "randomForest"
   ),
   

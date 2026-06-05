@@ -24,6 +24,26 @@
 #' @export
 response <- function(x, ...) {
   
+  # Unwrap special wrappers - extract response from stored formula
+  if (inherits(x, "FitMod.xgboost") || inherits(x, "FitMod.lme4")) {
+    if (is.null(x$formula) || is.null(x$call$data))
+      stop("Cannot recover response: formula or data not stored in object")
+    mf  <- model.frame(x$formula,
+                       data = eval(x$call$data, envir = parent.frame()))
+    res <- model.response(mf)
+    attr(res, "response") <- as.character(x$formula[[2L]])
+    return(res)
+  }
+  
+  # glmnet: formula stored directly on the object      # <-- hier einfügen
+  if (!is.null(x$fitfn) && x$fitfn == "glmnet" && !is.null(x$formula)) {
+    mf  <- model.frame(x$formula,
+                       data = eval(x$call$data, envir = parent.frame()))
+    res <- model.response(mf)
+    attr(res, "response") <- as.character(x$formula[[2L]])
+    return(res)
+  }
+  
   res <- if (inherits(x, "C5.0")) {
     .response_from_call(x)
     

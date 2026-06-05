@@ -140,6 +140,10 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     .print_mixed(x, digits, pdigits, conf.level, output = output, ...)
   } else if (inherits(x, "lmerMod") || inherits(x, "glmerMod")) {
     .print_mixed(x, digits, pdigits, conf.level, output = output, ...)
+  } else if (x$fitfn %in% c("randomForest", "nnet", "rpart", "C5.0",
+                          "svm", "naiveBayes", "lda", "qda",
+                          "glmnet", "xgboost")) {
+    .print_ml(x, digits, pdigits, ...)
   } else {
     class(x) <- class(x)[class(x) != "FitMod"]
     print(x, ...)
@@ -847,4 +851,96 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   
   invisible(x)
 }
+
+
+
+#' @keywords internal
+.print_ml <- function(x, digits = 3, pdigits = 3, ...) {
+  
+  fitfn <- x$fitfn
+  
+  # Unwrap FitMod wrapper
+  obj <- x
+  class(obj) <- class(obj)[class(obj) != "FitMod"]
+  if (inherits(obj, "FitMod.xgboost")) obj <- obj$model
+  
+  # --- header ---
+  model_label <- switch(fitfn,
+                        randomForest = "Random Forest",
+                        nnet         = "Neural Network",
+                        rpart        = "Decision Tree",
+                        C5.0         = "C5.0 Decision Tree",
+                        svm          = "Support Vector Machine",
+                        naiveBayes   = "Naive Bayes",
+                        lda          = "Linear Discriminant Analysis",
+                        qda          = "Quadratic Discriminant Analysis",
+                        glmnet       = "Regularised Regression (glmnet)",
+                        xgboost      = "XGBoost",
+                        fitfn
+  )
+  
+  cat(sprintf("\n%s\n", model_label))
+  cat("\nCall:\n",
+      paste(deparse(x$call), sep = "\n", collapse = "\n"),
+      "\n", sep = "")
+  
+  # --- variable importance ---
+  vi <- tryCatch(varImp(x, scale = "max"), error = function(e) NULL)
+  if (!is.null(vi)) {
+    cat("\nVariable importance:\n")
+    vi_out <- setNamesX(
+      fm(vi$importance, digits = digits),
+      vi$variable
+    )
+    print(vi_out, quote = FALSE)
+  }
+  
+  # --- confusion matrix ---
+  pred <- tryCatch(
+    predict(x, output = "class")$class,
+    error = function(e) NULL
+  )
+  resp <- tryCatch(
+    response(x),
+    error = function(e) NULL
+  )
+  
+  if (!is.null(pred) && !is.null(resp)) {
+    cat("\nConfusion matrix (training):\n")
+    cm <- conf(pred, resp)
+    print(cm$table)
+    cat(sprintf("\nAccuracy: %s   Kappa: %s\n",
+                fm(cm$acc,   digits = digits),
+                fm(cm$kappa, digits = digits)))
+    
+    # Brier score and c-statistic for binary
+    prob <- tryCatch(predict(x, output = "prob"), error = function(e) NULL)
+    if (!is.null(prob)) {
+      bs <- tryCatch(
+        brierScore(prob[, 2L], as.numeric(resp) - 1L),
+        error = function(e) NULL
+      )
+      cs <- tryCatch(
+        assocsXY(prob[, 2L], as.numeric(resp) - 1L,
+                 which = "cstat")$cstat,
+        error = function(e) NULL
+      )
+      if (!is.null(bs) || !is.null(cs)) {
+        if (!is.null(bs))
+          cat(sprintf("Brier score: %s", fm(bs, digits = digits)))
+        if (!is.null(cs))
+          cat(sprintf("   c-statistic: %s", fm(cs, digits = digits)))
+        cat("\n")
+      }
+    }
+  }
+  
+  # --- footer ---
+  n_obs <- tryCatch(nrow(model.frame(obj)), error = function(e) NA_integer_)
+  if (!is.na(n_obs))
+    cat(sprintf("\nObs: %d\n\n", n_obs))
+  
+  invisible(x)
+}
+
 
