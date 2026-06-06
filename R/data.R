@@ -119,7 +119,7 @@ NULL
 #'   \item{folstatus}{Vital status at follow-up (0 = alive, 1 = dead; event indicator).}
 #'   \item{age}{Age at hospital admission (in years).}
 #'   \item{gender}{Gender of the patient (0 = male, 1 = female).}
-#'   \item{bmi}{Body Mass Index (kg/m²).}
+#'   \item{bmi}{Body Mass Index (kg/m\eqn{^2}).}
 #'   \item{agex}{Age group (factor), derived from \code{age} via
 #'    \code{\link[DescToolsX]{cutAge}}.}
 #' }
@@ -188,7 +188,7 @@ NULL
 #'     tolerance test).}
 #'   \item{pressure}{Diastolic blood pressure (mm Hg).}
 #'   \item{triceps}{Triceps skin fold thickness (mm).}
-#'   \item{insulin}{2-hour serum insulin (μU/ml).}
+#'   \item{insulin}{2-hour serum insulin (\eqn{\mu}U/ml).}
 #'   \item{mass}{Body mass index.}
 #'   \item{pedigree}{Diabetes pedigree function.}
 #'   \item{age}{Age (years).}

@@ -12,7 +12,7 @@ A data frame with 768 rows and 9 variables:
 tolerance test).}
 \item{pressure}{Diastolic blood pressure (mm Hg).}
 \item{triceps}{Triceps skin fold thickness (mm).}
-\item{insulin}{2-hour serum insulin (μU/ml).}
+\item{insulin}{2-hour serum insulin (\eqn{\mu}U/ml).}
 \item{mass}{Body mass index.}
 \item{pedigree}{Diabetes pedigree function.}
 \item{age}{Age (years).}
