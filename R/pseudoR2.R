@@ -89,10 +89,10 @@
 
 
 
-#' @family regression.utils
-#' @concept regression
-#' @concept classification-metrics
-#' @concept descriptive-statistics
+
+#' @family regression.utils  
+#' @concept regression  
+#' @concept model-evaluation
 #'
 #'
 #' @export

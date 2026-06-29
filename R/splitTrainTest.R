@@ -42,6 +42,11 @@
 #'
 
 
+
+#' @family data.split  
+#' @concept modelling
+#'
+#'
 #' @export
 splitTrainTest <- function(x, p = 0.1, logical = FALSE) {
   

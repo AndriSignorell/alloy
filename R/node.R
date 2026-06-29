@@ -30,6 +30,12 @@
 #' @seealso \code{\link{rules}}
 
 
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 node <- function(x, node = NULL, type = c("all", "split", "leaf"),
                  digits = 3L) {

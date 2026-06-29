@@ -29,9 +29,19 @@
 #' @seealso \code{\link[pROC]{coords}}, \code{\link[pROC]{roc}}
 
 
+
+#' @family roc  
+#' @concept classification  
+#' @concept model-evaluation  
+#' @concept roc
+#'
+#'
 #' @export
 bestCut <- function(x, method = c("youden", "closest.topleft")) {
   method <- match.arg(method)
   pROC::coords(roc = x, x = "best", best.method = method,
                transpose = TRUE)
 }
+
+
+

@@ -110,4 +110,10 @@ head(predict(fitWei))
 }
 \seealso{
 \code{\link{fitMod}}, \code{\link{print.FitMod}}
+
+Other modelling:
+\code{\link[=fitMod]{fitMod()}},
+\code{\link[=print.FitMod]{print.FitMod()}}
 }
+\concept{modelling}
+\concept{prediction}

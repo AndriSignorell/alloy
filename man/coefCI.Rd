@@ -49,8 +49,12 @@ coefCI(fit)
 Other regression.utils:
 \code{\link[=pseudoR2]{pseudoR2()}},
 \code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=refLevel]{refLevel()}},
+\code{\link[=response]{response()}},
+\code{\link[=varImp]{varImp()}},
 \code{\link[=vif]{vif()}}
 }
-\concept{confidence-intervals}
+\concept{bootstrap}
+\concept{confidence-interval}
 \concept{regression}
 \concept{regression.utils}

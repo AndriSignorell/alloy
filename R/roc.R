@@ -35,6 +35,13 @@
 #'
 #' @seealso \code{\link[pROC]{roc}}, \code{\link{bestCut}},
 #'   \code{\link{response}}
+
+#' @family roc  
+#' @concept classification  
+#' @concept model-evaluation  
+#' @concept roc
+#'
+#'
 #' @export
 roc <- function(x, resp = NULL, ...) {
   if (is.null(resp))

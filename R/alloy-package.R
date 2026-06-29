@@ -47,7 +47,7 @@
 #'   \item{\code{\link{vif}}}{Variance inflation factors (VIF / GVIF).}
 #'   \item{\code{\link{coefCI}}, \code{\link{rSqCI}}}{Bootstrap CIs for
 #'     coefficients and R\eqn{^2}.}
-#'   \item{\code{\link{conf}}}{Confusion matrix and classification metrics.}
+#'   \item{\code{\link[DescToolsX]{conf}}}{Confusion matrix and classification metrics.}
 #'   \item{\code{\link{roc}}, \code{\link{bestCut}}}{ROC analysis.}
 #'   \item{\code{\link{refLevel}}}{Reference levels of factor predictors.}
 #'   \item{\code{\link{rules}}, \code{\link{node}}, \code{\link{cParam}},
@@ -79,3 +79,6 @@
 #'
 #' @keywords internal
 "_PACKAGE"
+
+
+

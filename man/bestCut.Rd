@@ -38,4 +38,10 @@ bestCut(r, method = "closest.topleft")
 }
 \seealso{
 \code{\link[pROC]{coords}}, \code{\link[pROC]{roc}}
+
+Other roc:
+\code{\link[=roc]{roc()}}
 }
+\concept{classification}
+\concept{model-evaluation}
+\concept{roc}

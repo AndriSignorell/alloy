@@ -72,3 +72,15 @@ Overrides the default \code{rpart} plot and delegates to
 \code{\link[rpart.plot]{rpart.plot}}, optionally overlaying node id
 labels on each box.
 }
+\seealso{
+Other tree:
+\code{\link[=bestTree]{bestTree()}},
+\code{\link[=cParam]{cParam()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=node]{node()}},
+\code{\link[=rules]{rules()}},
+\code{\link[=splits]{splits()}}
+}
+\concept{classification}
+\concept{modelling}
+\concept{tree}

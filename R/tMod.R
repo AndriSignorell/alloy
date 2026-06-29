@@ -31,11 +31,6 @@
 #'
 #' @seealso \code{\link{tmodSummary}}
 #'
-#' @family topic.modelComparison
-#' @concept regression
-#' @concept model comparison
-#' @concept coefficient analysis
-#'
 #' @examples
 #' # --- Linear models ---
 #' m1 <- lm(mpg ~ wt, data = mtcars)
@@ -57,6 +52,12 @@
 
 
 
+
+#' @family model.comparison  
+#' @concept model-evaluation  
+#' @concept regression
+#'
+#'
 #' @export
 tMod <- function(..., FUN = NULL, order = NA, verbose = FALSE){
   

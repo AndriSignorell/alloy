@@ -57,3 +57,11 @@ fitMod(Species ~ ., data = iris, fitfn = "rpart")
 fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
 
 }
+\seealso{
+Other modelling:
+\code{\link[=predict.FitMod]{predict.FitMod()}},
+\code{\link[=print.FitMod]{print.FitMod()}}
+}
+\concept{classification}
+\concept{modelling}
+\concept{regression}

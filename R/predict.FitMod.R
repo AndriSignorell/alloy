@@ -89,6 +89,12 @@
 #'
 #' @seealso \code{\link{fitMod}}, \code{\link{print.FitMod}}
 
+
+#' @family modelling  
+#' @concept modelling  
+#' @concept prediction
+#'
+#'
 #' @export
 predict.FitMod <- function(object, newdata = NULL,
                            output = c("prob", "class", "both", "where", "leaf"),

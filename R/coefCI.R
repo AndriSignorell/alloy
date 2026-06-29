@@ -25,9 +25,11 @@
 #' coefCI(fit)
 #'
 
-#' @family regression.utils
-#' @concept regression
-#' @concept confidence-intervals
+
+#' @family regression.utils  
+#' @concept regression  
+#' @concept confidence-interval  
+#' @concept bootstrap
 #'
 #'
 #' @export

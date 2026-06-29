@@ -36,12 +36,13 @@
 #' vif(mod)
 #'
 
-#' @family regression.utils
-#' @concept regression
-#' @concept data-inspection
-#'
-#'
 
+
+#' @family regression.utils  
+#' @concept regression  
+#' @concept multicollinearity
+#'
+#'
 #' @export
 vif <- function(fit) {
   

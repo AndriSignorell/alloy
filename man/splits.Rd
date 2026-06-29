@@ -23,3 +23,15 @@ r <- rpart::rpart(Species ~ ., data = iris)
 splits(r)
 
 }
+\seealso{
+Other tree:
+\code{\link[=bestTree]{bestTree()}},
+\code{\link[=cParam]{cParam()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=node]{node()}},
+\code{\link[=plot.rpart]{plot.rpart()}},
+\code{\link[=rules]{rules()}}
+}
+\concept{classification}
+\concept{modelling}
+\concept{tree}

@@ -21,6 +21,11 @@
 #'
 #' @seealso \code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}}
 
+
+#' @family regression.utils  
+#' @concept regression
+#'
+#'
 #' @export
 response <- function(x, ...) {
   

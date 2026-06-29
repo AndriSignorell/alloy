@@ -22,6 +22,12 @@
 #' \emph{Classification and Regression Trees}. Wadsworth.
 #'
 
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 bestTree <- function(x) {
   

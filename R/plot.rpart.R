@@ -28,6 +28,12 @@
 #'
 #' @return Invisibly returns the list returned by \code{rpart.plot}.
 #'
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 plot.rpart <- function(x      = stop("no 'x' arg"),
                        type   = 2L,

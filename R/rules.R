@@ -22,6 +22,12 @@
 #' @seealso \code{\link{node}}, \code{\link[rpart]{path.rpart}}
 
 
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 rules <- function(x, node = NULL, leafonly = FALSE) {
   

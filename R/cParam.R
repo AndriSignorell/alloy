@@ -20,6 +20,12 @@
 #'
 #' @seealso \code{\link{bestTree}}, \code{\link[rpart]{printcp}},
 #'   \code{\link[rpart]{plotcp}}
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 cParam <- function(x, ...) {
   

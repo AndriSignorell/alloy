@@ -48,6 +48,11 @@
 #' # "versicolor"
 #'
 #' @seealso \code{\link[stats]{contrasts}}, \code{\link[stats]{contr.treatment}}
+
+#' @family regression.utils  
+#' @concept regression
+#'
+#'
 #' @export
 refLevel <- function(x) {
   

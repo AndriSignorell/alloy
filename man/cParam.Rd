@@ -31,4 +31,15 @@ plot(cp)
 \seealso{
 \code{\link{bestTree}}, \code{\link[rpart]{printcp}},
 \code{\link[rpart]{plotcp}}
+
+Other tree:
+\code{\link[=bestTree]{bestTree()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=node]{node()}},
+\code{\link[=plot.rpart]{plot.rpart()}},
+\code{\link[=rules]{rules()}},
+\code{\link[=splits]{splits()}}
 }
+\concept{classification}
+\concept{modelling}
+\concept{tree}

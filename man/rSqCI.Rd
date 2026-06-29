@@ -80,8 +80,12 @@ rSqCI(fit, sides = "left")
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
 \code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=refLevel]{refLevel()}},
+\code{\link[=response]{response()}},
+\code{\link[=varImp]{varImp()}},
 \code{\link[=vif]{vif()}}
 }
-\concept{confidence-intervals}
+\concept{bootstrap}
+\concept{confidence-interval}
 \concept{regression}
 \concept{regression.utils}

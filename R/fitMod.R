@@ -45,6 +45,13 @@
 #' # Mixed models
 #' fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
 #'
+
+#' @family modelling  
+#' @concept modelling  
+#' @concept regression  
+#' @concept classification
+#'
+#'
 #' @export
 fitMod <- function(formula, data, ..., subset, na.action = na.pass,
                    fitfn = NULL) {

@@ -25,14 +25,16 @@
 #'
 #' @seealso \code{\link{tMod}}
 #'
-#' @family topic.modelComparison
-#' @concept regression
-#' @concept model comparison
-#'
 
 
 #' @param conf.level Confidence level for intervals
 #' @param useProfile Logical; use profile likelihood for CI (glm only)
+
+#' @family model.comparison  
+#' @concept model-evaluation  
+#' @concept regression
+#'
+#'
 #' @export
 tmodSummary <- function(x, ...){
   UseMethod("tmodSummary")

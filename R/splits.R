@@ -16,6 +16,12 @@
 #'
 
 
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 splits <- function(x) {
   

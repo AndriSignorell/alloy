@@ -99,9 +99,11 @@ Veall, M. R., & Zimmermann, K. F. (1996). Pseudo-R2 measures for some common lim
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
 \code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=refLevel]{refLevel()}},
+\code{\link[=response]{response()}},
+\code{\link[=varImp]{varImp()}},
 \code{\link[=vif]{vif()}}
 }
-\concept{classification-metrics}
-\concept{descriptive-statistics}
+\concept{model-evaluation}
 \concept{regression}
 \concept{regression.utils}

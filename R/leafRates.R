@@ -22,6 +22,12 @@
 #' leafRates(r)
 #'
 
+
+#' @family tree  
+#' @concept classification  
+#' @concept modelling
+#'
+#'
 #' @export
 leafRates <- function(x) {
   

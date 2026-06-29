@@ -32,6 +32,12 @@
 #' plot(vi)
 #'
 #' @seealso \code{\link{plot.varImp}}
+
+#' @family regression.utils  
+#' @concept feature-selection  
+#' @concept modelling
+#'
+#'
 #' @export
 varImp <- function(x, scale = c("max", "sum", "none"), sort = TRUE, ...) {
   

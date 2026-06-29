@@ -50,3 +50,5 @@ idx <- splitTrainTest(iris, logical = TRUE)
 table(idx)
 
 }
+\concept{data.split}
+\concept{modelling}

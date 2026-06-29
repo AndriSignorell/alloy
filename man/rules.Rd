@@ -32,4 +32,15 @@ rules(r, leafonly = TRUE)
 }
 \seealso{
 \code{\link{node}}, \code{\link[rpart]{path.rpart}}
+
+Other tree:
+\code{\link[=bestTree]{bestTree()}},
+\code{\link[=cParam]{cParam()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=node]{node()}},
+\code{\link[=plot.rpart]{plot.rpart()}},
+\code{\link[=splits]{splits()}}
 }
+\concept{classification}
+\concept{modelling}
+\concept{tree}

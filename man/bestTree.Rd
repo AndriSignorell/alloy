@@ -30,3 +30,15 @@ r.pruned <- rpart::prune(r, cp = bt$cp)
 Breiman, L., Friedman, J., Olshen, R., & Stone, C. (1984).
 \emph{Classification and Regression Trees}. Wadsworth.
 }
+\seealso{
+Other tree:
+\code{\link[=cParam]{cParam()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=node]{node()}},
+\code{\link[=plot.rpart]{plot.rpart()}},
+\code{\link[=rules]{rules()}},
+\code{\link[=splits]{splits()}}
+}
+\concept{classification}
+\concept{modelling}
+\concept{tree}

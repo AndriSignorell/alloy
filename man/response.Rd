@@ -30,4 +30,14 @@ the return value.
 }
 \seealso{
 \code{\link[stats]{model.response}}, \code{\link[stats]{model.frame}}
+
+Other regression.utils:
+\code{\link[=coefCI]{coefCI()}},
+\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=refLevel]{refLevel()}},
+\code{\link[=varImp]{varImp()}},
+\code{\link[=vif]{vif()}}
 }
+\concept{regression}
+\concept{regression.utils}

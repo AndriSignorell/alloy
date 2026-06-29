@@ -112,4 +112,9 @@ print(fitWei, output = "genuine")
 }
 \seealso{
 \code{\link{fitMod}}, \code{\link{predict.FitMod}}
+
+Other modelling:
+\code{\link[=fitMod]{fitMod()}},
+\code{\link[=predict.FitMod]{predict.FitMod()}}
 }
+\concept{modelling}

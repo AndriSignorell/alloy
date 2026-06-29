@@ -88,6 +88,11 @@
 #' @seealso \code{\link{fitMod}}, \code{\link{predict.FitMod}}
 
 
+
+#' @family modelling  
+#' @concept modelling
+#'
+#'
 #' @export
 print.FitMod <- function(x, digits = 3, pdigits = 3,
                          conf.level = 0.95,

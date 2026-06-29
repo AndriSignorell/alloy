@@ -41,4 +41,15 @@ node(r, type = "leaf")
 }
 \seealso{
 \code{\link{rules}}
+
+Other tree:
+\code{\link[=bestTree]{bestTree()}},
+\code{\link[=cParam]{cParam()}},
+\code{\link[=leafRates]{leafRates()}},
+\code{\link[=plot.rpart]{plot.rpart()}},
+\code{\link[=rules]{rules()}},
+\code{\link[=splits]{splits()}}
 }
+\concept{classification}
+\concept{modelling}
+\concept{tree}

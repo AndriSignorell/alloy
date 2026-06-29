@@ -47,8 +47,11 @@ vif(mod)
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
 \code{\link[=pseudoR2]{pseudoR2()}},
-\code{\link[=rSqCI]{rSqCI()}}
+\code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=refLevel]{refLevel()}},
+\code{\link[=response]{response()}},
+\code{\link[=varImp]{varImp()}}
 }
-\concept{data-inspection}
+\concept{multicollinearity}
 \concept{regression}
 \concept{regression.utils}
