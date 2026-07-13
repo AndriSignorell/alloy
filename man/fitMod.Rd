@@ -4,26 +4,32 @@
 \alias{fitMod}
 \title{Fit a statistical or machine-learning model with automatic method selection}
 \usage{
-fitMod(formula, data, ..., subset, na.action = na.pass, fitfn = NULL)
+fitMod(formula, data, ..., subset, na.action, fitfn = NULL)
 }
 \arguments{
-\item{formula}{A model formula.}
+\item{formula}{A two-sided model formula.}
 
 \item{data}{A data frame containing the variables in \code{formula}.}
 
 \item{...}{Additional arguments passed to the underlying fitting function.}
 
-\item{subset}{An optional vector specifying a subset of observations.}
+\item{subset}{An optional vector specifying a subset of observations.
+Only supported for fitting functions that accept a \code{subset}
+argument (and for \code{"glmnet"} and \code{"xgboost"}, where it is
+applied when the design matrix is built).}
 
-\item{na.action}{A function for handling missing values.
-Default is \code{\link[stats]{na.pass}}.}
+\item{na.action}{A function for handling missing values, passed to the
+underlying fitting function (or to \code{\link[stats]{model.frame}}
+for \code{"glmnet"} and \code{"xgboost"}).  If not supplied, the
+default of the respective fitting function applies (usually
+\code{\link[stats]{na.omit}}).}
 
 \item{fitfn}{Character string naming the fitting method.  One of
 \code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
 \code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
 \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
 \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-\code{"svm"}, \code{"naive_bayes"}, \code{"randomForest"},
+\code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
 \code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
 \code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
 \code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
@@ -35,7 +41,10 @@ An object of class \code{c("FitMod", <original class>)}.
 For \code{xgboost} and \code{lme4} models, a list of class
 \code{c("FitMod", "FitMod.xgboost")} or
 \code{c("FitMod", "FitMod.lme4")} wrapping the original model
-object in \code{$model}.
+object in \code{$model}.  For \code{"glmnet"} and \code{"xgboost"}
+the result additionally stores \code{terms}, \code{xlev} and
+\code{x_train}, so that \code{predict()} can rebuild design matrices
+for new data with the factor levels of the training data.
 }
 \description{
 A unified interface for fitting a wide range of regression and
@@ -45,16 +54,37 @@ The return value is always an object of class \code{"FitMod"} layered on
 top of the original model object, so all standard methods
 (\code{predict}, \code{print}, \code{coef}, \ldots) continue to work.
 }
+\details{
+Automatic method selection uses the following heuristic: a dichotomous
+response (exactly two distinct values, factor/logical or numeric coded
+as 0/1) is fitted with \code{"logit"}, an ordered factor with
+\code{"polr"}, an unordered factor with \code{"multinom"}, a
+non-negative integer response with \code{"poisson"}, and any other
+numeric response with \code{"lm"}.  Note that integer storage does not
+necessarily mean count data -- data import functions often return
+integer columns for metric variables.  The chosen method is always
+reported via \code{message()}; supply \code{fitfn} explicitly to
+override the heuristic.
+}
 \examples{
-# Auto-detection
-fitMod(Species ~ ., data = iris)        # -> multinom
-fitMod(Sepal.Length ~ ., data = iris)   # -> lm
+# Auto-detection: numeric response -> lm
+fitMod(Sepal.Length ~ ., data = iris)
 
-# Explicit
-fitMod(Species ~ ., data = iris, fitfn = "rpart")
+# factor response -> multinom
+if (requireNamespace("nnet", quietly = TRUE)) {
+  fitMod(Species ~ ., data = iris)
+}
+
+# Explicit method
+if (requireNamespace("rpart", quietly = TRUE)) {
+  fitMod(Species ~ ., data = iris, fitfn = "rpart")
+}
 
 # Mixed models
-fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
+if (requireNamespace("lme4", quietly = TRUE)) {
+  fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
+         fitfn = "lmMixed")
+}
 
 }
 \seealso{

@@ -247,7 +247,7 @@ plot.TMod <- function(x, terms=NULL, intercept=FALSE, ...){
   if (!is.null(dots))
     args.plotdot1[names(dots)] <- dots
   
-  do.call(aurora::plotDot, args.plotdot1)
+  do.call(lyra::plotDot, args.plotdot1)
 }
 
 

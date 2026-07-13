@@ -1,6 +1,4 @@
 
-
-
 #' Fit a statistical or machine-learning model with automatic method selection
 #'
 #' A unified interface for fitting a wide range of regression and
@@ -10,55 +8,82 @@
 #' top of the original model object, so all standard methods
 #' (\code{predict}, \code{print}, \code{coef}, \ldots) continue to work.
 #'
-#' @param formula A model formula.
+#' @param formula A two-sided model formula.
 #' @param data A data frame containing the variables in \code{formula}.
 #' @param ... Additional arguments passed to the underlying fitting function.
 #' @param subset An optional vector specifying a subset of observations.
-#' @param na.action A function for handling missing values.
-#'   Default is \code{\link[stats]{na.pass}}.
+#'   Only supported for fitting functions that accept a \code{subset}
+#'   argument (and for \code{"glmnet"} and \code{"xgboost"}, where it is
+#'   applied when the design matrix is built).
+#' @param na.action A function for handling missing values, passed to the
+#'   underlying fitting function (or to \code{\link[stats]{model.frame}}
+#'   for \code{"glmnet"} and \code{"xgboost"}).  If not supplied, the
+#'   default of the respective fitting function applies (usually
+#'   \code{\link[stats]{na.omit}}).
 #' @param fitfn Character string naming the fitting method.  One of
 #'   \code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
 #'   \code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
 #'   \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
 #'   \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-#'   \code{"svm"}, \code{"naive_bayes"}, \code{"randomForest"},
+#'   \code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
 #'   \code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
 #'   \code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
 #'   \code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
 #'   \code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
 #'   If \code{NULL} (default) the method is chosen automatically.
 #'
+#' @details
+#' Automatic method selection uses the following heuristic: a dichotomous
+#' response (exactly two distinct values, factor/logical or numeric coded
+#' as 0/1) is fitted with \code{"logit"}, an ordered factor with
+#' \code{"polr"}, an unordered factor with \code{"multinom"}, a
+#' non-negative integer response with \code{"poisson"}, and any other
+#' numeric response with \code{"lm"}.  Note that integer storage does not
+#' necessarily mean count data -- data import functions often return
+#' integer columns for metric variables.  The chosen method is always
+#' reported via \code{message()}; supply \code{fitfn} explicitly to
+#' override the heuristic.
+#'
 #' @return An object of class \code{c("FitMod", <original class>)}.
 #'   For \code{xgboost} and \code{lme4} models, a list of class
 #'   \code{c("FitMod", "FitMod.xgboost")} or
 #'   \code{c("FitMod", "FitMod.lme4")} wrapping the original model
-#'   object in \code{$model}.
+#'   object in \code{$model}.  For \code{"glmnet"} and \code{"xgboost"}
+#'   the result additionally stores \code{terms}, \code{xlev} and
+#'   \code{x_train}, so that \code{predict()} can rebuild design matrices
+#'   for new data with the factor levels of the training data.
 #'
 #' @examples
-#' # Auto-detection
-#' fitMod(Species ~ ., data = iris)        # -> multinom
-#' fitMod(Sepal.Length ~ ., data = iris)   # -> lm
+#' # Auto-detection: numeric response -> lm
+#' fitMod(Sepal.Length ~ ., data = iris)
 #'
-#' # Explicit
-#' fitMod(Species ~ ., data = iris, fitfn = "rpart")
+#' # factor response -> multinom
+#' if (requireNamespace("nnet", quietly = TRUE)) {
+#'   fitMod(Species ~ ., data = iris)
+#' }
+#'
+#' # Explicit method
+#' if (requireNamespace("rpart", quietly = TRUE)) {
+#'   fitMod(Species ~ ., data = iris, fitfn = "rpart")
+#' }
 #'
 #' # Mixed models
-#' fitMod(Reaction ~ Days + (1|Subject), lme4::sleepstudy, fitfn = "lmMixed")
+#' if (requireNamespace("lme4", quietly = TRUE)) {
+#'   fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
+#'          fitfn = "lmMixed")
+#' }
 #'
-
-#' @family modelling  
-#' @concept modelling  
-#' @concept regression  
+#' @family modelling
+#' @concept regression
 #' @concept classification
-#'
-#'
 #' @export
-fitMod <- function(formula, data, ..., subset, na.action = na.pass,
-                   fitfn = NULL) {
+fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   
   # --- validate inputs ---
   if (!inherits(formula, "formula"))
     stop("'formula' must be a formula object.")
+  if (length(formula) != 3L)
+    stop("'formula' must be two-sided (response ~ predictors).")
   if (!is.data.frame(data))
     stop("'data' must be a data frame.")
   
@@ -67,77 +92,58 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   
   # --- auto-detect fitting function if needed ---
   if (is.null(fitfn)) {
-    resp  <- eval(formula[[2]], envir = data, enclos = parent.frame())
+    resp  <- eval(formula[[2L]], envir = data, enclos = parent.frame())
     fitfn <- .guess_fitfn(resp)
     message("fitMod: using fitfn = '", fitfn, "'")
   } else {
-    if (!fitfn %in% names(.fitfn_registry))
-      stop(
-        "Unknown fitfn '", fitfn, "'. ",
-        "Choose one of: ",
-        paste(names(.fitfn_registry), collapse = ", "), "."
-      )
+    fitfn <- match.arg(fitfn, names(.fitfn_registry))
   }
   
-  # --- look up registry entry ---
+  # --- look up registry entry, ensure package is available ---
   entry <- .fitfn_registry[[fitfn]]
-  
-  # --- glmnet: auto-detect family and convert formula to x/y ---
-  if (fitfn == "glmnet") {
-    resp <- eval(formula[[2L]], envir = data, enclos = parent.frame())
-    
-    if (is.null(cl[["family"]]))
-      cl[["family"]] <- if (isDichotomous(resp))           "binomial"
-    else if (inherits(resp, "factor")) "multinomial"
-    else if (inherits(resp, "integer")) "poisson"
-    else                               "gaussian"
-    
-    # cv.glmnet has no formula interface - convert manually
-    mf              <- model.frame(formula, data = data)
-    x_train         <- model.matrix(formula[-2L], data = mf)[, -1L, drop = FALSE]
-    cl[["y"]]       <- model.response(mf)
-    cl[["x"]]       <- x_train
-    cl[["formula"]] <- NULL
-    cl[["data"]]    <- NULL
-  }
-  
-  # --- xgboost: auto-detect objective and convert formula to x/y ---
-  if (fitfn == "xgboost") {
-    resp <- eval(formula[[2L]], envir = data, enclos = parent.frame())
-    
-    mf      <- model.frame(formula, data = data)
-    y_raw   <- model.response(mf)
-    x_train <- model.matrix(formula[-2L], data = mf)[, -1L, drop = FALSE]
-    
-    cl[["x"]]       <- x_train
-    cl[["y"]]       <- y_raw
-    cl[["formula"]] <- NULL
-    cl[["data"]]    <- NULL
-    
-    cl[["objective"]] <- cl[["objective"]] %||%
-      if (isDichotomous(resp))           "binary:logistic"
-    else if (inherits(resp, "factor")) "multi:softprob"
-    else if (inherits(resp, "integer")) "count:poisson"
-    else                               "reg:squarederror"
-    
-    x_train_xgb  <- x_train
-    y_levels_xgb <- if (is.factor(y_raw)) levels(y_raw) else NULL
-  }
-  
-  # --- ensure package is available ---
   .require_pkg(entry$pkg)
   
-  # --- resolve fitting function ---
-  fun <- if (is.null(entry$pkg)) {
-    get(entry$fn, envir = parent.env(environment()), inherits = TRUE)
-  } else {
-    get(entry$fn, asNamespace(entry$pkg), inherits = FALSE)
+  # --- glmnet / xgboost: no formula interface, convert to x/y ---
+  # subset and na.action are honoured via model.frame() and removed from
+  # the call afterwards (the target functions do not accept them)
+  design <- NULL
+  
+  if (fitfn == "glmnet") {
+    design <- .build_design(cl, parent.frame())
+    
+    if (!("family" %in% names(cl)))
+      cl[["family"]] <- .guess_glmnet_family(design$y)
+    
+    cl[["x"]] <- design$x
+    cl[["y"]] <- design$y
+    # NOTE: cl is a call, not a list - assigning NULL to an *absent*
+    # component via [[<- throws "subscript out of bounds", and subset/
+    # na.action are absent unless explicitly supplied (match.call()!)
+    for (nm in c("formula", "data", "subset", "na.action"))
+      if (nm %in% names(cl)) cl[[nm]] <- NULL
+  }
+  
+  if (fitfn == "xgboost") {
+    design <- .build_design(cl, parent.frame())
+    
+    if (!("objective" %in% names(cl)))
+      cl[["objective"]] <- .guess_xgb_objective(design$y)
+    
+    cl[["x"]] <- design$x
+    cl[["y"]] <- design$y
+    for (nm in c("formula", "data", "subset", "na.action"))
+      if (nm %in% names(cl)) cl[[nm]] <- NULL
   }
   
   # --- apply registry defaults and strip fitMod-specific args ---
   cl       <- .apply_defaults(cl, entry$defaults)
   cl$fitfn <- NULL
-  cl[[1L]] <- fun
+  
+  # Namespaced call head (pkg::fn): the fitting function is found even if
+  # its package is not attached, the call stored by the fitter via
+  # match.call() is valid as-is, and update()/drop1() on the result work
+  # in any environment
+  cl[[1L]] <- call("::", as.name(entry$pkg), as.name(entry$fn))
   
   # --- fit model ---
   res <- eval(cl, parent.frame())
@@ -145,12 +151,16 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   # --- xgboost: wrap in list since xgboost objects don't support $<- ---
   if (fitfn == "xgboost") {
     res <- list(
-      model    = res,
-      fitfn    = fitfn,
-      formula  = formula,
-      x_train  = x_train_xgb,
-      y_levels = y_levels_xgb,
-      call     = match.call()
+      model          = res,
+      fitfn          = fitfn,
+      formula        = formula,
+      terms          = design$terms,
+      xlev           = design$xlev,
+      x_train        = design$x,
+      y_levels       = if (is.factor(design$y)) levels(design$y) else NULL,
+      classification = is.character(cl[["objective"]]) &&
+        grepl("^(binary|multi):", cl[["objective"]]),
+      call           = match.call()
     )
     class(res) <- c("FitMod", "FitMod.xgboost")
     return(res)
@@ -168,110 +178,104 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     return(res)
   }
   
+  # --- post-process on the natural class, before FitMod is prepended ---
+  res <- .postprocess(res, fitfn)
+  
   # --- attach FitMod class and metadata (all other models) ---
-  class(res)    <- c("FitMod", class(res))
-  res$fitfn     <- fitfn
-  res$call[[1]] <- as.name(entry$fix_call)
+  class(res) <- c("FitMod", class(res))
+  res$fitfn  <- fitfn
   
   # --- store glmnet-specific data for predict ---
+  # cv.glmnet's own stored call embeds the full x matrix; replace it with
+  # the compact fitMod call (update() then refits via fitMod, by design)
   if (fitfn == "glmnet") {
-    res[["formula"]] <- formula
-    res[["x_train"]] <- x_train
-    res[["call"]]    <- match.call()
+    res[["formula"]]        <- formula
+    res[["terms"]]          <- design$terms
+    res[["xlev"]]           <- design$xlev
+    res[["x_train"]]        <- design$x
+    res[["classification"]] <- identical(cl[["family"]], "binomial") ||
+      identical(cl[["family"]], "multinomial")
+    res[["call"]]           <- match.call()
   }
-  
-  # --- post-process ---
-  res <- .postprocess(res, fitfn)
   
   res
 }
 
 
 
-
 # == internal helper functions ============================================
 
 
-
 # Internal registry: one entry per supported fitting function
+# NOTE: the former fix_call field is obsolete -- the namespaced call head
+# (pkg::fn) makes the stored calls valid without repair.
 
 .fitfn_registry <- list(
   
   lm = list(
     pkg      = "stats",
     fn       = "lm",
-    defaults = list(),
-    fix_call = "lm"
+    defaults = list()
   ),
   
   logit = list(
     pkg      = "stats",
     fn       = "glm",
-    defaults = list(family = "binomial"),
-    fix_call = "glm"
+    defaults = list(family = "binomial")
   ),
   
   poisson = list(
     pkg      = "stats",
     fn       = "glm",
-    defaults = list(family = "poisson"),
-    fix_call = "glm"
+    defaults = list(family = "poisson")
   ),
   
   quasipoisson = list(
     pkg      = "stats",
     fn       = "glm",
-    defaults = list(family = "quasipoisson"),
-    fix_call = "glm"
+    defaults = list(family = "quasipoisson")
   ),
   
   gamma = list(
     pkg      = "stats",
     fn       = "glm",
-    defaults = list(family = quote(Gamma(link = "log"))),
-    fix_call = "glm"
+    defaults = list(family = quote(Gamma(link = "log")))
   ),
   
   negbin = list(
     pkg      = "MASS",
     fn       = "glm.nb",
-    defaults = list(),
-    fix_call = "glm.nb"
+    defaults = list()
   ),
   
   polr = list(
     pkg      = "MASS",
     fn       = "polr",
-    defaults = list(Hess = TRUE, model = TRUE),
-    fix_call = "polr"
+    defaults = list(Hess = TRUE, model = TRUE)
   ),
   
   lmrob = list(
     pkg      = "robustbase",
     fn       = "lmrob",
-    defaults = list(),
-    fix_call = "lmrob"
+    defaults = list()
   ),
   
   tobit = list(
-    pkg      = NULL,        # internal function
+    pkg      = "AER",
     fn       = "tobit",
-    defaults = list(),
-    fix_call = "tobit"
+    defaults = list()
   ),
   
   zeroinfl = list(
     pkg      = "pscl",
     fn       = "zeroinfl",
-    defaults = list(),
-    fix_call = "zeroinfl"
+    defaults = list()
   ),
   
   multinom = list(
     pkg      = "nnet",
     fn       = "multinom",
-    defaults = list(maxit = 500, model = TRUE, trace = FALSE),
-    fix_call = "multinom"
+    defaults = list(maxit = 500, model = TRUE, trace = FALSE)
   ),
   
   nnet = list(
@@ -283,68 +287,59 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
       size    = 10,
       entropy = TRUE,    # cross-entropy loss for classification
       decay   = 0.01     # L2 regularization, helps convergence
-    ),
-    fix_call = "nnet"
+    )
   ),
   
   rpart = list(
     pkg      = "rpart",
     fn       = "rpart",
-    defaults = list(model = TRUE, y = TRUE),
-    fix_call = "rpart"
+    defaults = list(model = TRUE, y = TRUE)
   ),
   
   randomForest = list(
     pkg      = "randomForest",
     fn       = "randomForest",
-    defaults = list(),
-    fix_call = "randomForest"
+    defaults = list()
   ),
   
   C5.0 = list(
     pkg      = "C50",
     fn       = "C5.0",
-    defaults = list(),
-    fix_call = "C5.0"
+    defaults = list()
   ),
   
   lda = list(
     pkg      = "MASS",
     fn       = "lda",
-    defaults = list(),
-    fix_call = "lda"
+    defaults = list()
   ),
   
   qda = list(
     pkg      = "MASS",
     fn       = "qda",
-    defaults = list(),
-    fix_call = "qda"
+    defaults = list()
   ),
   
   svm = list(
     pkg      = "e1071",
     fn       = "svm",
-    defaults = list(probability = TRUE),
-    fix_call = "svm"
+    defaults = list(probability = TRUE)
   ),
   
   naiveBayes = list(
     pkg      = "naivebayes",
     fn       = "naive_bayes",
-    defaults = list(),
-    fix_call = "naive_bayes"
+    defaults = list()
   ),
   
   glmnet = list(
     pkg      = "glmnet",
     fn       = "cv.glmnet",
     defaults = list(
-      alpha   = 1,       # Lasso; user can override to 0 (Ridge) or 0.5 (Elastic Net)
-      nfolds  = 10,
-      family  = "multinomial"  # auto-detect would be better - see below
-    ),
-    fix_call = "cv.glmnet"
+      alpha  = 1,      # Lasso; user can override to 0 (Ridge) or 0.5 (Elastic Net)
+      nfolds = 10
+      # family is auto-detected in fitMod() from the response type
+    )
   ),
   
   xgboost = list(
@@ -354,81 +349,70 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
       nrounds       = 100L,
       max_depth     = 3L,
       learning_rate = 0.1
-    ),
-    fix_call = "xgboost"
+    )
   ),
   
   coxph = list(
     pkg      = "survival",
     fn       = "coxph",
-    defaults = list(model = TRUE, x = TRUE),
-    fix_call = "coxph"
+    defaults = list(model = TRUE, x = TRUE)
   ),
   
   weibull = list(
     pkg      = "survival",
     fn       = "survreg",
-    defaults = list(dist = "weibull"),
-    fix_call = "survreg"
+    defaults = list(dist = "weibull")
   ),
   
   exponential = list(
     pkg      = "survival",
     fn       = "survreg",
-    defaults = list(dist = "exponential"),
-    fix_call = "survreg"
+    defaults = list(dist = "exponential")
   ),
   
   lognormal = list(
     pkg      = "survival",
     fn       = "survreg",
-    defaults = list(dist = "lognormal"),
-    fix_call = "survreg"
+    defaults = list(dist = "lognormal")
   ),
   
   loglogistic = list(
     pkg      = "survival",
     fn       = "survreg",
-    defaults = list(dist = "loglogistic"),
-    fix_call = "survreg"
+    defaults = list(dist = "loglogistic")
   ),
   
   lmMixed = list(
     pkg      = "lme4",
     fn       = "lmer",
-    defaults = list(),
-    fix_call = "lmer"
+    defaults = list()
   ),
   
   logitMixed = list(
     pkg      = "lme4",
     fn       = "glmer",
-    defaults = list(family = "binomial"),
-    fix_call = "glmer"
+    defaults = list(family = "binomial")
   ),
   
   poissonMixed = list(
     pkg      = "lme4",
     fn       = "glmer",
-    defaults = list(family = "poisson"),
-    fix_call = "glmer"
+    defaults = list(family = "poisson")
   ),
   
   negbinMixed = list(
     pkg      = "lme4",
     fn       = "glmer.nb",
-    defaults = list(),
-    fix_call = "glmer.nb"
+    defaults = list()
   ),
   
   gammaMixed = list(
     pkg      = "lme4",
     fn       = "glmer",
-    defaults = list(family = quote(Gamma(link = "log"))),
-    fix_call = "glmer"
+    defaults = list(family = quote(Gamma(link = "log")))
   )
   
-  )
+)
 
 
 # -------------------------------------------------------------------------
@@ -437,20 +421,89 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
 
 #' @keywords internal
 .guess_fitfn <- function(resp) {
-  if (isDichotomous(resp))
+  
+  if (all(is.na(resp)))
+    stop("Response contains only missing values.")
+  
+  # dichotomous: exactly two distinct values AND a type where a
+  # binomial fit is meaningful (factor/logical/character or 0/1 coded)
+  if (isTRUE(isDichotomous(resp, strict = TRUE, na.rm = TRUE)) &&
+      (is.factor(resp) || is.logical(resp) || is.character(resp) ||
+       all(resp %in% c(0, 1) | is.na(resp))))
     return("logit")
+  
   if (inherits(resp, "ordered"))
     return("polr")
-  if (inherits(resp, "factor"))
+  if (is.factor(resp))
     return("multinom")
-  if (inherits(resp, "integer"))
-    return("poisson")
-  if (inherits(resp, "numeric"))
+  if (is.integer(resp))
+    return(if (any(resp < 0, na.rm = TRUE)) "lm" else "poisson")
+  if (is.numeric(resp))
     return("lm")
+  
   stop(
     "Cannot guess fitting function for response of class '",
     paste(class(resp), collapse = "/"), "'. ",
     "Please provide 'fitfn' explicitly."
+  )
+}
+
+
+#' @keywords internal
+.guess_glmnet_family <- function(resp) {
+  if (isTRUE(isDichotomous(resp, strict = TRUE, na.rm = TRUE)))
+    "binomial"
+  else if (is.factor(resp))
+    "multinomial"
+  else if (is.integer(resp) && !any(resp < 0, na.rm = TRUE))
+    "poisson"
+  else
+    "gaussian"
+}
+
+
+#' @keywords internal
+.guess_xgb_objective <- function(resp) {
+  if (isTRUE(isDichotomous(resp, strict = TRUE, na.rm = TRUE)))
+    "binary:logistic"
+  else if (is.factor(resp))
+    "multi:softprob"
+  else if (is.integer(resp) && !any(resp < 0, na.rm = TRUE))
+    "count:poisson"
+  else
+    "reg:squarederror"
+}
+
+
+# -------------------------------------------------------------------------
+# Build design matrix x and response y from the matched call
+# (used for target functions without a formula interface)
+# -------------------------------------------------------------------------
+
+# Standard model.frame idiom (cf. lm): subset and na.action are kept as
+# unevaluated expressions and correctly resolved within 'data'.
+# The intercept column is only dropped if the formula actually has one.
+#' @keywords internal
+.build_design <- function(cl, env) {
+  
+  mfCall <- cl
+  keep   <- match(c("formula", "data", "subset", "na.action"),
+                  names(mfCall), 0L)
+  mfCall <- mfCall[c(1L, keep)]
+  mfCall[[1L]] <- quote(stats::model.frame)
+  mfCall$drop.unused.levels <- TRUE
+  mf <- eval(mfCall, env)
+  
+  tt <- attr(mf, "terms")
+  x  <- model.matrix(tt, mf)
+  if (attr(tt, "intercept") == 1L)
+    x <- x[, -1L, drop = FALSE]
+  
+  list(
+    x     = x,
+    y     = model.response(mf),
+    terms = tt,
+    xlev  = stats::.getXlevels(tt, mf)
   )
 }
 
@@ -461,19 +514,22 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
 
 #' @keywords internal
 .require_pkg <- function(pkg) {
-  if (!is.null(pkg) && !requireNamespace(pkg, quietly = TRUE))
+  if (!requireNamespace(pkg, quietly = TRUE))
     stop("Package '", pkg, "' must be installed for this fitting function.")
 }
 
 
 # -------------------------------------------------------------------------
-# Apply registry defaults to call (only if not already set by user)
+# Apply registry defaults to call (only if not supplied by the user)
 # -------------------------------------------------------------------------
 
+# Membership check instead of is.null(): an explicitly supplied NULL is
+# a deliberate user choice and must not be overwritten by a default
+# (same principle as modifyListSafe())
 #' @keywords internal
 .apply_defaults <- function(cl, defaults) {
   for (nm in names(defaults))
-    if (is.null(cl[[nm]]))
+    if (!(nm %in% names(cl)))
       cl[[nm]] <- defaults[[nm]]
   cl
 }
@@ -481,6 +537,7 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
 
 # -------------------------------------------------------------------------
 # Post-processing: steps that extend the result object after fitting
+# (called on the natural class, before "FitMod" is prepended)
 # -------------------------------------------------------------------------
 
 #' @keywords internal
@@ -490,10 +547,11 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
 
 #' @keywords internal
 .postprocess.multinom <- function(res, fitfn) {
-  # Wald z-test p-values (2-tailed)
+  # Wald z-test p-values (2-tailed); lower.tail avoids underflow to
+  # exactly 0 for large |z|
   sm <- suppressMessages(summary(res))
   z  <- sm$coefficients / sm$standard.errors
-  res[["pval"]]  <- (1 - pnorm(abs(z), 0, 1)) * 2
+  res[["pval"]]  <- 2 * pnorm(abs(z), lower.tail = FALSE)
   res[["drop1"]] <- .drop1.multinom(res)
   res
 }
@@ -533,15 +591,9 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
 .drop1.multinom <- function(object, scope, test = c("Chisq", "none"), ...) {
   
   if (!inherits(object, "multinom"))
-    stop("object must be of class 'multinom'")
+    stop("'object' must be of class 'multinom'.")
   
   test <- match.arg(test)
-  
-  # Make multinom available in the evaluation environment -
-  # required during R CMD check where nnet is not on the search path
-  multinom <- getFromNamespace("multinom", "nnet")
-  env <- environment(formula(object))
-  assign("multinom", multinom, envir = env)
   
   if (missing(scope))
     scope <- drop.scope(object)
@@ -549,28 +601,24 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
     if (!is.character(scope))
       scope <- attr(terms(update.formula(object, scope)), "term.labels")
     if (!all(scope %in% attr(object$terms, "term.labels")))
-      stop("scope is not a subset of term labels")
+      stop("'scope' is not a subset of the term labels.")
   }
   
-  # Resolve environment; fall back to caller if formula has no attached env
+  # Isolated evaluation environment on top of the formula environment:
+  # provides the fitting function and the training data for the refits
+  # without writing into the user's workspace and without consuming
+  # RNG state for temp names (reproducibility after set.seed()).
+  # model.frame(object) is already stripped to exactly the rows used
+  # during fitting.
   env <- environment(formula(object))
   if (is.null(env))
     env <- parent.frame()
   
-  # Use model.frame: works without explicit data=, already stripped to
-  # exactly the rows used during fitting
-  orig_data <- model.frame(object)
+  evalEnv <- new.env(parent = env)
+  assign("multinom", getFromNamespace("multinom", "nnet"), envir = evalEnv)
+  assign(".drop1_data", model.frame(object), envir = evalEnv)
   
-  # Collision-safe temp name (random 32-bit hex)
-  tmp_name <- sprintf(".drop1_data_%08x", sample.int(2147483647L, 1L))
-  assign(tmp_name, orig_data, envir = env)
-  on.exit(
-    if (exists(tmp_name, envir = env, inherits = FALSE))
-      rm(list = tmp_name, envir = env),
-    add = TRUE
-  )
-  
-  ns  <- length(scope)
+  ns <- length(scope)
   
   # Result matrix
   has_chisq <- test == "Chisq"
@@ -598,9 +646,9 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   for (i in seq_len(ns)) {
     tt   <- scope[i]
     call <- update(object, as.formula(paste("~ . -", tt)), evaluate = FALSE)
-    call$data <- as.name(tmp_name)
+    call$data <- as.name(".drop1_data")
     
-    nfit <- eval(call, envir = env)
+    nfit <- eval(call, envir = evalEnv)
     
     ans[i + 1L, "Df"] <- nfit$edf
     
@@ -622,6 +670,4 @@ fitMod <- function(formula, data, ..., subset, na.action = na.pass,
   
   as.data.frame(ans)
 }
-
-
 

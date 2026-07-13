@@ -87,7 +87,7 @@ plot.rpart <- function(x      = stop("no 'x' arg"),
       border  = NA,
       font    = 2L,
       col     = "steelblue",
-      bg      = addAlpha("white", 0.7),
+      bg      = addOpacity("white", 0.7),
       cex     = 0.8
     )
   }

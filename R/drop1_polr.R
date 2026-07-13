@@ -43,9 +43,14 @@
 #' original formula.  This is intentional: it avoids complex formula
 #' reconstruction for transformed terms (\code{poly()}, \code{ns()}, etc.)
 #' and is consistent with the Type-II approach used in \pkg{car}.  As a
-#' consequence, \code{offset}, \code{subset}, and special formula terms are
-#' not re-evaluated in the reduced fits - they are already baked into the
-#' model matrix.
+#' consequence, \code{subset} and special formula terms are already baked
+#' into the model matrix and need no re-evaluation.  Offset terms, however,
+#' are \emph{not} part of the model matrix and would be silently dropped in
+#' the reduced fits, invalidating the LR comparison; models with an offset
+#' are therefore rejected with an error.
+#'
+#' The reduced models are refitted with the \code{method} of the full model
+#' (logistic, probit, ...), so the deviances are comparable.
 #'
 #' Fits that fail to converge are silently set to \code{NA}.  Note that
 #' \code{polr()} sometimes issues convergence \emph{warnings} without
@@ -57,7 +62,7 @@
 #' @return A \code{data.frame} of class \code{c("anova", "data.frame")}.
 #' @keywords internal
 .drop1.polr <- function(mod, ...) {
-  
+
   # Guard: intercept-only model has no terms to drop
   nms <- .polr_term_names(mod)
   if (length(nms) == 0L) {
@@ -75,85 +80,106 @@
     )
     return(result)
   }
-  
+
   fac     <- attr(terms(mod), "factors")
   n.terms <- length(nms)
-  
+
   # Compute model frame once
-  mf   <- model.frame(mod)
-  y    <- model.response(mf)
-  wt   <- model.weights(mf)
-  
+  mf <- model.frame(mod)
+  y  <- model.response(mf)
+  wt <- model.weights(mf)
+
+  # Offsets are not part of the model matrix - the reduced fits would
+  # silently drop them and the LR comparison against the full model
+  # (which includes the offset) would be invalid
+  if (!is.null(model.offset(mf)))
+    stop(
+      "'.drop1.polr()' does not support models with an offset: ",
+      "the reduced fits on the model matrix would silently drop it. ",
+      "Please compute the LR tests manually via anova()."
+    )
+
   X    <- model.matrix(mod)
   asgn <- attr(X, "assign")
   df   <- .polr_df_terms(mod)
-  
+
   # Map term name to column indices in model matrix
   which.nms <- function(name) {
     term.idx <- match(name, nms)
     which(asgn == term.idx)
   }
-  
-  # Safe polr fitter: returns NULL on error, issues message on convergence warning
+
+  # Safe polr fitter: refits with the method of the full model (logistic,
+  # probit, ...) so that deviances are comparable; returns NULL on error,
+  # issues message on convergence warning
+  # NOTE: do NOT call MASS::polr(formula, weights = weights) with plain
+  # symbols here - polr's internal model.frame() evaluates the 'weights'
+  # symbol in environment(formula), not in this function's frame, where
+  # lookup falls through to the function stats::weights and fails with
+  # "invalid type (closure) for variable '(weights)'".  do.call() splices
+  # the *values* into the call, so nothing needs to be resolved.
+  method <- mod$method
   .safe_polr <- function(formula, weights) {
-    mod <- tryCatch(
+    args <- list(formula, method = method)
+    if (!is.null(weights))
+      args$weights <- weights
+    tryCatch(
       withCallingHandlers(
-        MASS::polr(formula, weights = weights),
+        do.call(MASS::polr, args),
         warning = function(w) {
-          if (grepl("conver|probabilities numerically 0 or 1", conditionMessage(w),
-                    ignore.case = TRUE))
+          if (grepl("conver|probabilities numerically 0 or 1",
+                    conditionMessage(w), ignore.case = TRUE))
             message("polr convergence warning: ", conditionMessage(w))
           invokeRestart("muffleWarning")
         }
       ),
       error = function(e) NULL
     )
-    mod
   }
-  
+
   aic <- numeric(n.terms)
   LR  <- numeric(n.terms)
   p   <- numeric(n.terms)
-  
+
   for (term in seq_len(n.terms)) {
     rels      <- nms[.polr_relatives(nms[term], nms, fac)]
     exclude.1 <- unlist(lapply(c(nms[term], rels), which.nms),
                         use.names = FALSE)
-    
+
     mod.1 <- if (n.terms > 1L)
       .safe_polr(y ~ X[, -c(1L, exclude.1)], weights = wt)
     else
-      .safe_polr(y ~ 1L, weights = wt)
-    
+      .safe_polr(y ~ 1, weights = wt)
+
     if (is.null(mod.1)) {
       aic[term] <- NA_real_
       LR[term]  <- NA_real_
       p[term]   <- NA_real_
       next
     }
-    
+
     dev.1 <- deviance(mod.1)
-    
+
     mod.2 <- if (length(rels) == 0L) {
       mod
     } else {
       exclude.2 <- unlist(lapply(rels, which.nms), use.names = FALSE)
       .safe_polr(y ~ X[, -c(1L, exclude.2)], weights = wt)
     }
-    
+
     if (is.null(mod.2)) {
       aic[term] <- NA_real_
       LR[term]  <- NA_real_
       p[term]   <- NA_real_
       next
     }
-    
+
     dev.2     <- deviance(mod.2)
     LR[term]  <- dev.1 - dev.2
     p[term]   <- pchisq(LR[term], df[term], lower.tail = FALSE)
     aic[term] <- AIC(mod.1)
   }
-  
+
   result <- data.frame(
     AIC          = aic,
     "LR Chisq"   = LR,
@@ -171,30 +197,27 @@
 }
 
 
-
-
-
-
 #' @keywords internal
 .summary_polr <- function(x, conf.level = 0.95, output = c("coef", "or")) {
-  
+
   output <- match.arg(output)
   alpha  <- 1 - (1 - conf.level) / 2
-  
-  r.summary  <- summary(x)
-  coefs      <- r.summary$coefficients  # all rows: predictors + thresholds
-  
+
+  r.summary <- summary(x)
+  coefs     <- r.summary$coefficients  # all rows: predictors + thresholds
+
   # Split into predictors and thresholds
   zeta_names <- names(x$zeta)
   pred_names <- setdiff(rownames(coefs), zeta_names)
-  
+
   # --- predictor block ---
   coefs_pred <- coefs[pred_names, , drop = FALSE]
   est <- coefs_pred[, "Value"]
   se  <- coefs_pred[, "Std. Error"]
   z   <- abs(est / se)
-  p   <- 2 * (1 - pnorm(z))
-  
+  # lower.tail avoids underflow to exactly 0 for large |z|
+  p   <- 2 * pnorm(z, lower.tail = FALSE)
+
   d.coef <- data.frame(
     id        = pred_names,
     estimate  = est,
@@ -205,7 +228,7 @@
     row.names = NULL,
     stringsAsFactors = FALSE
   )
-  
+
   # --- threshold block ---
   # confint.default does not cover zeta - derive CI from SE in summary
   zeta_se <- coefs[zeta_names, "Std. Error"]
@@ -217,12 +240,12 @@
     row.names = NULL,
     stringsAsFactors = FALSE
   )
-  
+
   # --- rename CI columns after conf.level ---
   lci_label <- sprintf("%s-lci", fm(conf.level, fmt = "%", digits = 0))
   names(d.coef)[names(d.coef) == "lci"] <- lci_label
   names(d.zeta)[names(d.zeta) == "lci"] <- lci_label
-  
+
   # --- transform to OR if requested ---
   if (output == "or") {
     cols <- c("estimate", lci_label, "uci")
@@ -230,7 +253,7 @@
     # ORs for thresholds are not meaningful
     d.zeta <- NULL
   }
-  
+
   structure(
     list(
       coefficients = d.coef,
@@ -248,27 +271,26 @@
 }
 
 
-
 #' @keywords internal
 .print_polr <- function(x, digits = 3, pdigits = 3,
                         conf.level = 0.95,
                         output = c("coef", "or"), ...) {
-  
+
   output <- match.arg(output)
   xx     <- if (inherits(x, "SummaryFitMod")) x
-  else .summary_polr(x, conf.level = conf.level, output = output)
-  
+            else .summary_polr(x, conf.level = conf.level, output = output)
+
   lci_col <- grep("-lci$", names(xx$coefficients), value = TRUE)
-  
+
   # Format coefficient table
   out_coef <- cbind(
     " "    = xx$coefficients$id,
     fm(xx$coefficients[, c("estimate", lci_col, "uci")], digits = digits),
     "pval" = fm(xx$coefficients$pval, fmt = "p",
-                    digits = pdigits, eps = 10^-pdigits),
+                digits = pdigits, eps = 10^-pdigits),
     " "    = fm(xx$coefficients$pval, fmt = "*")
   )
-  
+
   # Format threshold table (coef mode only)
   if (!is.null(xx$thresholds)) {
     out_zeta <- cbind(
@@ -276,33 +298,25 @@
       fm(xx$thresholds[, c("estimate", lci_col, "uci")], digits = digits)
     )
   }
-  
+
   # Print
   cat("\nCall:\n",
       paste(deparse(xx$call), sep = "\n", collapse = "\n"),
       "\n", sep = "")
   cat(sprintf("\n%s:\n", xx$results))
   print(out_coef, quote = FALSE, print.gap = 2L, row.names = FALSE)
-  
+
   if (!is.null(xx$thresholds)) {
     cat("\nThresholds:\n")
     print(out_zeta, quote = FALSE, print.gap = 2L, row.names = FALSE)
   }
-  
+
   cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
   cat(sprintf("\nObs (NAs): %d (%d)", xx$nobs, xx$na.action))
   cat("\tPseudo R\u00B2 (McFadden):",
       fm(xx$PseudoR2["McFadden"], digits = digits))
   cat("   AIC:", fm(xx$PseudoR2["AIC"], digits = digits))
   cat("\n\n")
-  
+
   invisible(xx)
 }
-
-
-# not needed anymore, we have output = "or"
-#' #' @export
-#' OddsRatio.polr <- function(x, conf.level = 0.95, digits = 3, ...) {
-#'   .summary_polr(x, conf.level = conf.level, output = "or")
-#' }
-
