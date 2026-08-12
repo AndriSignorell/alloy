@@ -45,7 +45,7 @@
 #'   \item{\code{\link{tMod}}}{Side-by-side comparison of multiple models.}
 #'   \item{\code{\link{pseudoR2}}}{Pseudo-R\eqn{^2} measures for GLMs.}
 #'   \item{\code{\link{vif}}}{Variance inflation factors (VIF / GVIF).}
-#'   \item{\code{\link{coefCI}}, \code{\link{rSqCI}}}{Bootstrap CIs for
+#'   \item{\code{\link{coefCI}}, \code{\link{rSq}}}{Bootstrap CIs for
 #'     coefficients and R\eqn{^2}.}
 #'   \item{\code{\link[DescToolsX]{conf}}}{Confusion matrix and classification metrics.}
 #'   \item{\code{\link{roc}}, \code{\link{bestCut}}}{ROC analysis.}

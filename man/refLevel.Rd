@@ -62,7 +62,7 @@ refLevel(m2)
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
 \code{\link[=pseudoR2]{pseudoR2()}},
-\code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=rSq]{rSq()}},
 \code{\link[=response]{response()}},
 \code{\link[=varImp]{varImp()}},
 \code{\link[=vif]{vif()}}

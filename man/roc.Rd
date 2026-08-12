@@ -49,7 +49,8 @@ r2 <- roc(p, resp = Admit$admit)
 \code{\link{response}}
 
 Other roc:
-\code{\link[=bestCut]{bestCut()}}
+\code{\link[=bestCut]{bestCut()}},
+\code{\link[=lift]{lift()}}
 }
 \concept{classification}
 \concept{model-evaluation}

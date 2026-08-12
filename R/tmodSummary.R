@@ -243,8 +243,10 @@ tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
     
     statsx <- pseudoR2(x, which = "all")
     
-    # Associations
-    statsy <- sapply(assocsXY(pred, y), "[", 1)
+    # Associations - one pass over the concordant/discordant pairs yields
+    # all ordinal measures; [1] takes each point estimate. Keys are the
+    # ordAssocs() list names (tauA, somers, gamma, cstat).
+    statsy <- sapply(ordAssocs(pred, y), "[", 1)
     
     statsx <- c(
       statsx,
@@ -257,7 +259,7 @@ tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
       
       numdf = attr(logLik(x), "df"),
       
-      "Kendall Tau-a" = unname(statsy["tau_a"]),
+      "Kendall Tau-a" = unname(statsy["tauA"]),
       "Somers Delta"  = unname(statsy["somers"]),
       "Gamma"         = unname(statsy["gamma"]),
       

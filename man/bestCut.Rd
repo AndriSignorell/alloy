@@ -40,6 +40,7 @@ bestCut(r, method = "closest.topleft")
 \code{\link[pROC]{coords}}, \code{\link[pROC]{roc}}
 
 Other roc:
+\code{\link[=lift]{lift()}},
 \code{\link[=roc]{roc()}}
 }
 \concept{classification}

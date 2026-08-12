@@ -287,7 +287,7 @@
     " "    = xx$coefficients$id,
     fm(xx$coefficients[, c("estimate", lci_col, "uci")], digits = digits),
     "pval" = fm(xx$coefficients$pval, fmt = "p",
-                digits = pdigits, eps = 10^-pdigits),
+                digits = pdigits, pThreshold = 10^-pdigits),
     " "    = fm(xx$coefficients$pval, fmt = "*")
   )
 

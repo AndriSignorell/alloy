@@ -9,6 +9,7 @@ S3method(plot,varImp)
 S3method(predict,FitMod)
 S3method(print,CP)
 S3method(print,FitMod)
+S3method(print,Lift)
 S3method(print,TMod)
 S3method(print,leafRates)
 S3method(print,node)
@@ -25,12 +26,14 @@ export(bestCut)
 export(bestTree)
 export(cParam)
 export(coefCI)
+export(coeffDiffCI)
 export(coxph)
 export(fitMod)
 export(leafRates)
+export(lift)
 export(node)
 export(pseudoR2)
-export(rSqCI)
+export(rSq)
 export(refLevel)
 export(response)
 export(roc)
@@ -41,71 +44,89 @@ export(tMod)
 export(tmodSummary)
 export(varImp)
 export(vif)
-importFrom(DescToolsX,assocsXY)
-importFrom(DescToolsX,brierScore)
-importFrom(DescToolsX,cStat)
-importFrom(DescToolsX,conf)
-importFrom(MASS,glm.nb)
-importFrom(MASS,lda)
-importFrom(MASS,polr)
-importFrom(MASS,qda)
-importFrom(bedrock,appendX)
-importFrom(bedrock,isDichotomous)
-importFrom(bedrock,nDec)
-importFrom(bedrock,setNamesX)
-importFrom(bedrock,unwhich)
-importFrom(graphics,hist)
-importFrom(graphics,par)
-importFrom(lyra,addOpacity)
-importFrom(lyra,boxedText)
-importFrom(lyra,fade)
-importFrom(lyra,fm)
-importFrom(lyra,pal)
-importFrom(lyra,plotDot)
-importFrom(lyra,strAlign)
-importFrom(lyra,style)
-importFrom(nnet,multinom)
-importFrom(nnet,nnet)
-importFrom(stats,AIC)
-importFrom(stats,BIC)
-importFrom(stats,anova)
-importFrom(stats,as.formula)
-importFrom(stats,coef)
-importFrom(stats,confint)
-importFrom(stats,confint.default)
-importFrom(stats,contr.poly)
-importFrom(stats,cov2cor)
-importFrom(stats,delete.response)
-importFrom(stats,deviance)
-importFrom(stats,drop.scope)
-importFrom(stats,drop1)
-importFrom(stats,family)
-importFrom(stats,fitted)
-importFrom(stats,formula)
-importFrom(stats,glm)
-importFrom(stats,lm)
-importFrom(stats,logLik)
-importFrom(stats,model.frame)
-importFrom(stats,model.matrix)
-importFrom(stats,model.offset)
-importFrom(stats,model.response)
-importFrom(stats,model.weights)
-importFrom(stats,na.omit)
-importFrom(stats,na.pass)
-importFrom(stats,nobs)
-importFrom(stats,pchisq)
-importFrom(stats,pf)
-importFrom(stats,pnorm)
-importFrom(stats,predict)
-importFrom(stats,pt)
-importFrom(stats,qnorm)
-importFrom(stats,terms)
-importFrom(stats,update)
-importFrom(stats,update.formula)
-importFrom(stats,vcov)
-importFrom(stats,weights)
-importFrom(survival,Surv)
-importFrom(survival,coxph)
-importFrom(survival,survreg)
+importFrom(DescToolsX,
+  brierScore,
+  cStat,
+  conf,
+  ordAssocs
+)
+importFrom(MASS,
+  glm.nb,
+  lda,
+  polr,
+  qda
+)
+importFrom(bedrock,
+  appendX,
+  isDichotomous,
+  nDec,
+  setNamesX,
+  unwhich
+)
+importFrom(graphics,
+  hist,
+  par
+)
+importFrom(nnet,
+  multinom,
+  nnet
+)
+importFrom(pharos,
+  addOpacity,
+  boxedText,
+  fade,
+  fm,
+  pal,
+  plotDot,
+  strAlign,
+  style
+)
+importFrom(stats,
+  AIC,
+  BIC,
+  anova,
+  as.formula,
+  coef,
+  confint,
+  confint.default,
+  contr.poly,
+  cov2cor,
+  delete.response,
+  deviance,
+  df.residual,
+  drop.scope,
+  drop1,
+  family,
+  fitted,
+  formula,
+  glm,
+  lm,
+  logLik,
+  model.frame,
+  model.matrix,
+  model.offset,
+  model.response,
+  model.weights,
+  na.omit,
+  na.pass,
+  nobs,
+  pchisq,
+  pf,
+  pnorm,
+  predict,
+  pt,
+  qnorm,
+  qt,
+  terms,
+  update,
+  update.formula,
+  vcov,
+  weights
+)
+importFrom(survival,
+  Surv,
+  coxph,
+  survreg
+)
 importFrom(utils,getFromNamespace)
 useDynLib(alloy, .registration = TRUE)

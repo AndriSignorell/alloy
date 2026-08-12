@@ -32,7 +32,7 @@
   out <- cbind(
     fm(cbind(est, ci), digits = digits),
     fm(coefs[, "Pr(>|z|)"], fmt = "p",
-       eps = 10^-pdigits, digits = pdigits),
+       pThreshold = 10^-pdigits, digits = pdigits),
     fm(coefs[, "Pr(>|z|)"], fmt = "*")
   )
   colnames(out) <- c("estimate", ci_label, "p-val", "")
@@ -46,7 +46,7 @@
     p <- anova_p[i]
     summary_row <- c(
       rep(".", 3L),
-      fm(p, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
       fm(p, fmt = "*")
     )
     out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)

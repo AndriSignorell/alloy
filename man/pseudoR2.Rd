@@ -98,7 +98,7 @@ Veall, M. R., & Zimmermann, K. F. (1996). Pseudo-R2 measures for some common lim
 \seealso{
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
-\code{\link[=rSqCI]{rSqCI()}},
+\code{\link[=rSq]{rSq()}},
 \code{\link[=refLevel]{refLevel()}},
 \code{\link[=response]{response()}},
 \code{\link[=varImp]{varImp()}},

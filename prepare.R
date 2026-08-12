@@ -31,6 +31,7 @@
 # summary.FitMod implementieren
 # relImp() für Regression via relaimpo
 # Roxygen-Doku vervollständigen
+
 # 
 # Design-Regeln:
 #   
@@ -225,9 +226,28 @@ predict(fitLogitMixed, output = "both")
 
 
 
+# == importance ============================================================
+
+r.lm <- fitMod(Fertility ~ ., swiss)
+
+bootrun <- relaimpo::boot.relimp(r.lm)
+
+bootrun <- r.lm |> relaimpo::boot.relimp() |> futurize::futurize()
+
+xx <- rnorm(1000)
+
+library(futurize)
+xx |> sample(100) |> futurize()
+
+
+relimp(r.lm)
+sum(relaimpo::calc.relimp(r.lm, type = "lmg")$lmg) - rSq(r.lm)
 
 
 
+library(relaimpo)
 
-
-
+str(zz)
+relaimpo::booteval.relimp(bootrun, bty = "perc", level = 0.95, 
+                sort = FALSE, norank = FALSE, nodiff = FALSE, 
+                typesel = c("lmg", "pmvd", "last", "first", "betasq", "pratt", "genizi", "car"))

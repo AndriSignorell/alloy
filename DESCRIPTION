@@ -17,7 +17,7 @@ Imports:
     MASS,
     survival,
     nnet,
-    lyra,
+    pharos,
     bedrock,
     DescToolsX
 Suggests: 
@@ -50,5 +50,5 @@ VignetteBuilder: R.rsp, knitr
 URL: https://andrisignorell.github.io/alloy/,
             https://github.com/AndriSignorell/alloy/
 BugReports: https://github.com/AndriSignorell/alloy/issues
-Config/roxygen2/version: 8.0.0
+Config/roxygen2/version: 8.1.0
 LazyData: true

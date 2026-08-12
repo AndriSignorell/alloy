@@ -276,7 +276,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     out <- cbind(
       fm(cbind(est, ci_out), digits = digits),
       fm(coefs[, 4L], fmt = "p",
-                       eps = 10^-pdigits, digits = pdigits),
+         pThreshold = 10^-pdigits, digits = pdigits),
       fm(coefs[, 4L], fmt = "*")
     )
     colnames(out) <- c(est_label, ci_label, "p-val", "")
@@ -290,7 +290,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
       p <- anova_p[i]
       summary_row <- c(
         rep(".", 3L),
-        fm(p, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+        fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
         fm(p, fmt = "*")
       )
       out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
@@ -354,7 +354,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
                            digits = max(0L, nDec(as.character(signif(conf.level))) - 2L)))
     out_alpha <- cbind(
       fm(cbind(alpha, lci, uci), digits = digits),
-      fm(p_disp, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+      fm(p_disp, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
       fm(p_disp, fmt = "*")
     )
     colnames(out_alpha) <- c("estimate", ci_label, "p-val", "")
@@ -422,7 +422,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     out <- cbind(
       fm(cbind(est, ci), digits = digits),
       fm(coefs[, "Pr(>|z|)"], fmt = "p",
-         eps = 10^-pdigits, digits = pdigits),
+         pThreshold = 10^-pdigits, digits = pdigits),
       fm(coefs[, "Pr(>|z|)"], fmt = "*")
     )
     colnames(out) <- c("estimate", ci_label, "p-val", "")
@@ -511,7 +511,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   out <- cbind(
     fm(cbind(est, lci, uci), digits = digits),
     fm(coefs[, "Pr(>|z|)"], fmt = "p",
-       eps = 10^-pdigits, digits = pdigits),
+       pThreshold = 10^-pdigits, digits = pdigits),
     fm(coefs[, "Pr(>|z|)"], fmt = "*")
   )
   colnames(out) <- c(est_label, ci_label, "p-val", "")
@@ -525,7 +525,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     p <- anova_p[i]
     summary_row <- c(
       rep(".", 3L),
-      fm(p, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
       fm(p, fmt = "*")
     )
     out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
@@ -559,7 +559,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
               as.integer(xx$logtest["df"]),
               fm(xx$logtest["test"], digits = digits),
               fm(xx$logtest["pvalue"], fmt = "p",
-                 eps = 10^-pdigits, digits = pdigits)))
+                 pThreshold = 10^-pdigits, digits = pdigits)))
   cat("\n\n")
   
   invisible(xx)
@@ -619,7 +619,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   out <- cbind(
     fm(cbind(est_out, lci, uci), digits = digits),
     fm(coefs[, "p"],  fmt = "p",
-       eps = 10^-pdigits, digits = pdigits),
+       pThreshold = 10^-pdigits, digits = pdigits),
     fm(coefs[, "p"], fmt = "*")
   )
   colnames(out) <- c(est_label, ci_label, "p-val", "")
@@ -633,7 +633,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     p <- anova_p[i]
     summary_row <- c(
       rep(".", 3L),
-      fm(p, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
       fm(p, fmt = "*")
     )
     out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
@@ -693,7 +693,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   cat(sprintf("   LR \u03c7\u00b2(%d): %s   p: %s",
               lr_df,
               fm(lr_stat, digits = digits),
-              fm(lr_p, fmt = "p", eps = 10^-pdigits, digits = pdigits)))
+              fm(lr_p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits)))
   cat("\n\n")
   
   invisible(xx)
@@ -749,7 +749,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   
   out <- cbind(
     fm(cbind(est, ci_out), digits = digits),
-    fm(pval, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+    fm(pval, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
     fm(pval, fmt = "*")
   )
   colnames(out) <- c(est_label, ci_label, "p-val", "")
@@ -772,7 +772,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     p <- anova_p[i]
     summary_row <- c(
       rep(".", 3L),
-      fm(p, fmt = "p", eps = 10^-pdigits, digits = pdigits),
+      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
       fm(p, fmt = "*")
     )
     out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
@@ -926,8 +926,9 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
         error = function(e) NULL
       )
       cs <- tryCatch(
-        assocsXY(prob[, 2L], as.numeric(resp) - 1L,
-                 which = "cstat")$cstat,
+        DescToolsX::cStat(prob[, 2L], as.numeric(resp) - 1L),
+        # assocsXY(prob[, 2L], as.numeric(resp) - 1L,
+        #          which = "cstat")$cstat,
         error = function(e) NULL
       )
       if (!is.null(bs) || !is.null(cs)) {
