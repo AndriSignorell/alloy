@@ -1,120 +1,125 @@
 
-#' Pseudo R-squared Measures for Regression Models
+#' Pseudo R-Squared Measures for Regression Models
 #'
-#' Computes a set of pseudo R-squared statistics for fitted regression models,
-#' including generalized linear models and related extensions.
+#' Computes a set of pseudo R-squared statistics for fitted regression models
+#' where the ordinary coefficient of determination is not defined, such as
+#' logistic, Poisson or ordinal regression.
 #'
-#' The following measures are available:
-#' \itemize{
-#'   \item \strong{McFadden}: Likelihood ratio index.
-#'   \item \strong{McFaddenAdj}: Adjusted McFadden index (penalized for model complexity).
-#'   \item \strong{CoxSnell}: Maximum likelihood R-squared.
-#'   \item \strong{Nagelkerke}: Scaled Cox-Snell R-squared.
-#'   \item \strong{AldrichNelson}: Based on likelihood ratio.
-#'   \item \strong{VeallZimmermann}: Correction of Aldrich-Nelson.
-#'   \item \strong{McKelveyZavoina}: Latent variable R-squared (for logit/probit).
-#'   \item \strong{Efron}: Squared correlation between observed and predicted values.
-#'   \item \strong{Tjur}: Coefficient of discrimination (binomial models only).
-#'   \item \strong{AIC}: Akaike Information Criterion.
-#'   \item \strong{BIC}: Bayesian Information Criterion.
-#'   \item \strong{logLik}: Log-likelihood of fitted model.
-#'   \item \strong{logLik0}: Log-likelihood of null (intercept-only) model.
-#'   \item \strong{G2}: Likelihood ratio statistic.
-#' }
-#' 
-#' Supported classes include:
-#' \itemize{
-#'   \item \code{glm}
-#'   \item \code{nnet::multinom} (requires package \pkg{nnet})
-#'   \item \code{MASS::polr} (requires package \pkg{MASS})
-#'   \item \code{VGAM::vglm} (requires package \pkg{VGAM})
-#' }
-#' 
-#' @param fit A fitted model object. Supported classes include:
-#' \itemize{
-#'   \item \code{glm}
-#'   \item \code{nnet::multinom}
-#'   \item \code{MASS::polr}
-#'   \item \code{VGAM::vglm} (requires package \pkg{VGAM})
+#' The following measures are available. Which of them can be computed depends
+#' on the model class, the family and the link function; measures that are not
+#' defined for a given fit are omitted from the result.
+#' \describe{
+#'   \item{\code{McFadden}}{likelihood ratio index}
+#'   \item{\code{McFaddenAdj}}{adjusted likelihood ratio index, penalized for
+#'     the number of estimated parameters}
+#'   \item{\code{CoxSnell}}{maximum likelihood R-squared}
+#'   \item{\code{Nagelkerke}}{Cox-Snell R-squared, rescaled to a maximum of 1}
+#'   \item{\code{AldrichNelson}}{based on the likelihood ratio statistic}
+#'   \item{\code{VeallZimmermann}}{correction of Aldrich-Nelson}
+#'   \item{\code{McKelveyZavoina}}{latent variable R-squared, logit and probit
+#'     links only}
+#'   \item{\code{Efron}}{squared correlation between observed and predicted
+#'     values}
+#'   \item{\code{Tjur}}{coefficient of discrimination, binary responses only}
+#'   \item{\code{AIC}, \code{BIC}}{information criteria of the fitted model}
+#'   \item{\code{logLik}, \code{logLik0}}{log-likelihood of the fitted and of
+#'     the null model}
+#'   \item{\code{G2}}{likelihood ratio statistic}
 #' }
 #'
-#' @param which Character vector specifying which statistic(s) to return.
-#'   Defaults to \code{"McFadden"}. Use \code{"all"} to return all measures.
+#' @param fit a fitted model object of class \code{glm}, \code{multinom}
+#'   (\pkg{nnet}), \code{polr} (\pkg{MASS}) or \code{vglm} (\pkg{VGAM})
+#' @param which character vector naming the measures to return, or
+#'   \code{"all"} for everything available
 #'
-#' @return A named numeric vector with the requested pseudo R-squared measure(s).
+#' @return a named numeric vector holding the requested measures
 #'
 #' @details
-#' Pseudo R-squared measures provide analogues to the coefficient of determination
-#' for models where ordinary R-squared is not defined, such as logistic or ordinal regression.
+#' All measures are derived from the log-likelihoods of the fitted and of the
+#' intercept-only model, not from the deviance ratio; the two coincide only
+#' where the saturated log-likelihood vanishes.
 #'
-#' The null model is internally refitted as an intercept-only model using
-#' \code{model.frame(x)} to ensure consistency with the original data and handling
-#' of missing values.
+#' For \code{glm} objects the null model is refitted through
+#' \code{\link[stats]{glm.fit}} on the model's own response, prior weights and
+#' offset. Aggregated responses (\code{cbind(success, failure)}), frequency
+#' weights and offsets are therefore handled correctly, and the original data
+#' need not be accessible. For the remaining classes the null model is refitted
+#' with \code{\link[stats]{update}}, which requires the data of the original
+#' call to be available.
 #'
-#' For \code{vglm} objects, the package \pkg{VGAM} must be installed. The function
-#' uses \code{VGAM::predictvglm()} for obtaining linear predictors.
+#' Where prior weights are present, the sample size entering Cox-Snell,
+#' Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
+#' number of rows.
 #'
-#' Some measures (e.g., McKelvey-Zavoina) depend on the link function and are only
-#' defined for logit and probit links.
-#'
-#' @note
-#' \itemize{
-#'   \item Weighted models are supported only if weights are stored in the fitted model.
-#'   \item Models fitted with aggregated responses (e.g., \code{cbind(success, failure)})
-#'     may yield incorrect results.
-#'   \item For \code{vglm} models, ensure the model was fitted with \code{model = TRUE}
-#'     to guarantee correct extraction of the model frame.
-#' }
+#' For \code{vglm} objects the package \pkg{VGAM} must be installed and the
+#' model should have been fitted with \code{model = TRUE}, so that the model
+#' frame can be extracted.
 #'
 #' @references
-#' McFadden, D. (1974). Conditional logit analysis of qualitative choice behavior.
+#' McFadden, D. (1974) Conditional logit analysis of qualitative choice
+#' behavior. In: Zarembka, P. (ed.) \emph{Frontiers in Econometrics},
+#' Academic Press, New York, 105-142.
 #'
-#' Cox, D. R., & Snell, E. J. (1989). Analysis of Binary Data.
+#' Cox, D. R., Snell, E. J. (1989) \emph{Analysis of Binary Data},
+#' 2nd ed., Chapman and Hall, London.
 #'
-#' Nagelkerke, N. J. D. (1991). A note on a general definition of the coefficient of determination.
+#' Nagelkerke, N. J. D. (1991) A note on a general definition of the
+#' coefficient of determination. \emph{Biometrika}, 78(3), 691-692.
 #'
-#' Veall, M. R., & Zimmermann, K. F. (1996). Pseudo-R2 measures for some common limited dependent variable models.
+#' Veall, M. R., Zimmermann, K. F. (1996) Pseudo-R2 measures for some common
+#' limited dependent variable models. \emph{Journal of Economic Surveys},
+#' 10(3), 241-259.
+#'
+#' Tjur, T. (2009) Coefficients of determination in logistic regression models.
+#' \emph{The American Statistician}, 63(4), 366-372.
 #'
 #' @examples
-#' # Logistic regression example
-#' data(mtcars)
-#' mtcars$am <- factor(mtcars$am)
-#'
 #' fit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
 #'
 #' pseudoR2(fit)
-#' pseudoR2(fit, which = "Nagelkerke")
+#' ## [1] 0.7178751
+#'
+#' pseudoR2(fit, which = c("Nagelkerke", "Tjur"))
 #' pseudoR2(fit, which = "all")
 #'
-
-
-
-
-#' @family regression.utils  
-#' @concept regression  
+#' @family regression.utils
 #' @concept model-evaluation
-#'
+#' @concept goodness-of-fit
 #'
 #' @export
 pseudoR2 <- function(fit, which = "McFadden") {
-  
-  info <- .getModelInfo(fit)
-  
-  preds <- .getPredictions(fit, info)
-  
-  nullmod <- .getNullModel(fit, info)
-  
-  core <- .computeCoreMetrics(fit, nullmod, info)
-  
-  if(info$type == "glm") {
-    extra <- .computeGLMMetrics(fit, preds, core, info)
-    core[names(extra)] <- extra
+
+  all <- identical(which, "all")
+
+  # matched up front, so that a typo does not cost a null model refit
+  if (!all) {
+    which <- match.arg(which, .pseudoR2Measures, several.ok = TRUE)
   }
-  
-  if(identical(which, "all")) return(core)
-  
-  which <- match.arg(which, names(core), several.ok = TRUE)
-  core[which]
+
+  info <- .getModelInfo(fit)
+
+  res <- .coreMeasures(info)
+
+  if (info$type %in% c("glm", "vglm")) {
+    res <- c(res, .extraMeasures(fit, info, res))
+  }
+
+  res <- res[intersect(.pseudoR2Measures, names(res))]
+
+  if (all) {
+    return(res)
+  }
+
+  missing <- setdiff(which, names(res))
+
+  if (length(missing) > 0L) {
+    stop(gettextf(
+      "measure not defined for this fit: %s",
+      paste(missing, collapse = ", ")
+    ), call. = FALSE)
+  }
+
+  res[which]
 }
 
 
@@ -123,256 +128,274 @@ pseudoR2 <- function(fit, which = "McFadden") {
 # == internal helper functions =============================================
 
 
+#' Vocabulary of all measures, also fixing their order in the result
+#'
 #' @keywords internal
 #' @noRd
-.isVglm <- function(x) {
-  inherits(x, "vglm")
-}
+.pseudoR2Measures <- c(
+  "McFadden", "McFaddenAdj", "CoxSnell", "Nagelkerke",
+  "AldrichNelson", "VeallZimmermann", "McKelveyZavoina",
+  "Efron", "Tjur",
+  "AIC", "BIC", "logLik", "logLik0", "G2"
+)
 
 
 
+
+#' Everything the measures need, collected from the fit in one place
+#'
+#' \code{n} is the number of observations, \code{nEff} the sample size the
+#' measures are scaled by, which differs from \code{n} under prior weights.
+#' The degrees of freedom and the log-likelihood are taken from
+#' \code{\link[stats]{logLik}} rather than from class specific components, as
+#' the latter are named inconsistently across the supported classes.
+#'
 #' @keywords internal
 #' @noRd
 .getModelInfo <- function(x) {
-  
-  if(inherits(x, "glm")) {
-    type <- "glm"
-    
-    L.full <- logLik(x)
-    
-    return(list(
-      type = type,
-      logLik = L.full,
-      n = attr(L.full, "nobs"),
-      edf = x$rank,
-      AIC = AIC(x),
-      BIC = BIC(x)
-    ))
-  }
-  
-  if(.isVglm(x)) {
-    
-    if(!requireNamespace("VGAM", quietly = TRUE)) {
-      stop("Package 'VGAM' required for vglm models")
-    }
-    
-    L.full <- logLik(x)
-    
-    return(list(
-      type = "vglm",
-      logLik = L.full,
-      n = nobs(x),          # wichtig: logLik liefert das nicht!
-      edf = x@rank,
-      AIC = AIC(x),
-      BIC = BIC(x)
-    ))
-  }
-  
-  if(inherits(x, "multinom")) {
-    return(list(
-      type = "multinom",
-      logLik = logLik(x),
-      n = attr(logLik(x), "nobs"),
-      edf = x$edf,
-      AIC = AIC(x),
-      BIC = BIC(x)
-    ))
-  }
-  
-  if(inherits(x, "polr")) {
-    return(list(
-      type = "polr",
-      logLik = logLik(x),
-      n = attr(logLik(x), "nobs"),
-      edf = x$rank,
-      AIC = AIC(x),
-      BIC = BIC(x)
-    ))
-  }
-  
-  stop("Unsupported model type")
-}
 
-
-#' @keywords internal
-#' @noRd
-.getPredictions <- function(x, info) {
-  
-  if (info$type == "glm") {
-    # Use fitted() and direct glm predict to avoid dispatching to
-    # predict.FitMod which returns a data.frame instead of a vector
-    obj <- x
-    class(obj) <- class(obj)[class(obj) != "FitMod"]
-    return(list(
-      link    = predict(obj, newdata = NULL, type = "link"),
-      resp    = fitted(x),
-      y       = x$y,
-      family  = x$family$family,
-      linkfun = x$family$link
-    ))
+  type <- if (inherits(x, "glm")) {
+    "glm"
+  } else if (inherits(x, "vglm")) {
+    "vglm"
+  } else if (inherits(x, "multinom")) {
+    "multinom"
+  } else if (inherits(x, "polr")) {
+    "polr"
+  } else {
+    stop(gettextf(
+      "no pseudo R-squared available for an object of class %s",
+      dQuote(class(x)[1L])
+    ), call. = FALSE)
   }
-  
-  
-  if(info$type == "vglm") {
-    
-    link <- VGAM::predictvglm(x, type = "link")
-    resp <- predict(x, type = "response")
-    
-    # family + link extrahieren
-    fam <- x@family@vfamily
-    
-    linkfun <- if(all(x@misc$link == "logit")) {
-      "logit"
-    } else if(all(x@misc$link == "probit")) {
-      "probit"
+
+  if (type == "vglm" && !requireNamespace("VGAM", quietly = TRUE)) {
+    stop("package 'VGAM' is required for vglm models", call. = FALSE)
+  }
+
+  loglik <- stats::logLik(x)
+
+  # logLik() does not attach nobs everywhere, and polr keeps the number of
+  # rows in $n but the weighted case count in $nobs
+  n <- attr(loglik, "nobs")
+
+  if (is.null(n)) {
+    n <- if (type == "vglm") {
+      stats::nobs(x)
     } else {
-      NA
+      x[["nobs"]] %||% x[["n"]] %||% stats::nobs(x)
     }
-    
-    return(list(
-      link = link,
-      resp = resp,
-      y = x@y,
-      family = fam,
-      linkfun = linkfun
-    ))
   }
-  
-  NULL
-}
 
+  edf <- attr(loglik, "df")
 
-#' @keywords internal
-#' @noRd
-.getNullModel <- function(x, info) {
-  
-  f <- formula(x)
-  yname <- all.vars(f)[1]
-  
-  data <- model.frame(x)
-  
-  null_formula <- as.formula(paste(yname, "~ 1"))
-  
-  if(info$type == "glm") {
-    
-    return(glm(null_formula,
-               data = data,
-               family = x$family,
-               weights = x$prior.weights))
+  if (is.null(edf)) {
+    edf <- if (type == "vglm") x@rank else x$rank
   }
-  
-  if(info$type == "vglm") {
-    
-    return(VGAM::vglm(
-      formula = null_formula,
-      data = data,
-      family = x@family,
-      weights = if(!is.null(x@prior.weights)) as.vector(x@prior.weights) else NULL,
-      control = x@control
-    ))
-  }
-  
-  if(info$type == "multinom") {
-    
-    if(!requireNamespace("nnet", quietly = TRUE)) {
-      stop("Package 'nnet' required for multinom models")
-    }
-    
-    return(nnet::multinom(null_formula,
-                          data = data,
-                          weights = x$weights,
-                          trace = FALSE))
-  }
-  
-  if(info$type == "polr") {
-    
-    if(!requireNamespace("MASS", quietly = TRUE)) {
-      stop("Package 'MASS' required for polr models")
-    }
-    
-    return(MASS::polr(null_formula,
-                      data = data,
-                      weights = x$weights,
-                      method = x$method))
-  }
-}
 
-
-
-#' @keywords internal
-#' @noRd
-.computeGLMMetrics <- function(x, preds, core, info) {
-  
-  if(info$type %notin% c("glm", "vglm"))
-    return(NULL)
-  
-  y <- preds$y
-  yhat <- preds$link
-  yresp <- preds$resp
-  n <- info$n
-  
-  s2 <- switch(preds$linkfun,
-               probit = 1,
-               logit = pi^2 / 3,
-               NA)
-  
-  out <- c(
-    
-    AldrichNelson = core["G2"] / (core["G2"] + n),
-    
-    VeallZimmermann =
-      (core["G2"] / (core["G2"] + n)) *
-      (2 * core["logLik0"] - n) / (2 * core["logLik0"]),
-    
-    McKelveyZavoina = {
-      sse <- sum((yhat - mean(yhat))^2)
-      sse / (n * s2 + sse)
-    },
-    
-    Efron = 1 - sum((y - yresp)^2) / sum((y - mean(y))^2)
+  info <- list(
+    type = type,
+    fit = x,
+    logLik = as.numeric(loglik),
+    logLik0 = .nullLogLik(x, type),
+    n = n,
+    nEff = n,
+    edf = edf,
+    AIC = stats::AIC(x),
+    BIC = stats::BIC(x)
   )
-  
-  if(identical(preds$family, "binomial")) {
-    out["Tjur"] <- diff(tapply(yresp, y, mean))
+
+  # prior weights carry the sample size, e.g. with aggregated binomial data
+  if (type == "glm") {
+    info$nEff <- sum(x$prior.weights)
   }
-  
-  out
+
+  info
 }
 
 
 
+
+#' Log-likelihood of the intercept-only model
+#'
+#' For glm the null model is refitted on the model's own response, prior
+#' weights and offset, which avoids rebuilding a formula. That matters for
+#' aggregated responses, where the response term is not a plain variable name,
+#' and for offsets, which a formula rebuilt from the model frame would silently
+#' drop.
+#'
 #' @keywords internal
 #' @noRd
-.computeCoreMetrics <- function(x, nullmod, info) {
-  
-  L.full <- info$logLik
-  L.base <- logLik(nullmod)
-  
-  n <- info$n
-  
-  D.full <- -2 * L.full
-  D.base <- -2 * L.base
-  G2 <- -2 * (L.base - L.full)
-  
-  res <- c(
-    
-    McFadden = 1 - (L.full / L.base),
-    
-    McFaddenAdj = 1 - ((L.full - info$edf) / L.base),
-    
-    CoxSnell = 1 - exp(-G2 / n),
-    
-    Nagelkerke = (1 - exp((D.full - D.base) / n)) /
-      (1 - exp(-D.base / n)),
-    
+.nullLogLik <- function(x, type) {
+
+  # glm(y = FALSE) leaves no response behind, then only the refit remains
+  if (type == "glm" && !is.null(x$y)) {
+
+    n <- NROW(x$y)
+
+    fit0 <- stats::glm.fit(
+      x = matrix(1, nrow = n, ncol = 1L),
+      y = x$y,
+      weights = x$prior.weights,
+      offset = if (is.null(x$offset)) rep(0, n) else x$offset,
+      family = x$family
+    )
+
+    # as in logLik.glm: the dispersion counts as a parameter in these families
+    p0 <- 1L + as.integer(
+      x$family$family %in% c("gaussian", "Gamma", "inverse.gaussian")
+    )
+
+    return(p0 - fit0$aic / 2)
+  }
+
+  fit0 <- tryCatch(
+
+    if (type == "multinom") {
+      stats::update(x, . ~ 1, trace = FALSE)
+    } else {
+      stats::update(x, . ~ 1)
+    },
+
+    error = function(e) {
+      stop(gettextf(
+        "the null model could not be refitted, the data of the original call are probably out of scope: %s",
+        conditionMessage(e)
+      ), call. = FALSE)
+    }
+  )
+
+  as.numeric(stats::logLik(fit0))
+}
+
+
+
+
+#' Measures available for every supported model class
+#'
+#' @keywords internal
+#' @noRd
+.coreMeasures <- function(info) {
+
+  l1 <- info$logLik
+  l0 <- info$logLik0
+
+  n <- info$nEff
+
+  g2 <- -2 * (l0 - l1)
+
+  coxSnell <- 1 - exp(-g2 / n)
+
+  c(
+    McFadden = 1 - l1 / l0,
+    McFaddenAdj = 1 - (l1 - info$edf) / l0,
+    CoxSnell = coxSnell,
+    Nagelkerke = coxSnell / (1 - exp(2 * l0 / n)),
     AIC = info$AIC,
     BIC = info$BIC,
-    
-    logLik = L.full,
-    logLik0 = L.base,
-    G2 = G2
+    logLik = l1,
+    logLik0 = l0,
+    G2 = g2
   )
-  
+}
+
+
+
+
+#' Measures relying on the linear predictor or the fitted values
+#'
+#' Only those that are defined for the given link and response are returned.
+#'
+#' @keywords internal
+#' @noRd
+.extraMeasures <- function(x, info, core) {
+
+  p <- .getPredictions(x, info$type)
+
+  n <- info$nEff
+
+  # unname(), otherwise the names of the operands are inherited and the
+  # result is called AldrichNelson.G2
+  g2 <- unname(core["G2"])
+  l0 <- unname(core["logLik0"])
+
+  res <- c(
+    AldrichNelson = g2 / (g2 + n),
+    VeallZimmermann = (g2 / (g2 + n)) * (2 * l0 - n) / (2 * l0)
+  )
+
+  # latent variable residual variance, defined for these two links only
+  s2 <- if (isTRUE(p$link == "logit")) {
+    pi^2 / 3
+  } else if (isTRUE(p$link == "probit")) {
+    1
+  } else {
+    NA_real_
+  }
+
+  if (!is.na(s2)) {
+
+    sse <- sum((p$eta - mean(p$eta))^2)
+
+    res["McKelveyZavoina"] <- sse / (n * s2 + sse)
+  }
+
+  # Efron and Tjur need a univariate response
+  if (!is.null(p$y) && NCOL(p$y) == 1L) {
+
+    y <- as.vector(p$y)
+    yhat <- as.vector(p$fitted)
+
+    res["Efron"] <- 1 - sum((y - yhat)^2) / sum((y - mean(y))^2)
+
+    isBinary <- identical(p$family, "binomial") &&
+      length(unique(y)) == 2L
+
+    if (isBinary) {
+      res["Tjur"] <- unname(diff(tapply(yhat, y, mean)))
+    }
+  }
+
   res
 }
 
+
+
+
+#' Linear predictor, fitted values and response on a common shape
+#'
+#' @keywords internal
+#' @noRd
+.getPredictions <- function(x, type) {
+
+  if (type == "glm") {
+
+    # taken from the object, so that no predict() method is dispatched
+    return(list(
+      eta = x$linear.predictors,
+      fitted = x$fitted.values,
+      y = x$y,
+      family = x$family$family,
+      link = x$family$link
+    ))
+  }
+
+  # careful: all(NULL == "logit") is TRUE, hence the length check
+  lk <- x@misc$link
+
+  link <- if (length(lk) > 0L && all(lk == "logit")) {
+    "logit"
+  } else if (length(lk) > 0L && all(lk == "probit")) {
+    "probit"
+  } else {
+    NA_character_
+  }
+
+  list(
+    eta = VGAM::predictvglm(x, type = "link"),
+    fitted = VGAM::predictvglm(x, type = "response"),
+    y = x@y,
+    family = x@family@vfamily[1L],
+    link = link
+  )
+}
