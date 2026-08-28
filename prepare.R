@@ -11,7 +11,7 @@
 #
 # Print-Output – Stata-ähnlich, konsistent:
 #   
-#   CIs, p-Werte, Referenzkategorie-Header
+# CIs, p-Werte, Referenzkategorie-Header
 # output = "or"/"irr"/"hr"/"tr"/"genuine"
 # vcov = "HC3" für robuste SE
 # ML-Modelle: Variable importance + Confusion matrix + Accuracy/Kappa/c-statistic

@@ -89,7 +89,9 @@ if (requireNamespace("lme4", quietly = TRUE)) {
 }
 \seealso{
 Other modelling:
+\code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
+\code{\link[=predictors]{predictors()}},
 \code{\link[=print.FitMod]{print.FitMod()}}
 }
 \concept{classification}

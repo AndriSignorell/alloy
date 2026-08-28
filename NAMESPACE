@@ -3,6 +3,7 @@
 S3method(confint,roc)
 S3method(model.matrix,gls)
 S3method(plot,CP)
+S3method(plot,FitMod)
 S3method(plot,TMod)
 S3method(plot,rpart)
 S3method(plot,varImp)
@@ -24,6 +25,7 @@ S3method(tmodSummary,lmrob)
 export(Surv)
 export(bestCut)
 export(bestTree)
+export(binnedResid)
 export(cParam)
 export(coefCI)
 export(coeffDiffCI)
@@ -32,7 +34,15 @@ export(fitMod)
 export(leafRates)
 export(lift)
 export(node)
+export(panelBinnedResid)
+export(plotBinnedResid)
+export(plotCalibration)
+export(plotInfluence)
+export(plotPartialResid)
+export(plotSeparation)
+export(predictors)
 export(pseudoR2)
+export(quantileResid)
 export(rSq)
 export(refLevel)
 export(response)
@@ -58,6 +68,8 @@ importFrom(MASS,
 )
 importFrom(bedrock,
   appendX,
+  callIf,
+  checkConfLevel,
   isDichotomous,
   nDec,
   setNamesX,
@@ -72,12 +84,24 @@ importFrom(nnet,
   nnet
 )
 importFrom(pharos,
+  .applyParFromDots,
+  .drawBox,
+  .drawGrid,
+  .marTop,
+  .resolveTitle,
+  .useTheme,
+  .withGraphicsState,
+  abcCoords,
   addOpacity,
+  band,
   boxedText,
   fade,
   fm,
+  getTheme,
   pal,
+  plotBubble,
   plotDot,
+  plotQQ,
   strAlign,
   style
 )

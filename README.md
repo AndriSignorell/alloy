@@ -1,74 +1,153 @@
----
-output:
-  pdf_document: default
-  html_document: default
----
-
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+# 📦 alloy <img src="man/figures/logo.png" align="right" height="139" alt="alloy logo" />
 
 <!-- badges: start -->
-
-[![CRAN status](https://www.r-pkg.org/badges/version-last-release/ModTools)](https://CRAN.R-project.org/package=ModTools) [![downloads](https://cranlogs.r-pkg.org/badges/grand-total/ModTools)](https://CRAN.R-project.org/package=ModTools) [![downloads](http://cranlogs.r-pkg.org/badges/last-week/ModTools)](https://CRAN.R-project.org/package=ModTools) [![License: GPL v2+](https://img.shields.io/badge/License-GPL%20v2+-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html) [![Lifecycle: maturing](https://img.shields.io/badge/lifecycle-maturing-blue.svg)](https://lifecycle.r-lib.org/articles/stages.html) [![R build status](https://github.com/AndriSignorell/ModTools/workflows/R-CMD-check/badge.svg)](https://github.com/AndriSignorell/ModTools/actions) [![pkgdown](https://github.com/AndriSignorell/ModTools/workflows/pkgdown/badge.svg)](https://andrisignorell.github.io/ModTools/)
-
+[![CRAN status](https://www.r-pkg.org/badges/version/alloy)](https://CRAN.R-project.org/package=alloy)
+[![License: GPL v2](https://img.shields.io/badge/License-GPL%20v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html)
 <!-- badges: end -->
 
-# Tools for Building Regression and Classification Models
+**Title:** Unified Modeling Framework for Regression and Classification\
+**License:** GPL (≥ 2)
 
-A unified interface to the most common regression and classification algorithms - including random forests, neural networks, decision trees, and support vector machines - blending them into a single, consistent workflow. Complements model fitting with tools for validation, tuning, variable importance, and ROC analysis.
+## 🧩 Overview
 
-There is a rich selection of R packages implementing algorithms for classification and regression tasks out there. The authors legitimately take the liberty to tailor the function interfaces according to their own taste and needs. For us other users, however, this often results in struggling with user interfaces, some of which are rather weird - to put it mildly - and almost always different in terms of arguments and result structures. ModTools pursues the goal of offering uniform handling for the most important regression and classification models in applied data analyses. The function FitMod() is designed as a simple and consistent interface to these original functions while maintaining the flexibility to pass on all possible arguments. print, plot, summary and predict operations can so be carried out following the same logic. The results will again be reshaped to a reasonable standard. For all the functions of this package Google styleguides are used as naming rules (in absence of convincing alternatives). The ’BigCamelCase’ style has been consequently applied to functions borrowed from contributed R packages as well.
+`alloy` is the modelling layer of the **DescToolsX ecosystem**. One call
+to `fitMod()` covers regression and classification methods of very
+different origins — from linear models through survival and mixed models
+to trees, forests, boosting and neural networks — and picks a sensible
+method automatically from the type of the response.
 
-As always: Feedback, feature requests, bug reports and other suggestions are welcome! Please report problems to [GitHub issues tracker](https://github.com/AndriSignorell/ModTools/issues) (preferred) or directly to the maintainer.
+Every fitted object carries the class `"FitMod"` on top of the original
+model, so `print()`, `predict()`, `coef()` and `plot()` behave the same
+way whatever was fitted underneath, while all methods of the original
+object remain available.
 
-## Installation
+A set of diagnostics for binary responses complements the fitting: the
+plots that a logistic model actually needs, rather than the ones that
+work for a linear one.
 
-You can install the released version of **ModTools** from [CRAN](https://CRAN.R-project.org) with:
+📖 **Documentation:** <https://andrisignorell.github.io/alloy/>
 
-``` r
-install.packages("ModTools")
-```
-
-And the development version from GitHub with:
-
-``` r
-if (!require("remotes")) install.packages("remotes")
-remotes::install_github("AndriSignorell/ModTools")
-```
-
-# Warning
-
-**Warning:** This package is still under development. Although the code seems meanwhile quite stable, until release of version 1.0 you should be aware that everything in the package might be subject to change. Backward compatibility is not yet guaranteed. Functions may be deleted or renamed and new syntax may be inconsistent with earlier versions. By release of version 1.0 the “deprecated-defunct process” will be installed.
-
-# Authors
-
-Andri Signorell\
-Helsana Versicherungen AG, Health Sciences, Zurich\
-HWZ University of Applied Sciences in Business Administration Zurich.
-
-R is a community project. This can be seen from the fact that this package includes R source code and/or documentation previously published by [various authors and contributors](https://andrisignorell.github.io/ModTools/authors.html). Special thanks go to Beat Bruengger, Mathias Frueh, Daniel Wollschlaeger for their valuable contributions and testing. The good things come from all these guys, any problems are likely due to my tweaking. Thank you all!
-
-**Maintainer:** Andri Signorell
-
-# Examples
+## ⚙️ Installation
 
 ``` r
-library(ModTools)
+install.packages("alloy")
 ```
 
-<!-- ## Demo "Binomial Models" -->
+Or the development version from GitHub:
 
 ``` r
-demo(bin_mod, package = "ModTools")
+remotes::install_github("AndriSignorell/alloy")
 ```
 
-<!-- ## Demo "Multinomial Models" -->
+## 📚 Core Features
+
+### 🔹 Model Fitting
+
+`fitMod()` dispatches to more than thirty fitting functions:
+
+-   Linear and generalised linear: `lm`, `logit`, `poisson`,
+    `quasipoisson`, `gamma`, `negbin`, `lmrob`
+-   Ordinal and multinomial: `polr`, `multinom`
+-   Censored and survival: `tobit`, `coxph`, `weibull`, `exponential`,
+    `lognormal`, `loglogistic`
+-   Zero-inflated counts: `zeroinfl`
+-   Mixed models: `lmMixed`, `logitMixed`, `poissonMixed`,
+    `negbinMixed`, `gammaMixed`
+-   Machine learning: `rpart`, `C5.0`, `randomForest`, `xgboost`,
+    `glmnet`, `svm`, `naiveBayes`, `nnet`, `lda`, `qda`
+
+### 🔹 Unified Methods
+
+-   `print.FitMod()` — coefficient tables with confidence intervals,
+    reference-category headers and fit statistics, reportable as
+    coefficients, odds ratios, incidence rate ratios, hazard ratios or
+    time ratios
+-   `predict.FitMod()` — probabilities, classes or both, with column
+    order always aligned to the response levels
+-   `plot.FitMod()` — the diagnostic panels appropriate to the model
+-   `predictors()`, `response()`, `refLevel()`
+
+### 🔹 Diagnostics for Logistic Models
+
+-   `plotBinnedResid()` / `binnedResid()` — functional form
+-   `plotCalibration()` — are the predicted risks right
+-   `quantileResid()` — randomised quantile residuals, normal under a
+    correct model
+-   `plotInfluence()` — which observations drive the fit
+-   `plotSeparation()` — do the predictions order the outcomes
+-   `plotPartialResid()` — linearity in the logit, per term
+-   `?model-diagnostics-overview` — which plot answers which question
+
+### 🔹 Model Evaluation
+
+-   `roc()`, `bestCut()`, `confint.roc()`, `lift()`
+-   `pseudoR2()` — McFadden, Cox-Snell, Nagelkerke, Tjur and others
+-   `rSq()`, `coefCI()`, `coeffDiffCI()` — with parallel bootstrap
+-   `vif()` — VIF and generalised VIF
+-   `varImp()`, `plot.varImp()`
+-   `splitTrainTest()`
+
+### 🔹 Trees
+
+-   `bestTree()` (1-SE rule), `cParam()`, `leafRates()`, `node()`,
+    `rules()`, `splits()`, `plot.rpart()`
+
+### 🔹 Model Comparison
+
+-   `tMod()` — several models side by side, in a table or a plot
+-   `tmodSummary()` — the S3 generic behind it
+
+### 🔹 Datasets
+
+Teaching datasets for the model families: `Admit`, `Apt`, `BioChemists`,
+`Contraception`, `Fish`, `IceCream`, `Lahigh`, `Ologit`, `Pima`,
+`Whas100`.
+
+## 🚀 Design Principles
+
+-   **One interface** — the same call, the same output, whatever is
+    fitted underneath
+-   **Non-destructive** — `"FitMod"` layers on top of the original
+    object; nothing of the underlying model is lost
+-   **Diagnostics that fit the model** — binary responses get the plots
+    that work for them
+-   **Fast** — bootstrap routines implemented in C++ via Rcpp,
+    RcppArmadillo and RcppParallel
+
+## 🧪 Example
 
 ``` r
-demo(mult_mod, package = "ModTools")
+library(alloy)
+
+# method chosen automatically from the response
+fitMod(Sepal.Length ~ ., data = iris)
+
+# explicit, and reported as odds ratios
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+print(fitLogit, output = "or")
+
+# the diagnostics a logistic model actually needs
+op <- par(mfrow = c(2, 3))
+plot(fitLogit)
+par(op)
+
+# several models side by side
+tMod(lm(mpg ~ wt, mtcars), lm(mpg ~ wt + hp, mtcars))
 ```
 
-<!-- ## Demo "Numeric Models" -->
+## 🧱 The Suite
 
-``` r
-demo(num_mod, package = "ModTools")
-```
+`alloy` builds on `bedrock` (base utilities), `pharos` (graphics) and
+`DescToolsX` (descriptive statistics); the formal counterparts to its
+diagnostic plots live in `lumen`.
+
+## 🙏 Acknowledgements
+
+Parts of the code and documentation were reviewed with the help of large
+language models (OpenAI Codex, Anthropic Claude). Every suggestion was
+assessed, edited and verified by the maintainer, who remains solely
+responsible for the content of this package.
+
+## 📜 License
+
+GPL (≥ 2)

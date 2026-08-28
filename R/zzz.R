@@ -21,8 +21,8 @@
 #'             
 #' @importFrom graphics hist par
 #' @importFrom DescToolsX brierScore cStat ordAssocs conf
-#' @importFrom pharos fm style strAlign plotDot addOpacity boxedText fade pal
-#' @importFrom bedrock setNamesX unwhich isDichotomous appendX nDec
+#' @importFrom pharos fm style strAlign plotDot addOpacity boxedText fade pal getTheme .useTheme .resolveTitle .withGraphicsState .applyParFromDots .marTop .drawGrid band .drawBox plotQQ plotBubble abcCoords
+#' @importFrom bedrock setNamesX unwhich isDichotomous appendX nDec checkConfLevel callIf
 #' 
 #' @importFrom MASS polr glm.nb lda qda
 #' @importFrom survival Surv coxph survreg

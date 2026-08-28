@@ -115,6 +115,8 @@ print(fitWei, output = "genuine")
 
 Other modelling:
 \code{\link[=fitMod]{fitMod()}},
-\code{\link[=predict.FitMod]{predict.FitMod()}}
+\code{\link[=plot.FitMod]{plot.FitMod()}},
+\code{\link[=predict.FitMod]{predict.FitMod()}},
+\code{\link[=predictors]{predictors()}}
 }
 \concept{modelling}

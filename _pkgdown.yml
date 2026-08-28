@@ -1,0 +1,111 @@
+url: https://andrisignorell.github.io/alloy/
+home:
+  title: alloy
+  description: Unified interface for fitting regression and classification models,
+    with diagnostics for binary responses
+destination: docs
+development:
+  mode: auto
+template:
+  default_assets: yes
+  bootstrap: 5
+  bootswatch: flatly
+navbar:
+  structure:
+    left:
+    - version
+    - home
+    - reference
+    - news
+    right: github
+  components:
+    version:
+      icon: fa-book
+      menu:
+      - text: 'Documentation for version of package:'
+      - text: Released
+        href: https://andrisignorell.github.io/alloy/
+      - text: In-development
+        href: https://andrisignorell.github.io/alloy/dev/
+reference:
+- title: Model Fitting & Interface
+  desc: |
+    The unified fitting function and the methods that behave the same way whatever model was fitted underneath.
+  contents:
+  - fitMod
+  - print.FitMod
+  - predict.FitMod
+  - plot.FitMod
+  - predictors
+  - response
+  - refLevel
+- title: Diagnostics for Binary Responses
+  desc: |
+    The plots a logistic model needs, where the residual-versus-fitted plot of a linear model says nothing.
+  contents:
+  - model-diagnostics-overview
+  - plotBinnedResid
+  - binnedResid
+  - panelBinnedResid
+  - plotPartialResid
+  - plotCalibration
+  - quantileResid
+  - plotInfluence
+  - plotSeparation
+- title: Discrimination & Lift
+  desc: |
+    ROC curves, optimal cut-points, and the decile view used wherever only a fraction of the cases can be acted upon.
+  contents:
+  - roc
+  - confint.roc
+  - bestCut
+  - lift
+- title: Model Fit & Coefficients
+  desc: |
+    Goodness-of-fit measures, coefficient intervals, collinearity, and variable importance.
+  contents:
+  - pseudoR2
+  - rSq
+  - coefCI
+  - coeffDiffCI
+  - vif
+  - varImp
+  - plot.varImp
+- title: Trees
+  desc: |
+    Pruning, node structure, decision rules, and plotting of rpart trees.
+  contents:
+  - bestTree
+  - cParam
+  - node
+  - splits
+  - rules
+  - leafRates
+  - plot.rpart
+- title: Model Comparison
+  desc: |
+    Several fitted models side by side, in a table or a plot.
+  contents:
+  - tMod
+  - tmodSummary
+- title: Data Splitting & Utilities
+  desc: |
+    Training and test sets, and methods filling gaps in other packages.
+  contents:
+  - splitTrainTest
+  - model.matrix.gls
+- title: Datasets
+  desc: |
+    Teaching datasets illustrating the model families covered by fitMod().
+  contents:
+  - Admit
+  - Pima
+  - BioChemists
+  - Fish
+  - Lahigh
+  - IceCream
+  - Ologit
+  - Apt
+  - Whas100
+  - Contraception
+

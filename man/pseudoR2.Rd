@@ -2,98 +2,95 @@
 % Please edit documentation in R/pseudoR2.R
 \name{pseudoR2}
 \alias{pseudoR2}
-\title{Pseudo R-squared Measures for Regression Models}
+\title{Pseudo R-Squared Measures for Regression Models}
 \usage{
 pseudoR2(fit, which = "McFadden")
 }
 \arguments{
-\item{fit}{A fitted model object. Supported classes include:
-\itemize{
-\item \code{glm}
-\item \code{nnet::multinom}
-\item \code{MASS::polr}
-\item \code{VGAM::vglm} (requires package \pkg{VGAM})
-}}
+\item{fit}{a fitted model object of class \code{glm}, \code{multinom}
+(\pkg{nnet}), \code{polr} (\pkg{MASS}) or \code{vglm} (\pkg{VGAM})}
 
-\item{which}{Character vector specifying which statistic(s) to return.
-Defaults to \code{"McFadden"}. Use \code{"all"} to return all measures.}
+\item{which}{character vector naming the measures to return, or
+\code{"all"} for everything available}
 }
 \value{
-A named numeric vector with the requested pseudo R-squared measure(s).
+a named numeric vector holding the requested measures
 }
 \description{
-Computes a set of pseudo R-squared statistics for fitted regression models,
-including generalized linear models and related extensions.
+Computes a set of pseudo R-squared statistics for fitted regression models
+where the ordinary coefficient of determination is not defined, such as
+logistic, Poisson or ordinal regression.
 }
 \details{
-The following measures are available:
-\itemize{
-\item \strong{McFadden}: Likelihood ratio index.
-\item \strong{McFaddenAdj}: Adjusted McFadden index (penalized for model complexity).
-\item \strong{CoxSnell}: Maximum likelihood R-squared.
-\item \strong{Nagelkerke}: Scaled Cox-Snell R-squared.
-\item \strong{AldrichNelson}: Based on likelihood ratio.
-\item \strong{VeallZimmermann}: Correction of Aldrich-Nelson.
-\item \strong{McKelveyZavoina}: Latent variable R-squared (for logit/probit).
-\item \strong{Efron}: Squared correlation between observed and predicted values.
-\item \strong{Tjur}: Coefficient of discrimination (binomial models only).
-\item \strong{AIC}: Akaike Information Criterion.
-\item \strong{BIC}: Bayesian Information Criterion.
-\item \strong{logLik}: Log-likelihood of fitted model.
-\item \strong{logLik0}: Log-likelihood of null (intercept-only) model.
-\item \strong{G2}: Likelihood ratio statistic.
+The following measures are available. Which of them can be computed depends
+on the model class, the family and the link function; measures that are not
+defined for a given fit are omitted from the result.
+\describe{
+\item{\code{McFadden}}{likelihood ratio index}
+\item{\code{McFaddenAdj}}{adjusted likelihood ratio index, penalized for
+the number of estimated parameters}
+\item{\code{CoxSnell}}{maximum likelihood R-squared}
+\item{\code{Nagelkerke}}{Cox-Snell R-squared, rescaled to a maximum of 1}
+\item{\code{AldrichNelson}}{based on the likelihood ratio statistic}
+\item{\code{VeallZimmermann}}{correction of Aldrich-Nelson}
+\item{\code{McKelveyZavoina}}{latent variable R-squared, logit and probit
+links only}
+\item{\code{Efron}}{squared correlation between observed and predicted
+values}
+\item{\code{Tjur}}{coefficient of discrimination, binary responses only}
+\item{\code{AIC}, \code{BIC}}{information criteria of the fitted model}
+\item{\code{logLik}, \code{logLik0}}{log-likelihood of the fitted and of
+the null model}
+\item{\code{G2}}{likelihood ratio statistic}
 }
 
-Supported classes include:
-\itemize{
-\item \code{glm}
-\item \code{nnet::multinom} (requires package \pkg{nnet})
-\item \code{MASS::polr} (requires package \pkg{MASS})
-\item \code{VGAM::vglm} (requires package \pkg{VGAM})
-}
+All measures are derived from the log-likelihoods of the fitted and of the
+intercept-only model, not from the deviance ratio; the two coincide only
+where the saturated log-likelihood vanishes.
 
-Pseudo R-squared measures provide analogues to the coefficient of determination
-for models where ordinary R-squared is not defined, such as logistic or ordinal regression.
+For \code{glm} objects the null model is refitted through
+\code{\link[stats]{glm.fit}} on the model's own response, prior weights and
+offset. Aggregated responses (\code{cbind(success, failure)}), frequency
+weights and offsets are therefore handled correctly, and the original data
+need not be accessible. For the remaining classes the null model is refitted
+with \code{\link[stats]{update}}, which requires the data of the original
+call to be available.
 
-The null model is internally refitted as an intercept-only model using
-\code{model.frame(x)} to ensure consistency with the original data and handling
-of missing values.
+Where prior weights are present, the sample size entering Cox-Snell,
+Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
+number of rows.
 
-For \code{vglm} objects, the package \pkg{VGAM} must be installed. The function
-uses \code{VGAM::predictvglm()} for obtaining linear predictors.
-
-Some measures (e.g., McKelvey-Zavoina) depend on the link function and are only
-defined for logit and probit links.
-}
-\note{
-\itemize{
-\item Weighted models are supported only if weights are stored in the fitted model.
-\item Models fitted with aggregated responses (e.g., \code{cbind(success, failure)})
-may yield incorrect results.
-\item For \code{vglm} models, ensure the model was fitted with \code{model = TRUE}
-to guarantee correct extraction of the model frame.
-}
+For \code{vglm} objects the package \pkg{VGAM} must be installed and the
+model should have been fitted with \code{model = TRUE}, so that the model
+frame can be extracted.
 }
 \examples{
-# Logistic regression example
-data(mtcars)
-mtcars$am <- factor(mtcars$am)
-
 fit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
 
 pseudoR2(fit)
-pseudoR2(fit, which = "Nagelkerke")
+## [1] 0.7178751
+
+pseudoR2(fit, which = c("Nagelkerke", "Tjur"))
 pseudoR2(fit, which = "all")
 
 }
 \references{
-McFadden, D. (1974). Conditional logit analysis of qualitative choice behavior.
+McFadden, D. (1974) Conditional logit analysis of qualitative choice
+behavior. In: Zarembka, P. (ed.) \emph{Frontiers in Econometrics},
+Academic Press, New York, 105-142.
 
-Cox, D. R., & Snell, E. J. (1989). Analysis of Binary Data.
+Cox, D. R., Snell, E. J. (1989) \emph{Analysis of Binary Data},
+2nd ed., Chapman and Hall, London.
 
-Nagelkerke, N. J. D. (1991). A note on a general definition of the coefficient of determination.
+Nagelkerke, N. J. D. (1991) A note on a general definition of the
+coefficient of determination. \emph{Biometrika}, 78(3), 691-692.
 
-Veall, M. R., & Zimmermann, K. F. (1996). Pseudo-R2 measures for some common limited dependent variable models.
+Veall, M. R., Zimmermann, K. F. (1996) Pseudo-R2 measures for some common
+limited dependent variable models. \emph{Journal of Economic Surveys},
+10(3), 241-259.
+
+Tjur, T. (2009) Coefficients of determination in logistic regression models.
+\emph{The American Statistician}, 63(4), 366-372.
 }
 \seealso{
 Other regression.utils:
@@ -104,6 +101,6 @@ Other regression.utils:
 \code{\link[=varImp]{varImp()}},
 \code{\link[=vif]{vif()}}
 }
+\concept{goodness-of-fit}
 \concept{model-evaluation}
-\concept{regression}
 \concept{regression.utils}

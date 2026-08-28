@@ -5,3 +5,7 @@
 Rplots.pdf
 prepare.R
 
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$

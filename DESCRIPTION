@@ -1,11 +1,23 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.912
+Version: 0.0.0.913
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
-Description: Consistent user interface to the most common regression and classification algorithms, such as random forest, neural networks, C5 trees and support vector machines, complemented with a handful of auxiliary functions, such as variable importance and a tuning function for the parameters.
+Description: Fits regression and classification models of very different
+    origins through one interface. A single call to fitMod() covers
+    linear, generalised linear, ordinal, robust, censored, mixed and
+    survival models as well as trees, random forests, boosting,
+    penalised regression, support vector machines and neural networks,
+    and it selects a sensible method automatically from the type of the
+    response. Fitted objects carry a common class, so printing,
+    prediction and plotting behave the same way whatever was fitted
+    underneath, and coefficient tables can be reported on the odds
+    ratio, rate ratio, hazard ratio or time ratio scale. A set of
+    diagnostics for binary responses complements the model fitting,
+    among them binned residuals, calibration curves, randomised quantile
+    residuals, influence and separation plots.
 Encoding: UTF-8
 Depends: R (>= 4.6.0)
 License: GPL (>= 2)
