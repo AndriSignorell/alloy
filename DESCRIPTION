@@ -1,7 +1,7 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.913
+Version: 0.0.0.914
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
@@ -58,6 +58,9 @@ Suggests:
     testthat,
     knitr,
     rmarkdown
+Remotes:  
+    AndriSignorell/bedrock, AndriSignorell/pharos, 
+    AndriSignorell/DescToolsX
 VignetteBuilder: R.rsp, knitr
 URL: https://andrisignorell.github.io/alloy/,
             https://github.com/AndriSignorell/alloy/
