@@ -44,7 +44,7 @@ predict(
 
   For `fitfn = "glmnet"` only: the value of the penalty parameter
   \\\lambda\\ at which predictions are made. Passed to
-  [`predict.cv.glmnet`](https://rdrr.io/pkg/glmnet/man/predict.cv.glmnet.html).
+  [`predict.cv.glmnet`](https://glmnet.stanford.edu/reference/predict.cv.glmnet.html).
   Default is `"lambda.1se"`.
 
 - type:
