@@ -59,6 +59,10 @@ devtools::run_examples()
 devtools::install()
 
 
+pkgdown::build_site()
+
+
+
 getwd()
 f <- list.files(path = "C:/temp/alloy/R", full.names = T)
 

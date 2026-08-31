@@ -126,11 +126,14 @@ not available and a note is displayed instead.
 
 ## See also
 
-[`fitMod`](fitMod.md), [`predict.FitMod`](predict.FitMod.md)
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`predict.FitMod`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
 
-Other modelling: [`fitMod()`](fitMod.md),
-[`plot.FitMod()`](plot.FitMod.md),
-[`predict.FitMod()`](predict.FitMod.md), [`predictors()`](predictors.md)
+Other modelling:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
+[`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
+[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md)
 
 ## Examples
 

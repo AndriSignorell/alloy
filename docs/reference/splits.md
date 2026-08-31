@@ -23,9 +23,13 @@ per node.
 
 ## See also
 
-Other tree: [`bestTree()`](bestTree.md), [`cParam()`](cParam.md),
-[`leafRates()`](leafRates.md), [`node()`](node.md),
-[`plot.rpart()`](plot.rpart.md), [`rules()`](rules.md)
+Other tree:
+[`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
+[`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+[`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+[`node()`](https://andrisignorell.github.io/alloy/reference/node.md),
+[`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md),
+[`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md)
 
 ## Examples
 

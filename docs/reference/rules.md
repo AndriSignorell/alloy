@@ -32,12 +32,16 @@ An object of class `"rules"`, a list with components `frame`, `ylevels`,
 
 ## See also
 
-[`node`](node.md),
+[`node`](https://andrisignorell.github.io/alloy/reference/node.md),
 [`path.rpart`](https://rdrr.io/pkg/rpart/man/path.rpart.html)
 
-Other tree: [`bestTree()`](bestTree.md), [`cParam()`](cParam.md),
-[`leafRates()`](leafRates.md), [`node()`](node.md),
-[`plot.rpart()`](plot.rpart.md), [`splits()`](splits.md)
+Other tree:
+[`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
+[`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+[`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+[`node()`](https://andrisignorell.github.io/alloy/reference/node.md),
+[`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md),
+[`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md)
 
 ## Examples
 

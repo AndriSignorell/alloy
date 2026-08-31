@@ -56,9 +56,13 @@ Confidence intervals are based on empirical quantiles.
 
 ## See also
 
-Other regression.utils: [`pseudoR2()`](pseudoR2.md), [`rSq()`](rSq.md),
-[`refLevel()`](refLevel.md), [`response()`](response.md),
-[`varImp()`](varImp.md), [`vif()`](vif.md)
+Other regression.utils:
+[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+[`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
+[`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md)
 
 ## Examples
 
@@ -66,7 +70,7 @@ Other regression.utils: [`pseudoR2()`](pseudoR2.md), [`rSq()`](rSq.md),
 fit <- lm(mpg ~ wt + hp, data = mtcars)
 coefCI(fit)
 #>                     est         lci         uci
-#> (Intercept) 37.22727012 33.26612345 41.38766346
-#> wt          -3.87783074 -5.42334250 -2.57094227
-#> hp          -0.03177295 -0.04887914 -0.02005618
+#> (Intercept) 37.22727012 33.04957972 41.73030853
+#> wt          -3.87783074 -5.40187225 -2.46480345
+#> hp          -0.03177295 -0.04878816 -0.02040031
 ```

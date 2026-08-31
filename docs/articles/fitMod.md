@@ -1,8 +1,8 @@
 # fitMod: A Unified Interface for Statistical Models
 
-[`fitMod()`](../reference/fitMod.md) provides a unified interface for
-fitting and displaying a wide range of statistical models. The syntax is
-always the same:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+provides a unified interface for fitting and displaying a wide range of
+statistical models. The syntax is always the same:
 
 ``` r
 

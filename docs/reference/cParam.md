@@ -28,13 +28,17 @@ An object of class `"CP"` with components `cp` (the full CP table),
 
 ## See also
 
-[`bestTree`](bestTree.md),
+[`bestTree`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
 [`printcp`](https://rdrr.io/pkg/rpart/man/printcp.html),
 [`plotcp`](https://rdrr.io/pkg/rpart/man/plotcp.html)
 
-Other tree: [`bestTree()`](bestTree.md), [`leafRates()`](leafRates.md),
-[`node()`](node.md), [`plot.rpart()`](plot.rpart.md),
-[`rules()`](rules.md), [`splits()`](splits.md)
+Other tree:
+[`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
+[`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+[`node()`](https://andrisignorell.github.io/alloy/reference/node.md),
+[`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md),
+[`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md),
+[`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md)
 
 ## Examples
 

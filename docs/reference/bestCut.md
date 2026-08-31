@@ -37,7 +37,9 @@ columns; the result is then a matrix (one column per tied optimum).
 [`coords`](https://rdrr.io/pkg/pROC/man/coords.html),
 [`roc`](https://rdrr.io/pkg/pROC/man/roc.html)
 
-Other roc: [`lift()`](lift.md), [`roc()`](roc.md)
+Other roc:
+[`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md),
+[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md)
 
 ## Examples
 

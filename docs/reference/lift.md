@@ -29,7 +29,8 @@ print(x, digits = 3, ...)
 
   Optional factor or binary vector of true class labels. If `NULL`
   (default), `x` must be a `"FitMod"` object and the response is
-  extracted via [`response`](response.md).
+  extracted via
+  [`response`](https://andrisignorell.github.io/alloy/reference/response.md).
 
 - nBins:
 
@@ -94,11 +95,12 @@ overall figures.
 
 ## Details
 
-As in [`roc`](roc.md), the second column of `predict(x, type = "prob")`
-is used as the predictor when `x` is a `"FitMod"` object - the positive
-class is therefore the second factor level of the response. For models
-with non-standard probability output, supply the predictor vector
-explicitly via `x` and `resp`.
+As in [`roc`](https://andrisignorell.github.io/alloy/reference/roc.md),
+the second column of `predict(x, type = "prob")` is used as the
+predictor when `x` is a `"FitMod"` object - the positive class is
+therefore the second factor level of the response. For models with
+non-standard probability output, supply the predictor vector explicitly
+via `x` and `resp`.
 
 Cases are ranked by decreasing score and cut into `nBins` groups of
 equal size. Within group \\i\\, lift is the hit rate divided by the
@@ -124,10 +126,14 @@ probabilities are systematically biased.
 
 ## See also
 
-[`roc`](roc.md), [`bestCut`](bestCut.md), [`response`](response.md),
+[`roc`](https://andrisignorell.github.io/alloy/reference/roc.md),
+[`bestCut`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
+[`response`](https://andrisignorell.github.io/alloy/reference/response.md),
 [`pharos::plotLift()`](https://andrisignorell.github.io/pharos/reference/plotLift.html)
 
-Other roc: [`bestCut()`](bestCut.md), [`roc()`](roc.md)
+Other roc:
+[`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
+[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md)
 
 ## Examples
 

@@ -49,33 +49,40 @@ it:
 - 1:
 
   binned residuals against the fitted probabilities
-  ([`plotBinnedResid`](plotBinnedResid.md)) - overall functional form
+  ([`plotBinnedResid`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md)) -
+  overall functional form
 
 - 2:
 
-  calibration curve ([`plotCalibration`](plotCalibration.md)) - are the
-  predicted risks right at the level they claim
+  calibration curve
+  ([`plotCalibration`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md)) -
+  are the predicted risks right at the level they claim
 
 - 3:
 
   Q-Q plot of randomized quantile residuals
-  ([`quantileResid`](quantileResid.md)) - the one residual definition
-  that is normal under a correct binary model
+  ([`quantileResid`](https://andrisignorell.github.io/alloy/reference/quantileResid.md)) -
+  the one residual definition that is normal under a correct binary
+  model
 
 - 4:
 
-  influence ([`plotInfluence`](plotInfluence.md)) - which observations
-  the model fits badly, and which of those move it
+  influence
+  ([`plotInfluence`](https://andrisignorell.github.io/alloy/reference/plotInfluence.md)) -
+  which observations the model fits badly, and which of those move it
 
 - 5:
 
-  separation ([`plotSeparation`](plotSeparation.md)) - how well the
-  predictions order the outcomes
+  separation
+  ([`plotSeparation`](https://andrisignorell.github.io/alloy/reference/plotSeparation.md)) -
+  how well the predictions order the outcomes
 
 Linearity in the logit is checked per predictor and therefore has no
-fixed panel number; call [`plotPartialResid`](plotPartialResid.md) for
-the terms in question, or [`plotBinnedResid`](plotBinnedResid.md) with
-`var` set.
+fixed panel number; call
+[`plotPartialResid`](https://andrisignorell.github.io/alloy/reference/plotPartialResid.md)
+for the terms in question, or
+[`plotBinnedResid`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md)
+with `var` set.
 
 No layout is set: with more panels selected than the device holds, the
 method asks before each new page when the session is interactive, as
@@ -84,12 +91,14 @@ on one page is the caller's business (`par(mfrow = c(2, 3))`).
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
-Other modelling: [`fitMod()`](fitMod.md),
-[`predict.FitMod()`](predict.FitMod.md),
-[`predictors()`](predictors.md), [`print.FitMod()`](print.FitMod.md)
+Other modelling:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
+[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
 ## Examples
 

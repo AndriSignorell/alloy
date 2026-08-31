@@ -1,10 +1,11 @@
 # Predict method for FitMod objects
 
 Unified predict interface for all models fitted via
-[`fitMod`](fitMod.md). For regression and survival models the predicted
-values are returned as a numeric vector. For classification models
-either class probabilities, predicted classes, or both are returned as a
-`data.frame` with consistent column names across all model types.
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md).
+For regression and survival models the predicted values are returned as
+a numeric vector. For classification models either class probabilities,
+predicted classes, or both are returned as a `data.frame` with
+consistent column names across all model types.
 
 ## Usage
 
@@ -103,8 +104,9 @@ predict(
 
 Whether a model is treated as classification or regression is decided
 from the fitted object itself (e.g. `rpart$method`, `randomForest$type`,
-the `family`/`objective` stored by [`fitMod()`](fitMod.md) for
-`glmnet`/`xgboost`), not from the fitting method alone.
+the `family`/`objective` stored by
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+for `glmnet`/`xgboost`), not from the fitting method alone.
 
 For classification models the column order of probability outputs is
 always aligned with the factor levels of the response variable,
@@ -128,11 +130,14 @@ linear predictor (log-odds), use `predict(object, type = "link")`.
 
 ## See also
 
-[`fitMod`](fitMod.md), [`print.FitMod`](print.FitMod.md)
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`print.FitMod`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
-Other modelling: [`fitMod()`](fitMod.md),
-[`plot.FitMod()`](plot.FitMod.md), [`predictors()`](predictors.md),
-[`print.FitMod()`](print.FitMod.md)
+Other modelling:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
+[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
 ## Examples
 

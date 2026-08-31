@@ -3,9 +3,9 @@
 Computes the mean response residual within bins of the fitted
 probabilities or of one or more predictors, together with the pointwise
 band implied by the model. This is the computation behind
-[`plotBinnedResid`](plotBinnedResid.md), separated out so that the
-numbers can be had without a device and several predictors can be
-prepared in one call.
+[`plotBinnedResid`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md),
+separated out so that the numbers can be had without a device and
+several predictors can be prepared in one call.
 
 ## Usage
 
@@ -120,8 +120,8 @@ Multilevel/Hierarchical Models*. Cambridge University Press, ch. 5.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

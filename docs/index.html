@@ -11,14 +11,20 @@
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
-<script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<!-- mathjax math --><script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-mml-chtml.js" integrity="sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI=" crossorigin="anonymous"></script><script>
+  window.MathJax = {
+    chtml: {
+      fontURL: "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/output/chtml/fonts/woff-v2"
+    }
+  };
+</script><script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
 <script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="alloy">
 <meta name="description" content="Unified interface for fitting regression and classification models, with diagnostics for binary responses">
 <meta property="og:description" content="Unified interface for fitting regression and classification models, with diagnostics for binary responses">
-<meta property="og:image" content="/logo.png">
+<meta property="og:image" content="https://andrisignorell.github.io/alloy/logo.png">
 </head>
 <body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
@@ -28,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.912</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.914</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -41,8 +47,8 @@
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true"><span class="fa fa-book"></span></button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-">
 <li><h6 class="dropdown-header" data-toc-skip>Documentation for version of package:</h6></li>
-    <li><a class="external-link dropdown-item" href="https://andrisignorell.github.io/alloy/">Released</a></li>
-    <li><a class="external-link dropdown-item" href="https://andrisignorell.github.io/alloy/dev/">In-development</a></li>
+    <li><a class="dropdown-item" href="https://andrisignorell.github.io/alloy/">Released</a></li>
+    <li><a class="dropdown-item" href="https://andrisignorell.github.io/alloy/dev/">In-development</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
@@ -71,7 +77,7 @@
 <p><code>alloy</code> is the modelling layer of the <strong>DescToolsX ecosystem</strong>. One call to <code><a href="reference/fitMod.html">fitMod()</a></code> covers regression and classification methods of very different origins — from linear models through survival and mixed models to trees, forests, boosting and neural networks — and picks a sensible method automatically from the type of the response.</p>
 <p>Every fitted object carries the class <code>"FitMod"</code> on top of the original model, so <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code> and <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code> behave the same way whatever was fitted underneath, while all methods of the original object remain available.</p>
 <p>A set of diagnostics for binary responses complements the fitting: the plots that a logistic model actually needs, rather than the ones that work for a linear one.</p>
-<p>📖 <strong>Documentation:</strong> <a href="https://andrisignorell.github.io/alloy/" class="external-link uri">https://andrisignorell.github.io/alloy/</a></p>
+<p>📖 <strong>Documentation:</strong> <a href="https://andrisignorell.github.io/alloy/" class="uri">https://andrisignorell.github.io/alloy/</a></p>
 </div>
 <div class="section level2">
 <h2 id="gear-installation">⚙️ Installation<a class="anchor" aria-label="anchor" href="#gear-installation"></a>
@@ -201,7 +207,7 @@
 <h2 id="test_tube-example">🧪 Example<a class="anchor" aria-label="anchor" href="#test_tube-example"></a>
 </h2>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://andrisignorell.github.io/alloy/" class="external-link">alloy</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://andrisignorell.github.io/alloy/">alloy</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># method chosen automatically from the response</span></span>
 <span><span class="fu"><a href="reference/fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>

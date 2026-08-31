@@ -1,7 +1,9 @@
 # Extract model summaries for model comparison
 
-S3 generic used internally by [`tMod`](tMod.md) to extract coefficients
-and model statistics from fitted models in a standardized format.
+S3 generic used internally by
+[`tMod`](https://andrisignorell.github.io/alloy/reference/tMod.md) to
+extract coefficients and model statistics from fitted models in a
+standardized format.
 
 ## Usage
 
@@ -57,11 +59,13 @@ A list with components:
 
 Each method returns a list with components `coef` (a data frame of
 coefficients and confidence intervals) and `statsx` (a named numeric
-vector of model statistics). These are combined by [`tMod()`](tMod.md)
-to enable comparison across different model types.
+vector of model statistics). These are combined by
+[`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md) to
+enable comparison across different model types.
 
 ## See also
 
-[`tMod`](tMod.md)
+[`tMod`](https://andrisignorell.github.io/alloy/reference/tMod.md)
 
-Other model.comparison: [`tMod()`](tMod.md)
+Other model.comparison:
+[`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md)

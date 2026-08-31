@@ -110,9 +110,13 @@ remains available via `conf.level = NA`.
 [`lm`](https://rdrr.io/r/stats/lm.html),
 [`summary.lm`](https://rdrr.io/r/stats/summary.lm.html)
 
-Other regression.utils: [`coefCI()`](coefCI.md),
-[`pseudoR2()`](pseudoR2.md), [`refLevel()`](refLevel.md),
-[`response()`](response.md), [`varImp()`](varImp.md), [`vif()`](vif.md)
+Other regression.utils:
+[`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
+[`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md)
 
 ## Examples
 

@@ -24,7 +24,8 @@ roc(x, resp = NULL, ...)
 
   Optional factor or binary vector of true class labels. If `NULL`
   (default), `x` must be a `"FitMod"` object and the response is
-  extracted via [`response`](response.md).
+  extracted via
+  [`response`](https://andrisignorell.github.io/alloy/reference/response.md).
 
 - ...:
 
@@ -46,10 +47,13 @@ probability output, supply the predictor vector explicitly via `x` and
 
 ## See also
 
-[`roc`](https://rdrr.io/pkg/pROC/man/roc.html), [`bestCut`](bestCut.md),
-[`response`](response.md)
+[`roc`](https://rdrr.io/pkg/pROC/man/roc.html),
+[`bestCut`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
+[`response`](https://andrisignorell.github.io/alloy/reference/response.md)
 
-Other roc: [`bestCut()`](bestCut.md), [`lift()`](lift.md)
+Other roc:
+[`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
+[`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
 
 ## Examples
 

@@ -42,16 +42,18 @@ logit is not a question one can ask of a factor.
 
 ## See also
 
-[`binnedResid`](binnedResid.md) and
-[`plotPartialResid`](plotPartialResid.md), the two diagnostics that are
-computed per term;
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview.
+[`binnedResid`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+and
+[`plotPartialResid`](https://andrisignorell.github.io/alloy/reference/plotPartialResid.md),
+the two diagnostics that are computed per term;
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview.
 
-Other modelling: [`fitMod()`](fitMod.md),
-[`plot.FitMod()`](plot.FitMod.md),
-[`predict.FitMod()`](predict.FitMod.md),
-[`print.FitMod()`](print.FitMod.md)
+Other modelling:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
+[`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
 ## Examples
 

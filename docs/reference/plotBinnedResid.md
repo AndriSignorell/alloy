@@ -109,9 +109,10 @@ plotBinnedResid(
 
 ## Value
 
-invisibly, the [`binnedResid`](binnedResid.md) table: one row per bin
-with the columns `bin`, `x`, `y` (the mean residual), `n`, `se` and the
-band bounds `lci` and `uci`.
+invisibly, the
+[`binnedResid`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+table: one row per bin with the columns `bin`, `x`, `y` (the mean
+residual), `n`, `se` and the band bounds `lci` and `uci`.
 
 ## Details
 
@@ -151,10 +152,10 @@ Multilevel/Hierarchical Models*. Cambridge University Press, ch. 5.
 
 ## See also
 
-[`binnedResid`](binnedResid.md) for the numbers without a plot and for
-several predictors at once;
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[`binnedResid`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+for the numbers without a plot and for several predictors at once;
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

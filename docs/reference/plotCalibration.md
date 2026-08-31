@@ -158,8 +158,8 @@ predictive analytics. *BMC Medicine*, **17**, 230.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

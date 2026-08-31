@@ -3,8 +3,9 @@
 A panel function for
 [`plotFacet`](https://andrisignorell.github.io/pharos/reference/plotFacet.html)
 that draws one binned residual panel: the band, the zero line and the
-bin means. Pass the output of [`binnedResid`](binnedResid.md) as the
-samples.
+bin means. Pass the output of
+[`binnedResid`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+as the samples.
 
 ## Usage
 
@@ -43,8 +44,8 @@ called for its side effect; returns `NULL` invisibly.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

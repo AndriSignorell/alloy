@@ -79,9 +79,11 @@ explicitly to override the heuristic.
 
 ## See also
 
-Other modelling: [`plot.FitMod()`](plot.FitMod.md),
-[`predict.FitMod()`](predict.FitMod.md),
-[`predictors()`](predictors.md), [`print.FitMod()`](print.FitMod.md)
+Other modelling:
+[`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
+[`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
+[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
 ## Examples
 

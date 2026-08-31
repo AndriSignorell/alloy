@@ -8,24 +8,26 @@ them, or transforms them into something that is continuous under the
 model.
 
 **Panels of [`plot()`](https://rdrr.io/r/graphics/plot.default.html)** —
-drawn by [`plot.FitMod()`](plot.FitMod.md) via `which`:
+drawn by
+[`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md)
+via `which`:
 
 |  |  |  |
 |----|----|----|
 | Panel | Function | Question |
-| 1 | [`plotBinnedResid()`](plotBinnedResid.md) | is the functional form right |
-| 2 | [`plotCalibration()`](plotCalibration.md) | are the predicted risks right |
-| 3 | [`quantileResid()`](quantileResid.md) + `plotQQ()` | is the whole distribution right |
-| 4 | [`plotInfluence()`](plotInfluence.md) | which observations drive the fit |
-| 5 | [`plotSeparation()`](plotSeparation.md) | do the predictions order the outcomes |
+| 1 | [`plotBinnedResid()`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md) | is the functional form right |
+| 2 | [`plotCalibration()`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md) | are the predicted risks right |
+| 3 | [`quantileResid()`](https://andrisignorell.github.io/alloy/reference/quantileResid.md) + `plotQQ()` | is the whole distribution right |
+| 4 | [`plotInfluence()`](https://andrisignorell.github.io/alloy/reference/plotInfluence.md) | which observations drive the fit |
+| 5 | [`plotSeparation()`](https://andrisignorell.github.io/alloy/reference/plotSeparation.md) | do the predictions order the outcomes |
 
 **Called directly** — one panel per term, so no fixed panel number:
 
 |  |  |
 |----|----|
 | Function | Question |
-| [`plotPartialResid()`](plotPartialResid.md) | is this term linear in the logit |
-| [`plotBinnedResid()`](plotBinnedResid.md) with `var` | where in this predictor does the fit break |
+| [`plotPartialResid()`](https://andrisignorell.github.io/alloy/reference/plotPartialResid.md) | is this term linear in the logit |
+| [`plotBinnedResid()`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md) with `var` | where in this predictor does the fit break |
 
 ## Choosing among them
 
@@ -37,7 +39,8 @@ A ROC curve is not in this list on purpose. It measures discrimination
 and is invariant to any monotone transformation of the predicted
 probabilities, so it cannot detect miscalibration and barely responds to
 a misspecified functional form. It answers a real question, just not
-this one - see [`roc()`](roc.md) and
+this one - see
+[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md) and
 [`cStat()`](https://andrisignorell.github.io/DescToolsX/reference/cStat.html).
 
 The formal counterparts to these plots live in lumen:
@@ -51,5 +54,5 @@ the part that tells you what to change.
 Calibration intercept and slope are 0 and 1 by construction when a
 logistic model is evaluated on the data it was fitted to, so their
 in-sample values say nothing about overfitting. Pass `newdata` to
-[`plotCalibration()`](plotCalibration.md), or resample, before reading
-them as evidence.
+[`plotCalibration()`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md),
+or resample, before reading them as evidence.

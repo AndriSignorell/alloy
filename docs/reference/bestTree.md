@@ -34,9 +34,13 @@ Breiman, L., Friedman, J., Olshen, R., & Stone, C. (1984).
 
 ## See also
 
-Other tree: [`cParam()`](cParam.md), [`leafRates()`](leafRates.md),
-[`node()`](node.md), [`plot.rpart()`](plot.rpart.md),
-[`rules()`](rules.md), [`splits()`](splits.md)
+Other tree:
+[`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+[`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+[`node()`](https://andrisignorell.github.io/alloy/reference/node.md),
+[`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md),
+[`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md),
+[`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md)
 
 ## Examples
 

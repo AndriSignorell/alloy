@@ -41,11 +41,15 @@ nodes) `sons`, `sons_n`, `primarysplits`, `surrogatesplits`.
 
 ## See also
 
-[`rules`](rules.md)
+[`rules`](https://andrisignorell.github.io/alloy/reference/rules.md)
 
-Other tree: [`bestTree()`](bestTree.md), [`cParam()`](cParam.md),
-[`leafRates()`](leafRates.md), [`plot.rpart()`](plot.rpart.md),
-[`rules()`](rules.md), [`splits()`](splits.md)
+Other tree:
+[`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
+[`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+[`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+[`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md),
+[`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md),
+[`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md)
 
 ## Examples
 

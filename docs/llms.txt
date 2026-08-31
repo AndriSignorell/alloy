@@ -7,11 +7,12 @@ Classification
 ## 🧩 Overview
 
 `alloy` is the modelling layer of the **DescToolsX ecosystem**. One call
-to [`fitMod()`](reference/fitMod.md) covers regression and
-classification methods of very different origins — from linear models
-through survival and mixed models to trees, forests, boosting and neural
-networks — and picks a sensible method automatically from the type of
-the response.
+to
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+covers regression and classification methods of very different origins —
+from linear models through survival and mixed models to trees, forests,
+boosting and neural networks — and picks a sensible method automatically
+from the type of the response.
 
 Every fitted object carries the class `"FitMod"` on top of the original
 model, so [`print()`](https://rdrr.io/r/base/print.html),
@@ -45,8 +46,8 @@ remotes::install_github("AndriSignorell/alloy")
 
 ### 🔹 Model Fitting
 
-[`fitMod()`](reference/fitMod.md) dispatches to more than thirty fitting
-functions:
+[`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+dispatches to more than thirty fitting functions:
 
 - Linear and generalised linear: `lm`, `logit`, `poisson`,
   `quasipoisson`, `gamma`, `negbin`, `lmrob`
@@ -61,63 +62,72 @@ functions:
 
 ### 🔹 Unified Methods
 
-- [`print.FitMod()`](reference/print.FitMod.md) — coefficient tables
-  with confidence intervals, reference-category headers and fit
-  statistics, reportable as coefficients, odds ratios, incidence rate
-  ratios, hazard ratios or time ratios
-- [`predict.FitMod()`](reference/predict.FitMod.md) — probabilities,
-  classes or both, with column order always aligned to the response
-  levels
-- [`plot.FitMod()`](reference/plot.FitMod.md) — the diagnostic panels
-  appropriate to the model
-- [`predictors()`](reference/predictors.md),
-  [`response()`](reference/response.md),
-  [`refLevel()`](reference/refLevel.md)
+- [`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+  — coefficient tables with confidence intervals, reference-category
+  headers and fit statistics, reportable as coefficients, odds ratios,
+  incidence rate ratios, hazard ratios or time ratios
+- [`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
+  — probabilities, classes or both, with column order always aligned to
+  the response levels
+- [`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md)
+  — the diagnostic panels appropriate to the model
+- [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
+  [`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+  [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md)
 
 ### 🔹 Diagnostics for Logistic Models
 
-- [`plotBinnedResid()`](reference/plotBinnedResid.md) /
-  [`binnedResid()`](reference/binnedResid.md) — functional form
-- [`plotCalibration()`](reference/plotCalibration.md) — are the
-  predicted risks right
-- [`quantileResid()`](reference/quantileResid.md) — randomised quantile
-  residuals, normal under a correct model
-- [`plotInfluence()`](reference/plotInfluence.md) — which observations
-  drive the fit
-- [`plotSeparation()`](reference/plotSeparation.md) — do the predictions
-  order the outcomes
-- [`plotPartialResid()`](reference/plotPartialResid.md) — linearity in
-  the logit, per term
+- [`plotBinnedResid()`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md)
+  /
+  [`binnedResid()`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+  — functional form
+- [`plotCalibration()`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md)
+  — are the predicted risks right
+- [`quantileResid()`](https://andrisignorell.github.io/alloy/reference/quantileResid.md)
+  — randomised quantile residuals, normal under a correct model
+- [`plotInfluence()`](https://andrisignorell.github.io/alloy/reference/plotInfluence.md)
+  — which observations drive the fit
+- [`plotSeparation()`](https://andrisignorell.github.io/alloy/reference/plotSeparation.md)
+  — do the predictions order the outcomes
+- [`plotPartialResid()`](https://andrisignorell.github.io/alloy/reference/plotPartialResid.md)
+  — linearity in the logit, per term
 - `?model-diagnostics-overview` — which plot answers which question
 
 ### 🔹 Model Evaluation
 
-- [`roc()`](reference/roc.md), [`bestCut()`](reference/bestCut.md),
-  [`confint.roc()`](reference/confint.roc.md),
-  [`lift()`](reference/lift.md)
-- [`pseudoR2()`](reference/pseudoR2.md) — McFadden, Cox-Snell,
-  Nagelkerke, Tjur and others
-- [`rSq()`](reference/rSq.md), [`coefCI()`](reference/coefCI.md),
-  [`coeffDiffCI()`](reference/coeffDiffCI.md) — with parallel bootstrap
-- [`vif()`](reference/vif.md) — VIF and generalised VIF
-- [`varImp()`](reference/varImp.md),
-  [`plot.varImp()`](reference/plot.varImp.md)
-- [`splitTrainTest()`](reference/splitTrainTest.md)
+- [`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md),
+  [`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
+  [`confint.roc()`](https://andrisignorell.github.io/alloy/reference/confint.roc.md),
+  [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
+- [`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md)
+  — McFadden, Cox-Snell, Nagelkerke, Tjur and others
+- [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+  [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+  [`coeffDiffCI()`](https://andrisignorell.github.io/alloy/reference/coeffDiffCI.md)
+  — with parallel bootstrap
+- [`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md) —
+  VIF and generalised VIF
+- [`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
+  [`plot.varImp()`](https://andrisignorell.github.io/alloy/reference/plot.varImp.md)
+- [`splitTrainTest()`](https://andrisignorell.github.io/alloy/reference/splitTrainTest.md)
 
 ### 🔹 Trees
 
-- [`bestTree()`](reference/bestTree.md) (1-SE rule),
-  [`cParam()`](reference/cParam.md),
-  [`leafRates()`](reference/leafRates.md),
-  [`node()`](reference/node.md), [`rules()`](reference/rules.md),
-  [`splits()`](reference/splits.md),
-  [`plot.rpart()`](reference/plot.rpart.md)
+- [`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md)
+  (1-SE rule),
+  [`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+  [`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+  [`node()`](https://andrisignorell.github.io/alloy/reference/node.md),
+  [`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md),
+  [`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md),
+  [`plot.rpart()`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md)
 
 ### 🔹 Model Comparison
 
-- [`tMod()`](reference/tMod.md) — several models side by side, in a
-  table or a plot
-- [`tmodSummary()`](reference/tmodSummary.md) — the S3 generic behind it
+- [`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md) —
+  several models side by side, in a table or a plot
+- [`tmodSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
+  — the S3 generic behind it
 
 ### 🔹 Datasets
 
@@ -182,122 +192,153 @@ GPL (≥ 2)
 The unified fitting function and the methods that behave the same way
 whatever model was fitted underneath.
 
-- [`fitMod()`](fitMod.md) : Fit a statistical or machine-learning model
-  with automatic method selection
-- [`print(`*`<FitMod>`*`)`](print.FitMod.md) : Print method for FitMod
-  objects
-- [`predict(`*`<FitMod>`*`)`](predict.FitMod.md) : Predict method for
-  FitMod objects
-- [`plot(`*`<FitMod>`*`)`](plot.FitMod.md) : Diagnostic Plots for FitMod
-  Models
-- [`predictors()`](predictors.md) : Predictors of a Fitted Model
-- [`response()`](response.md) : Extract the response variable from a
-  fitted model
-- [`refLevel()`](refLevel.md) : Reference level of factor predictors in
-  a model
+- [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  : Fit a statistical or machine-learning model with automatic method
+  selection
+- [`print(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+  : Print method for FitMod objects
+- [`predict(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
+  : Predict method for FitMod objects
+- [`plot(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md)
+  : Diagnostic Plots for FitMod Models
+- [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md)
+  : Predictors of a Fitted Model
+- [`response()`](https://andrisignorell.github.io/alloy/reference/response.md)
+  : Extract the response variable from a fitted model
+- [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md)
+  : Reference level of factor predictors in a model
 
 ## Diagnostics for Binary Responses
 
 The plots a logistic model needs, where the residual-versus-fitted plot
 of a linear model says nothing.
 
-- [`model-diagnostics-overview`](model-diagnostics-overview.md) :
-  Diagnostics for Logistic Models in alloy
-- [`plotBinnedResid()`](plotBinnedResid.md) : Binned Residual Plot
-- [`binnedResid()`](binnedResid.md) : Binned Residuals
-- [`panelBinnedResid()`](panelBinnedResid.md) : Facet Panel for Binned
-  Residuals
-- [`plotPartialResid()`](plotPartialResid.md) : Partial Residual Plot
-  for Linearity in the Logit
-- [`plotCalibration()`](plotCalibration.md) : Calibration Curve
-- [`quantileResid()`](quantileResid.md) : Randomized Quantile Residuals
-- [`plotInfluence()`](plotInfluence.md) : Influence Plot for Logistic
-  Models
-- [`plotSeparation()`](plotSeparation.md) : Separation Plot
+- [`model-diagnostics-overview`](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+  : Diagnostics for Logistic Models in alloy
+- [`plotBinnedResid()`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md)
+  : Binned Residual Plot
+- [`binnedResid()`](https://andrisignorell.github.io/alloy/reference/binnedResid.md)
+  : Binned Residuals
+- [`panelBinnedResid()`](https://andrisignorell.github.io/alloy/reference/panelBinnedResid.md)
+  : Facet Panel for Binned Residuals
+- [`plotPartialResid()`](https://andrisignorell.github.io/alloy/reference/plotPartialResid.md)
+  : Partial Residual Plot for Linearity in the Logit
+- [`plotCalibration()`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md)
+  : Calibration Curve
+- [`quantileResid()`](https://andrisignorell.github.io/alloy/reference/quantileResid.md)
+  : Randomized Quantile Residuals
+- [`plotInfluence()`](https://andrisignorell.github.io/alloy/reference/plotInfluence.md)
+  : Influence Plot for Logistic Models
+- [`plotSeparation()`](https://andrisignorell.github.io/alloy/reference/plotSeparation.md)
+  : Separation Plot
 
 ## Discrimination & Lift
 
 ROC curves, optimal cut-points, and the decile view used wherever only a
 fraction of the cases can be acted upon.
 
-- [`roc()`](roc.md) : ROC curve for a fitted model or predictor vector
-- [`confint(`*`<roc>`*`)`](confint.roc.md) : Confidence intervals for
-  ROC curve coordinates
-- [`bestCut()`](bestCut.md) : Best cut-point of an ROC curve
-- [`lift()`](lift.md) [`print(`*`<Lift>`*`)`](lift.md) : Lift and gain
-  table for a fitted model or predictor vector
+- [`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md) :
+  ROC curve for a fitted model or predictor vector
+- [`confint(`*`<roc>`*`)`](https://andrisignorell.github.io/alloy/reference/confint.roc.md)
+  : Confidence intervals for ROC curve coordinates
+- [`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md)
+  : Best cut-point of an ROC curve
+- [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
+  [`print(`*`<Lift>`*`)`](https://andrisignorell.github.io/alloy/reference/lift.md)
+  : Lift and gain table for a fitted model or predictor vector
 
 ## Model Fit & Coefficients
 
 Goodness-of-fit measures, coefficient intervals, collinearity, and
 variable importance.
 
-- [`pseudoR2()`](pseudoR2.md) : Pseudo R-Squared Measures for Regression
-  Models
-- [`rSq()`](rSq.md) : R-squared of a Linear Model
-- [`coefCI()`](coefCI.md) : Bootstrap Confidence Intervals for Linear
-  Model Coefficients
-- [`coeffDiffCI()`](coeffDiffCI.md) : Confidence Interval for the
-  Difference of Two Regression Coefficients
-- [`vif()`](vif.md) : Variance Inflation Factors (VIF / GVIF)
-- [`varImp()`](varImp.md) : Variable importance for machine learning
-  models
-- [`plot(`*`<varImp>`*`)`](plot.varImp.md) : Cleveland dot plot for
-  variable importance
+- [`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md)
+  : Pseudo R-Squared Measures for Regression Models
+- [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md) :
+  R-squared of a Linear Model
+- [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md)
+  : Bootstrap Confidence Intervals for Linear Model Coefficients
+- [`coeffDiffCI()`](https://andrisignorell.github.io/alloy/reference/coeffDiffCI.md)
+  : Confidence Interval for the Difference of Two Regression
+  Coefficients
+- [`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md) :
+  Variance Inflation Factors (VIF / GVIF)
+- [`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md)
+  : Variable importance for machine learning models
+- [`plot(`*`<varImp>`*`)`](https://andrisignorell.github.io/alloy/reference/plot.varImp.md)
+  : Cleveland dot plot for variable importance
 
 ## Trees
 
 Pruning, node structure, decision rules, and plotting of rpart trees.
 
-- [`bestTree()`](bestTree.md) : Best tree size using the 1-SE rule
-- [`cParam()`](cParam.md) : Complexity parameter table for an rpart tree
-- [`node()`](node.md) : Structured node information for an rpart tree
-- [`splits()`](splits.md) : Split labels for each node of an rpart tree
-- [`rules()`](rules.md) : Decision rules for an rpart tree
-- [`leafRates()`](leafRates.md) : Misclassification rates per leaf node
-- [`plot(`*`<rpart>`*`)`](plot.rpart.md) : Plot an rpart tree using
-  rpart.plot with node labels
+- [`bestTree()`](https://andrisignorell.github.io/alloy/reference/bestTree.md)
+  : Best tree size using the 1-SE rule
+- [`cParam()`](https://andrisignorell.github.io/alloy/reference/cParam.md)
+  : Complexity parameter table for an rpart tree
+- [`node()`](https://andrisignorell.github.io/alloy/reference/node.md) :
+  Structured node information for an rpart tree
+- [`splits()`](https://andrisignorell.github.io/alloy/reference/splits.md)
+  : Split labels for each node of an rpart tree
+- [`rules()`](https://andrisignorell.github.io/alloy/reference/rules.md)
+  : Decision rules for an rpart tree
+- [`leafRates()`](https://andrisignorell.github.io/alloy/reference/leafRates.md)
+  : Misclassification rates per leaf node
+- [`plot(`*`<rpart>`*`)`](https://andrisignorell.github.io/alloy/reference/plot.rpart.md)
+  : Plot an rpart tree using rpart.plot with node labels
 
 ## Model Comparison
 
 Several fitted models side by side, in a table or a plot.
 
-- [`tMod()`](tMod.md) [`print(`*`<TMod>`*`)`](tMod.md)
-  [`plot(`*`<TMod>`*`)`](tMod.md) : Compare multiple statistical models
-- [`tmodSummary()`](tmodSummary.md) : Extract model summaries for model
-  comparison
+- [`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md)
+  [`print(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
+  [`plot(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
+  : Compare multiple statistical models
+- [`tmodSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
+  : Extract model summaries for model comparison
 
 ## Data Splitting & Utilities
 
 Training and test sets, and methods filling gaps in other packages.
 
-- [`splitTrainTest()`](splitTrainTest.md) : Split Data into Training and
-  Test Sets
-- [`model.matrix(`*`<gls>`*`)`](model.matrix.gls.md) : Model matrix for
-  gls objects
+- [`splitTrainTest()`](https://andrisignorell.github.io/alloy/reference/splitTrainTest.md)
+  : Split Data into Training and Test Sets
+- [`model.matrix(`*`<gls>`*`)`](https://andrisignorell.github.io/alloy/reference/model.matrix.gls.md)
+  : Model matrix for gls objects
 
 ## Datasets
 
 Teaching datasets illustrating the model families covered by fitMod().
 
-- [`Admit`](Admit.md) : Graduate school admissions
-- [`Pima`](Pima.md) : Pima Indians diabetes data
-- [`BioChemists`](BioChemists.md) : Biochemists' publication counts
-- [`Fish`](Fish.md) : A dataset containing information about 250 groups
-  of visitors to a state park. This dataset is the standard textbook
-  example for demonstrating Zero-Inflated Poisson (ZIP) and
-  Zero-Inflated Negative Binomial (ZINB) regression models, as it
-  contains an excess number of zeros in the count response variable.
-- [`Lahigh`](Lahigh.md) : Los Angeles High School Attendance and Test
-  Scores Data
-- [`IceCream`](IceCream.md) : Ice cream flavour preference
-- [`Ologit`](Ologit.md) : Ordinal outcome: applying to graduate school
-- [`Apt`](Apt.md) : Academic aptitude scores (tobit example)
-- [`Whas100`](Whas100.md) : Worcester Heart Attack Study (WHAS100)
-- [`Contraception`](Contraception.md) : Contraceptive use in Bangladesh
+- [`Admit`](https://andrisignorell.github.io/alloy/reference/Admit.md) :
+  Graduate school admissions
+- [`Pima`](https://andrisignorell.github.io/alloy/reference/Pima.md) :
+  Pima Indians diabetes data
+- [`BioChemists`](https://andrisignorell.github.io/alloy/reference/BioChemists.md)
+  : Biochemists' publication counts
+- [`Fish`](https://andrisignorell.github.io/alloy/reference/Fish.md) : A
+  dataset containing information about 250 groups of visitors to a state
+  park. This dataset is the standard textbook example for demonstrating
+  Zero-Inflated Poisson (ZIP) and Zero-Inflated Negative Binomial (ZINB)
+  regression models, as it contains an excess number of zeros in the
+  count response variable.
+- [`Lahigh`](https://andrisignorell.github.io/alloy/reference/Lahigh.md)
+  : Los Angeles High School Attendance and Test Scores Data
+- [`IceCream`](https://andrisignorell.github.io/alloy/reference/IceCream.md)
+  : Ice cream flavour preference
+- [`Ologit`](https://andrisignorell.github.io/alloy/reference/Ologit.md)
+  : Ordinal outcome: applying to graduate school
+- [`Apt`](https://andrisignorell.github.io/alloy/reference/Apt.md) :
+  Academic aptitude scores (tobit example)
+- [`Whas100`](https://andrisignorell.github.io/alloy/reference/Whas100.md)
+  : Worcester Heart Attack Study (WHAS100)
+- [`Contraception`](https://andrisignorell.github.io/alloy/reference/Contraception.md)
+  : Contraceptive use in Bangladesh
 
 # Articles
 
 ### All vignettes
 
-- [fitMod: A Unified Interface for Statistical Models](fitMod.md):
+- [fitMod: A Unified Interface for Statistical
+  Models](https://andrisignorell.github.io/alloy/articles/fitMod.md):

@@ -8,10 +8,11 @@ function – the package handles the rest.
 
 ## Main function
 
-The entry point is [`fitMod`](fitMod.md), which accepts a standard R
-formula and a `fitfn` argument naming the model type. When `fitfn` is
-omitted the appropriate method is chosen automatically from the response
-variable type.
+The entry point is
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+which accepts a standard R formula and a `fitfn` argument naming the
+model type. When `fitfn` is omitted the appropriate method is chosen
+automatically from the response variable type.
 
 Supported model families:
 
@@ -46,36 +47,38 @@ Supported model families:
 
 ## Unified output
 
-[`print.FitMod`](print.FitMod.md) produces Stata-style output with
-confidence intervals, p-values, and reference category headers,
-consistently across all model types. The `output` argument controls the
-scale: `"coef"`, `"or"`, `"irr"`, `"hr"`, `"tr"`, or `"genuine"`
-(original model output).
+[`print.FitMod`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+produces Stata-style output with confidence intervals, p-values, and
+reference category headers, consistently across all model types. The
+`output` argument controls the scale: `"coef"`, `"or"`, `"irr"`, `"hr"`,
+`"tr"`, or `"genuine"` (original model output).
 
-[`predict.FitMod`](predict.FitMod.md) returns a numeric vector for
-regression and survival models, and a tidy `data.frame` for classifiers
-(`output = "prob"`, `"class"`, or `"both"`).
+[`predict.FitMod`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
+returns a numeric vector for regression and survival models, and a tidy
+`data.frame` for classifiers (`output = "prob"`, `"class"`, or
+`"both"`).
 
 ## Additional functions
 
-- [`varImp`](varImp.md):
+- [`varImp`](https://andrisignorell.github.io/alloy/reference/varImp.md):
 
   Variable importance for ML models (Cleveland dot plot via
-  [`plot.varImp`](plot.varImp.md)).
+  [`plot.varImp`](https://andrisignorell.github.io/alloy/reference/plot.varImp.md)).
 
-- [`tMod`](tMod.md):
+- [`tMod`](https://andrisignorell.github.io/alloy/reference/tMod.md):
 
   Side-by-side comparison of multiple models.
 
-- [`pseudoR2`](pseudoR2.md):
+- [`pseudoR2`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md):
 
   Pseudo-R\\^2\\ measures for GLMs.
 
-- [`vif`](vif.md):
+- [`vif`](https://andrisignorell.github.io/alloy/reference/vif.md):
 
   Variance inflation factors (VIF / GVIF).
 
-- [`coefCI`](coefCI.md), [`rSq`](rSq.md):
+- [`coefCI`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+  [`rSq`](https://andrisignorell.github.io/alloy/reference/rSq.md):
 
   Bootstrap CIs for coefficients and R\\^2\\.
 
@@ -83,27 +86,37 @@ regression and survival models, and a tidy `data.frame` for classifiers
 
   Confusion matrix and classification metrics.
 
-- [`roc`](roc.md), [`bestCut`](bestCut.md):
+- [`roc`](https://andrisignorell.github.io/alloy/reference/roc.md),
+  [`bestCut`](https://andrisignorell.github.io/alloy/reference/bestCut.md):
 
   ROC analysis.
 
-- [`refLevel`](refLevel.md):
+- [`refLevel`](https://andrisignorell.github.io/alloy/reference/refLevel.md):
 
   Reference levels of factor predictors.
 
-- [`rules`](rules.md), [`node`](node.md), [`cParam`](cParam.md),
-  [`bestTree`](bestTree.md), [`leafRates`](leafRates.md),
-  [`splits`](splits.md):
+- [`rules`](https://andrisignorell.github.io/alloy/reference/rules.md),
+  [`node`](https://andrisignorell.github.io/alloy/reference/node.md),
+  [`cParam`](https://andrisignorell.github.io/alloy/reference/cParam.md),
+  [`bestTree`](https://andrisignorell.github.io/alloy/reference/bestTree.md),
+  [`leafRates`](https://andrisignorell.github.io/alloy/reference/leafRates.md),
+  [`splits`](https://andrisignorell.github.io/alloy/reference/splits.md):
 
   Utilities for `rpart` trees.
 
 ## Datasets
 
 The package ships with several benchmark datasets used in the vignette:
-[`Admit`](Admit.md), [`Apt`](Apt.md), [`BioChemists`](BioChemists.md),
-[`Contraception`](Contraception.md), [`Fish`](Fish.md),
-[`IceCream`](IceCream.md), [`Lahigh`](Lahigh.md), [`Ologit`](Ologit.md),
-[`Pima`](Pima.md), [`Whas100`](Whas100.md).
+[`Admit`](https://andrisignorell.github.io/alloy/reference/Admit.md),
+[`Apt`](https://andrisignorell.github.io/alloy/reference/Apt.md),
+[`BioChemists`](https://andrisignorell.github.io/alloy/reference/BioChemists.md),
+[`Contraception`](https://andrisignorell.github.io/alloy/reference/Contraception.md),
+[`Fish`](https://andrisignorell.github.io/alloy/reference/Fish.md),
+[`IceCream`](https://andrisignorell.github.io/alloy/reference/IceCream.md),
+[`Lahigh`](https://andrisignorell.github.io/alloy/reference/Lahigh.md),
+[`Ologit`](https://andrisignorell.github.io/alloy/reference/Ologit.md),
+[`Pima`](https://andrisignorell.github.io/alloy/reference/Pima.md),
+[`Whas100`](https://andrisignorell.github.io/alloy/reference/Whas100.md).
 
 ## Design philosophy
 
@@ -121,8 +134,9 @@ UCLA Statistical Methods and Data Analytics:
 
 ## See also
 
-[`fitMod`](fitMod.md), [`print.FitMod`](print.FitMod.md),
-[`predict.FitMod`](predict.FitMod.md)
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`print.FitMod`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md),
+[`predict.FitMod`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
 
 ## Author
 

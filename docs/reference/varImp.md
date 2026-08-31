@@ -48,12 +48,15 @@ A `data.frame` of class `c("varImp", "data.frame")` with columns:
 
 ## See also
 
-[`plot.varImp`](plot.varImp.md)
+[`plot.varImp`](https://andrisignorell.github.io/alloy/reference/plot.varImp.md)
 
-Other regression.utils: [`coefCI()`](coefCI.md),
-[`pseudoR2()`](pseudoR2.md), [`rSq()`](rSq.md),
-[`refLevel()`](refLevel.md), [`response()`](response.md),
-[`vif()`](vif.md)
+Other regression.utils:
+[`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+[`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md)
 
 ## Examples
 

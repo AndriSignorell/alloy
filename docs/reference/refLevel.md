@@ -50,9 +50,13 @@ Contrasts other than treatment contrasts (e.g. `contr.sum`,
 [`contrasts`](https://rdrr.io/r/stats/contrasts.html),
 [`contr.treatment`](https://rdrr.io/r/stats/contrast.html)
 
-Other regression.utils: [`coefCI()`](coefCI.md),
-[`pseudoR2()`](pseudoR2.md), [`rSq()`](rSq.md),
-[`response()`](response.md), [`varImp()`](varImp.md), [`vif()`](vif.md)
+Other regression.utils:
+[`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
+[`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md)
 
 ## Examples
 

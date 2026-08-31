@@ -85,12 +85,12 @@ invisibly, a data frame with the columns `p` and `y`, sorted by `p`.
 ## Details
 
 The plot answers a different question from
-[`plotCalibration`](plotCalibration.md): separation is about the
-*ordering* of the predictions, calibration about their *level*. A model
-can rank perfectly and still predict risks twice too high, and the ROC
-curve - being invariant to any monotone transformation of the
-predictions - cannot see the difference either. Read the two plots
-together.
+[`plotCalibration`](https://andrisignorell.github.io/alloy/reference/plotCalibration.md):
+separation is about the *ordering* of the predictions, calibration about
+their *level*. A model can rank perfectly and still predict risks twice
+too high, and the ROC curve - being invariant to any monotone
+transformation of the predictions - cannot see the difference either.
+Read the two plots together.
 
 The marker on the axis sits at the expected number of events, \\\sum
 \hat p_i\\, counted from the right. If it lands where the observed
@@ -104,8 +104,8 @@ Journal of Political Science*, **55**(4), 991–1002.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

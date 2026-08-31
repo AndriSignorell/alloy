@@ -56,8 +56,9 @@ With \\m = 1\\ the randomization interval spans the entire jump of the
 distribution function, so the uniform draw contributes about as much
 variation as the data do, and the residuals stay close to normal even
 when the mean structure is wrong. In a simulation with a squared term
-omitted (\\n = 2000\\), [`plotBinnedResid`](plotBinnedResid.md) put 35
-of 44 bins outside the 95\\ residuals returned \\p = 0.55\\.
+omitted (\\n = 2000\\),
+[`plotBinnedResid`](https://andrisignorell.github.io/alloy/reference/plotBinnedResid.md)
+put 35 of 44 bins outside the 95\\ residuals returned \\p = 0.55\\.
 
 Read the Q-Q plot for what it can see - a few extreme observations, and
 the distributional fit of grouped data (\\m \> 1\\), where the intervals
@@ -71,8 +72,8 @@ Dunn, P. K. and Smyth, G. K. (1996) Randomized quantile residuals.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

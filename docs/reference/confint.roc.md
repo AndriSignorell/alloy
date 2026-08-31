@@ -16,7 +16,8 @@ confint(object, parm, level = 0.95, x = "best", ...)
 - object:
 
   An object of class `"roc"` as returned by
-  [`roc`](https://rdrr.io/pkg/pROC/man/roc.html) or [`roc`](roc.md).
+  [`roc`](https://rdrr.io/pkg/pROC/man/roc.html) or
+  [`roc`](https://andrisignorell.github.io/alloy/reference/roc.md).
 
 - parm:
 
@@ -48,7 +49,7 @@ A `"ci.coords"` object as returned by
 ## See also
 
 [`ci.coords`](https://rdrr.io/pkg/pROC/man/ci.coords.html),
-[`roc`](roc.md)
+[`roc`](https://andrisignorell.github.io/alloy/reference/roc.md)
 
 ## Examples
 

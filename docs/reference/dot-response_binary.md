@@ -1,8 +1,9 @@
 # Extract and validate a binary response from a fitted model
 
-Wrapper around [`response`](response.md) that additionally validates
-that the response is a factor with exactly two levels, as required for
-ROC analysis.
+Wrapper around
+[`response`](https://andrisignorell.github.io/alloy/reference/response.md)
+that additionally validates that the response is a factor with exactly
+two levels, as required for ROC analysis.
 
 ## Usage
 
@@ -30,5 +31,5 @@ name of the response variable.
 
 ## See also
 
-[`response`](response.md),
+[`response`](https://andrisignorell.github.io/alloy/reference/response.md),
 [`roc`](https://rdrr.io/pkg/pROC/man/roc.html)

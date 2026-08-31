@@ -40,8 +40,9 @@ plotPartialResid(
 - term:
 
   name of the predictor. `NULL` (default) uses the first continuous term
-  in the model; [`predictors`](predictors.md)`(x, numeric = TRUE)` lists
-  the ones this plot can be drawn for.
+  in the model;
+  [`predictors`](https://andrisignorell.github.io/alloy/reference/predictors.md)`(x, numeric = TRUE)`
+  lists the ones this plot can be drawn for.
 
 - main:
 
@@ -113,8 +114,8 @@ does not, the bend is noise.
 
 ## See also
 
-[model-diagnostics-overview](model-diagnostics-overview.md) for an
-overview of the diagnostics for logistic models in alloy.
+[model-diagnostics-overview](https://andrisignorell.github.io/alloy/reference/model-diagnostics-overview.md)
+for an overview of the diagnostics for logistic models in alloy.
 
 ## Examples
 

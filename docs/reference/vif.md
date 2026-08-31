@@ -51,10 +51,13 @@ For models without intercept, a warning is issued.
 
 ## See also
 
-Other regression.utils: [`coefCI()`](coefCI.md),
-[`pseudoR2()`](pseudoR2.md), [`rSq()`](rSq.md),
-[`refLevel()`](refLevel.md), [`response()`](response.md),
-[`varImp()`](varImp.md)
+Other regression.utils:
+[`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+[`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md)
 
 ## Examples
 

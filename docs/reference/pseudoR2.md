@@ -123,9 +123,13 @@ models. *The American Statistician*, 63(4), 366-372.
 
 ## See also
 
-Other regression.utils: [`coefCI()`](coefCI.md), [`rSq()`](rSq.md),
-[`refLevel()`](refLevel.md), [`response()`](response.md),
-[`varImp()`](varImp.md), [`vif()`](vif.md)
+Other regression.utils:
+[`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
+[`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
+[`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
+[`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
+[`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
+[`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md)
 
 ## Examples
 

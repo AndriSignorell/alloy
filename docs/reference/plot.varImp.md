@@ -1,8 +1,9 @@
 # Cleveland dot plot for variable importance
 
 Displays a Cleveland dot plot of variable importance scores as returned
-by [`varImp`](varImp.md). Variables are ordered by importance (most
-important at the top).
+by
+[`varImp`](https://andrisignorell.github.io/alloy/reference/varImp.md).
+Variables are ordered by importance (most important at the top).
 
 ## Usage
 
@@ -23,7 +24,8 @@ plot(
 
 - x:
 
-  An object of class `"varImp"` as returned by [`varImp`](varImp.md).
+  An object of class `"varImp"` as returned by
+  [`varImp`](https://andrisignorell.github.io/alloy/reference/varImp.md).
 
 - main:
 
@@ -57,7 +59,7 @@ Invisibly returns `x`.
 
 ## See also
 
-[`varImp`](varImp.md)
+[`varImp`](https://andrisignorell.github.io/alloy/reference/varImp.md)
 
 ## Examples
 

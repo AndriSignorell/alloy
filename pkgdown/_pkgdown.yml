@@ -10,6 +10,8 @@ template:
   default_assets: yes
   bootstrap: 5
   bootswatch: flatly
+  math-rendering: mathjax
+
 navbar:
   structure:
     left:
