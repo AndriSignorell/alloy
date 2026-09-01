@@ -15,7 +15,7 @@ from a linear model using a fast parallel implementation."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.915</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.916</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -115,10 +115,10 @@ For each sample, the linear model is refitted and coefficients are stored.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">coefCI</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                     est         lci         uci</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.22727012 32.87737130 41.51406519</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.87783074 -5.41158407 -2.51776080</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03177295 -0.04979579 -0.01953861</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     est         lci       uci</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.22727012 33.25778705 41.444595</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.87783074 -5.46625231 -2.467192</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03177295 -0.04922129 -0.019460</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
