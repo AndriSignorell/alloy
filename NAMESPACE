@@ -101,6 +101,7 @@ importFrom(pharos,
   pal,
   plotBubble,
   plotDot,
+  plotFacet,
   plotQQ,
   strAlign,
   style

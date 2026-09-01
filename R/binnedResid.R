@@ -166,7 +166,8 @@ binnedResid <- function(x,
 #' @examples
 #' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
 #' bins <- binnedResid(fitLogit, var = predictors(fitLogit))
-#'
+#' vars <- predictors(fitLogit)
+#' 
 #' pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
 #'                   xlim = lapply(bins, function(b) range(b$x)),
 #'                   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
