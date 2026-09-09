@@ -67,8 +67,8 @@ vi <- varImp(fitRf)
 vi
 #>   variable importance
 #> 1    video  100.00000
-#> 2   puzzle   81.90459
-#> 3   female   21.40851
+#> 2   puzzle   80.72337
+#> 3   female   21.65644
 plot(vi)
 
 ```

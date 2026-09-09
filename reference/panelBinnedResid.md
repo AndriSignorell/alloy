@@ -54,10 +54,20 @@ fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #> Warning: only 16 distinct bins could be formed instead of the requested 20
 #> Warning: only 19 distinct bins could be formed instead of the requested 20
+vars <- predictors(fitLogit)
 
 pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
                   xlim = lapply(bins, function(b) range(b$x)),
                   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
                   stripLabels = vars, ylab = "mean residual")
-#> Error: object 'vars' not found
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+
 ```
