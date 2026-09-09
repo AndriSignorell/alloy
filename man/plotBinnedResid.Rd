@@ -120,12 +120,15 @@ plotBinnedResid(fitLogit)
 plotBinnedResid(fitLogit, var = "gre")
 
 # one panel per predictor: compute once, then facet with free x scales
-bins <- binnedResid(fitLogit, var = predictors(fitLogit))
-plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
-          xlim = lapply(bins, function(b) range(b$x)),
-          ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-          stripLabels = vars, ylab = "mean residual")
-
+vars <- predictors(fitLogit)
+bins <- binnedResid(fitLogit, var = vars)
+pharos::plotFacet(
+  bins, dim = c(1, length(vars)), panelFun = panelBinnedResid,
+  xlim = lapply(bins, function(b) range(b$x)),
+  ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
+  stripLabels = vars, ylab = "mean residual")
+  
+  
 }
 \references{
 Gelman, A. and Hill, J. (2007) \emph{Data Analysis Using Regression and

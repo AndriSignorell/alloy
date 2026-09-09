@@ -303,7 +303,7 @@ Several fitted models side by side, in a table or a plot.
 Training and test sets, and methods filling gaps in other packages.
 
 - [`splitTrainTest()`](https://andrisignorell.github.io/alloy/reference/splitTrainTest.md)
-  : Split Data into Training and Test Sets
+  : Split Data into Training, Validation and Test Sets
 - [`model.matrix(`*`<gls>`*`)`](https://andrisignorell.github.io/alloy/reference/model.matrix.gls.md)
   : Model matrix for gls objects
 

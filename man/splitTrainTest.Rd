@@ -2,52 +2,108 @@
 % Please edit documentation in R/splitTrainTest.R
 \name{splitTrainTest}
 \alias{splitTrainTest}
-\title{Split Data into Training and Test Sets}
+\title{Split Data into Training, Validation and Test Sets}
 \usage{
-splitTrainTest(x, p = 0.1, logical = FALSE)
+splitTrainTest(x, p = 0.1, strata = NULL, output = c("data", "group"))
 }
 \arguments{
-\item{x}{An object to split. Typically a vector, matrix or data frame.}
+\item{x}{an object to split, typically a vector, matrix or data frame}
 
-\item{p}{Proportion of observations assigned to the test set.
-Must be between 0 and 1. Default is \code{0.1}.}
+\item{p}{the proportions of the subsets. A single number is the proportion
+assigned to the test set, the remainder going to the training set. A vector
+of length two or more gives the proportion of each subset in turn. The
+values need not sum to 1 and are rescaled if they do not, so ratios such as
+\code{c(6, 2, 2)} can be given directly. Names, where present, are used as subset
+names; otherwise \code{c("train", "test")} and \code{c("train", "validation", "test")}
+are supplied for length two and three.}
 
-\item{logical}{Logical; if \code{TRUE}, a logical index vector is returned instead
-of the split data objects. \code{TRUE} indicates observations belonging to the
-test set.}
+\item{strata}{an optional vector of the same length (or number of rows) as
+\code{x}, giving the strata to sample within. A data frame or list of several
+vectors is reduced to their interaction. Missing values form a stratum of
+their own.}
+
+\item{output}{the value to return, either \code{"data"} (default) for the subsets
+themselves or \code{"group"} for a factor of subset memberships}
 }
 \value{
-If \code{logical = FALSE}, a list with elements:
-\describe{
-\item{train}{Training subset.}
-\item{test}{Test subset.}
-}
+For \code{output = "data"} a named list with one element per subset, in the order
+given by \code{p}, each a subset of \code{x} of the same type.
 
-If \code{logical = TRUE}, a logical vector of length \code{n}.
+For \code{output = "group"} a factor of length \code{n} whose levels are the subset
+names, giving the subset each observation was assigned to.
 }
 \description{
-Splits a vector, matrix or data frame into training and test subsets.
+Splits a vector, matrix or data frame into two or more random subsets, as
+used for training, validation and testing predictive models. The split can be
+stratified, so that the composition of a grouping variable is retained in
+every subset.
 }
 \details{
-Splitting data into training and test subsets is a common strategy for
-evaluating predictive models. The training set is used to fit the model,
-while the test set is used to assess predictive performance on unseen data.
-The function performs random sampling using R's global random number generator.
-To obtain reproducible results, users should call \code{set.seed()} prior to
-invoking this function.
-The function itself does not modify the random number generator state.
+Splitting data into disjoint subsets is a common strategy for evaluating
+predictive models. The training set is used to fit the model, the test set to
+assess predictive performance on unseen data. A three-way split adds a
+validation set for tuning and model selection, keeping the test set untouched
+until the final assessment.
+
+Subset sizes are \code{n * p} rounded by the largest remainder method, so they sum
+to \code{n} exactly and each subset is as close to its requested proportion as
+integer sizes allow. A subset that would remain empty is an error.
+
+Stratified sampling draws within each stratum separately and so reproduces
+the composition of \code{strata} in every subset. It is worth the effort whenever
+a stratum is small enough that an unstratified draw could leave it thinly
+represented, or absent, in one of the subsets: rare classes in a
+classification problem, an unbalanced treatment variable, few observations
+per site or period.
+
+Rounding within a stratum is not independent of the other strata. The
+fractional parts of \code{n * p} repeat across strata, so rounding each stratum on
+its own would hand the leftover observation to the same subset every time and
+bias the smallest subset downwards. The remainders are therefore carried from
+one stratum to the next, and the strata are visited in random order. A stratum
+smaller than the number of subsets is not an error, it simply cannot
+contribute to all of them.
+
+The assignment is drawn from R's global random number generator, whose state
+the function does not modify. Call \code{\link[=set.seed]{set.seed()}} before the function for
+reproducible results.
+
+The subsets are disjoint and exhaustive, so \code{output = "group"} is a complete
+description of the split. It can be stored alongside the data, tabulated, or
+passed to \code{\link[=split]{split()}} to obtain the data subsets later.
 }
 \examples{
 splitTrainTest(iris)
 
-set.seed = 123
+set.seed(123)
 d <- splitTrainTest(iris, p = 0.2)
 
 str(d$train)
 str(d$test)
 
-idx <- splitTrainTest(iris, logical = TRUE)
-table(idx)
+# train, validation and test in a 6:2:2 ratio
+d <- splitTrainTest(iris, p = c(6, 2, 2))
+sapply(d, nrow)
+##      train validation       test
+##         90         30         30
+
+# the same, with the species composition retained in every subset
+d <- splitTrainTest(iris, p = c(6, 2, 2), strata = iris$Species)
+sapply(d, function(z) table(z$Species))
+##            train validation test
+## setosa        30         10   10
+## versicolor    30         10   10
+## virginica     30         10   10
+
+# the memberships instead of the data
+grp <- splitTrainTest(iris, p = c(6, 2, 2), output = "group")
+table(grp)
+
+# any number of subsets, named as you like
+d <- splitTrainTest(1:100, p = c(fit = 0.5, calib = 0.25, holdout = 0.25))
+lengths(d)
+##     fit   calib holdout
+##      50      25      25
 
 }
 \concept{data.split}

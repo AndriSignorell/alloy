@@ -69,7 +69,16 @@ predictors(fitLogit, numeric = TRUE)     # rank drops out
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #> Warning: only 16 distinct bins could be formed instead of the requested 20
 #> Warning: only 19 distinct bins could be formed instead of the requested 20
-plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
-          xlim = "free", ylab = "mean residual")
-#> Error in plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid, xlim = "free",     ylab = "mean residual"): could not find function "plotFacet"
+pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+                  xlim = "free", ylab = "mean residual")
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+#> Warning: "bin" is not a graphical parameter
+#> Warning: "n" is not a graphical parameter
+#> Warning: "se" is not a graphical parameter
+
 ```

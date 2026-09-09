@@ -40,8 +40,8 @@
 #'
 #' # the loop this exists for
 #' bins <- binnedResid(fitLogit, var = predictors(fitLogit))
-#' plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
-#'           xlim = "free", ylab = "mean residual")
+#' pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+#'                   xlim = "free", ylab = "mean residual")
 #'
 #' @export
 predictors <- function(x, numeric = FALSE) {
