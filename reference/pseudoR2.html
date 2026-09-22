@@ -17,7 +17,7 @@ logistic, Poisson or ordinal regression."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.918</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.919</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -103,11 +103,15 @@ the number of estimated parameters</p></dd>
 links only</p></dd>
 
 <dt><code>Efron</code></dt>
-<dd><p>squared correlation between observed and predicted
-values</p></dd>
+<dd><p>one minus the ratio of the residual to the total sum
+of squares of the response, on the scale of the response. Only for an
+identity link does this coincide with the squared correlation between
+observed and fitted values</p></dd>
 
 <dt><code>Tjur</code></dt>
-<dd><p>coefficient of discrimination, binary responses only</p></dd>
+<dd><p>coefficient of discrimination, the mean fitted
+probability of the successes minus that of the failures, binomial
+responses only</p></dd>
 
 <dt><code>AIC</code>, <code>BIC</code></dt>
 <dd><p>information criteria of the fitted model</p></dd>
@@ -127,12 +131,29 @@ where the saturated log-likelihood vanishes.</p>
 <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm.fit</a></code> on the model's own response, prior weights and
 offset. Aggregated responses (<code>cbind(success, failure)</code>), frequency
 weights and offsets are therefore handled correctly, and the original data
-need not be accessible. For the remaining classes the null model is refitted
-with <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></code>, which requires the data of the original
-call to be available.</p>
+need not be accessible. For <code>polr</code> and <code>multinom</code>, the null model
+is refitted on the full model's model frame, preserving its analysis sample,
+weights and offsets. If that frame was not stored, it is rebuilt from the
+call, which does require the original data to be available. For
+<code>vglm</code> the null model is refitted with <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></code>,
+which requires the original data as well.</p>
 <p>Where prior weights are present, the sample size entering Cox-Snell,
 Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
-number of rows.</p>
+number of rows, and McKelvey-Zavoina, Efron and Tjur are computed with the
+weights as case counts.</p>
+<p>For binomial <code>glm</code> and <code>vglm</code> objects all measures refer to the
+single trial (Bernoulli) level. <code><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">logLik</a></code> of an
+aggregated fit
+(<code>cbind(success, failure)</code> or proportions with weights) contains the
+constant \(\sum \log\binom{n_i}{k_i}\), which the
+disaggregated 0/1 fit of the same model lacks. The constant cancels in
+<code>G2</code>, but not in ratios of log-likelihoods, so McFadden, Nagelkerke
+and the like would depend on how the data happen to be stored. Here
+<code>logLik</code>, <code>logLik0</code>, <code>AIC</code> and <code>BIC</code> are therefore
+computed without that constant, with <code>BIC</code> penalized by the number of
+trials, and both representations give identical results. For aggregated
+fits these values consequently differ from <code><a href="https://rdrr.io/r/stats/logLik.html" class="external-link">stats::logLik()</a></code>,
+<code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">stats::AIC()</a></code> and <code><a href="https://rdrr.io/r/stats/AIC.html" class="external-link">stats::BIC()</a></code>.</p>
 <p>For <code>vglm</code> objects the package <span class="pkg">VGAM</span> must be installed and the
 model should have been fitted with <code>model = TRUE</code>, so that the model
 frame can be extracted.</p>
@@ -182,6 +203,24 @@ limited dependent variable models. <em>Journal of Economic Surveys</em>,
 <span class="r-out co"><span class="r-pr">#&gt;</span>       0.8857450       0.9265406       0.8068398       0.8112073      16.0591105 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>             BIC          logLik         logLik0              G2 </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>      20.4563182      -5.0295552     -21.6148666      33.1706228 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># aggregated and disaggregated binomial data give the same result</span></span></span>
+<span class="r-in"><span><span class="va">d.agg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/aggregate.html" class="external-link">aggregate</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">am</span>, n <span class="op">=</span> <span class="fl">1</span><span class="op">)</span> <span class="op">~</span> <span class="va">cyl</span>, data <span class="op">=</span> <span class="va">mtcars</span>, FUN <span class="op">=</span> <span class="va">sum</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitAgg</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">am</span>, <span class="va">n</span> <span class="op">-</span> <span class="va">am</span><span class="op">)</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">d.agg</span>,</span></span>
+<span class="r-in"><span>              family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitInd</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">am</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">cyl</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">mtcars</span>, family <span class="op">=</span> <span class="va">binomial</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span>aggregated <span class="op">=</span> <span class="fu">pseudoR2</span><span class="op">(</span><span class="va">fitAgg</span>, which <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>      single <span class="op">=</span> <span class="fu">pseudoR2</span><span class="op">(</span><span class="va">fitInd</span>, which <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             McFadden McFaddenAdj  CoxSnell Nagelkerke AldrichNelson</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> aggregated 0.2150095  0.07621618 0.2520825  0.3401921     0.2250841</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> single     0.2150095  0.07621618 0.2520825  0.3401921     0.2250841</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>            VeallZimmermann McKelveyZavoina     Efron      Tjur      AIC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> aggregated       0.3916984        0.312241 0.2731479 0.2731479 39.93493</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> single           0.3916984        0.312241 0.2731479 0.2731479 39.93493</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 BIC    logLik   logLik0       G2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> aggregated 44.33214 -16.96746 -21.61487 9.294805</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> single     44.33214 -16.96746 -21.61487 9.294805</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
