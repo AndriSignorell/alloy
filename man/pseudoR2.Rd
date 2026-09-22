@@ -35,9 +35,13 @@ the number of estimated parameters}
 \item{\code{VeallZimmermann}}{correction of Aldrich-Nelson}
 \item{\code{McKelveyZavoina}}{latent variable R-squared, logit and probit
 links only}
-\item{\code{Efron}}{squared correlation between observed and predicted
-values}
-\item{\code{Tjur}}{coefficient of discrimination, binary responses only}
+\item{\code{Efron}}{one minus the ratio of the residual to the total sum
+of squares of the response, on the scale of the response. Only for an
+identity link does this coincide with the squared correlation between
+observed and fitted values}
+\item{\code{Tjur}}{coefficient of discrimination, the mean fitted
+probability of the successes minus that of the failures, binomial
+responses only}
 \item{\code{AIC}, \code{BIC}}{information criteria of the fitted model}
 \item{\code{logLik}, \code{logLik0}}{log-likelihood of the fitted and of
 the null model}
@@ -52,13 +56,31 @@ For \code{glm} objects the null model is refitted through
 \code{\link[stats]{glm.fit}} on the model's own response, prior weights and
 offset. Aggregated responses (\code{cbind(success, failure)}), frequency
 weights and offsets are therefore handled correctly, and the original data
-need not be accessible. For the remaining classes the null model is refitted
-with \code{\link[stats]{update}}, which requires the data of the original
-call to be available.
+need not be accessible. For \code{polr} and \code{multinom}, the null model
+is refitted on the full model's model frame, preserving its analysis sample,
+weights and offsets. If that frame was not stored, it is rebuilt from the
+call, which does require the original data to be available. For
+\code{vglm} the null model is refitted with \code{\link[stats]{update}},
+which requires the original data as well.
 
 Where prior weights are present, the sample size entering Cox-Snell,
 Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
-number of rows.
+number of rows, and McKelvey-Zavoina, Efron and Tjur are computed with the
+weights as case counts.
+
+For binomial \code{glm} and \code{vglm} objects all measures refer to the
+single trial (Bernoulli) level. \code{\link[stats]{logLik}} of an
+aggregated fit
+(\code{cbind(success, failure)} or proportions with weights) contains the
+constant \eqn{\sum \log\binom{n_i}{k_i}}{sum(lchoose(n, k))}, which the
+disaggregated 0/1 fit of the same model lacks. The constant cancels in
+\code{G2}, but not in ratios of log-likelihoods, so McFadden, Nagelkerke
+and the like would depend on how the data happen to be stored. Here
+\code{logLik}, \code{logLik0}, \code{AIC} and \code{BIC} are therefore
+computed without that constant, with \code{BIC} penalized by the number of
+trials, and both representations give identical results. For aggregated
+fits these values consequently differ from \code{stats::logLik()},
+\code{stats::AIC()} and \code{stats::BIC()}.
 
 For \code{vglm} objects the package \pkg{VGAM} must be installed and the
 model should have been fitted with \code{model = TRUE}, so that the model
@@ -72,6 +94,15 @@ pseudoR2(fit)
 
 pseudoR2(fit, which = c("Nagelkerke", "Tjur"))
 pseudoR2(fit, which = "all")
+
+# aggregated and disaggregated binomial data give the same result
+d.agg <- aggregate(cbind(am, n = 1) ~ cyl, data = mtcars, FUN = sum)
+fitAgg <- glm(cbind(am, n - am) ~ factor(cyl), data = d.agg,
+              family = binomial)
+fitInd <- glm(am ~ factor(cyl), data = mtcars, family = binomial)
+
+rbind(aggregated = pseudoR2(fitAgg, which = "all"),
+      single = pseudoR2(fitInd, which = "all"))
 
 }
 \references{
