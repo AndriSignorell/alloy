@@ -9,7 +9,6 @@ coefCI(
   conf.level = 0.95,
   sides = c("two.sided", "left", "right"),
   R = 2000,
-  seed = NULL,
   ...
 )
 }
@@ -21,8 +20,6 @@ coefCI(
 \item{sides}{Type of interval: \code{"two.sided"}, \code{"left"}, or \code{"right"}.}
 
 \item{R}{Number of bootstrap samples.}
-
-\item{seed}{Optional random seed.}
 
 \item{...}{Further arguments (unused).}
 }
@@ -47,7 +44,7 @@ coefCI(fit)
 }
 \seealso{
 Other regression.utils:
-\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=pseudoRSq]{pseudoRSq()}},
 \code{\link[=rSq]{rSq()}},
 \code{\link[=refLevel]{refLevel()}},
 \code{\link[=response]{response()}},

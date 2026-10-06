@@ -23,7 +23,7 @@ options."><meta property="og:image" content="https://andrisignorell.github.io/al
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.918</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,14 +63,14 @@ not 1 or when contrasts have been set globally via
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">refLevel</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">refLevel</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>A fitted model object with a <code>terms</code> attribute and a
 <code>model</code> data frame (e.g. objects of class <code>"lm"</code>,
 <code>"glm"</code>, <code>"lmerMod"</code>, or <code>"glmerMod"</code>).</p></dd>
@@ -85,7 +85,7 @@ no factor predictors.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>The function inspects <code>attr(model.matrix(x), "contrasts")</code> for
+    <p>The function inspects <code>attr(model.matrix(fit), "contrasts")</code> for
 each factor predictor.</p>
 <ul><li><p>If the contrast is stored as a <em>character string</em>
 (e.g. <code>"contr.treatment"</code>), the first level of the factor
@@ -101,7 +101,7 @@ level is identified as the unique row whose entries are all zero
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/contrasts.html" class="external-link">contrasts</a></code>, <code><a href="https://rdrr.io/r/stats/contrast.html" class="external-link">contr.treatment</a></code></p>
 <p>Other regression.utils:
 <code><a href="coefCI.html">coefCI()</a></code>,
-<code><a href="pseudoR2.html">pseudoR2()</a></code>,
+<code><a href="pseudoRSq.html">pseudoRSq()</a></code>,
 <code><a href="rSq.html">rSq()</a></code>,
 <code><a href="response.html">response()</a></code>,
 <code><a href="varImp.html">varImp()</a></code>,

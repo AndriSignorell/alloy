@@ -5,7 +5,7 @@
 \title{Calibration Curve}
 \usage{
 plotCalibration(
-  x,
+  fit,
   newdata = NULL,
   main = NULL,
   xlab = "predicted probability",
@@ -28,7 +28,7 @@ plotCalibration(
 )
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{newdata}{optional data frame for evaluating calibration out of
@@ -57,7 +57,7 @@ points. \code{.useTheme} (default) resolves against the active theme.}
 \item{smooth}{the loess smoother and its band. \code{TRUE} (default)
 draws it with defaults, \code{FALSE}/\code{NA} suppresses it, a named
 list is passed to \code{lines.loess} (e.g.
-\code{list(bandArgs = FALSE)}).}
+\code{list(band = FALSE)}).}
 
 \item{rug}{marks for the individual predictions, events above and
 non-events below the panel. \code{TRUE} (default), \code{FALSE}, or a

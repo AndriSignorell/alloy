@@ -8,7 +8,7 @@
 #' @details
 #' The function standardizes model output across different model classes
 #' (e.g. \code{lm}, \code{glm}, \code{coxph}, \code{gam}, \code{lmer}) using
-#' S3 methods implemented via \code{tmodSummary()}. This enables direct
+#' S3 methods implemented via \code{tModSummary()}. This enables direct
 #' comparison of model coefficients and fit statistics in tabular and
 #' graphical form.
 #'
@@ -29,7 +29,7 @@
 #'   \item \code{terms}: mapping of model terms
 #' }
 #'
-#' @seealso \code{\link{tmodSummary}}
+#' @seealso \code{\link{tModSummary}}
 #'
 #' @examples
 #' # --- Linear models ---
@@ -72,7 +72,7 @@ tMod <- function(..., FUN = NULL, order = NA, verbose = FALSE){
   }
   
   lmod <- list(...)
-  lst  <- lapply(lmod, tmodSummary)
+  lst  <- lapply(lmod, tModSummary)
   
 
   mc <- match.call(expand.dots = FALSE)

@@ -37,7 +37,7 @@
 #' intervals are narrow and the residuals do have power. For the mean
 #' structure use the binned residuals.
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param nSim number of independent randomizations. \code{1} (default)
 #'   returns a vector, larger values a matrix with one column per draw.
@@ -70,9 +70,9 @@
 #' apply(quantileResid(fitLogit, nSim = 20), 2, function(z) shapiro.test(z)$p.value)
 #'
 #' @export
-quantileResid <- function(x, nSim = 1L) {
+quantileResid <- function(fit, nSim = 1L) {
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
 
   if (!is.numeric(nSim) || length(nSim) != 1L || is.na(nSim) ||
       nSim < 1 || nSim != round(nSim))

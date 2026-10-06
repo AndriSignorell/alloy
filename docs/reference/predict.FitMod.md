@@ -86,19 +86,19 @@ predict(
 
   `output = "prob"`
 
-  :   A `data.frame` with one column per class containing predicted
-      probabilities. Column names match the factor levels of the
-      response variable.
+  : A `data.frame` with one column per class containing predicted
+    probabilities. Column names match the factor levels of the response
+    variable.
 
   `output = "class"`
 
-  :   A `data.frame` with a single column `class` (factor) containing
-      the predicted class.
+  : A `data.frame` with a single column `class` (factor) containing the
+    predicted class.
 
   `output = "both"`
 
-  :   The probability columns and the `class` column combined in one
-      `data.frame`.
+  : The probability columns and the `class` column combined in one
+    `data.frame`.
 
 ## Details
 

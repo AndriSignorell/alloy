@@ -1,18 +1,18 @@
 # Predictors of a Fitted Model
 
 Returns the names of the terms on the right hand side of a fitted model.
-The information is in `attr(terms(x), "term.labels")`; this is the same
-thing under a name one can guess.
+The information is in `attr(terms(fit), "term.labels")`; this is the
+same thing under a name one can guess.
 
 ## Usage
 
 ``` r
-predictors(x, numeric = FALSE)
+predictors(fit, numeric = FALSE)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted model - anything with a
   [`terms`](https://rdrr.io/r/stats/terms.html) method, including
@@ -34,7 +34,7 @@ as it was written (`"log(insulin)"`), an interaction as `"a:b"`, and a
 variable used twice appears once per term. That is the right granularity
 for looping over diagnostics, because a diagnostic is per term. For the
 underlying variable names - what a data frame would have to contain -
-use `all.vars(formula(x))[-1]`.
+use `all.vars(formula(fit))[-1]`.
 
 `numeric = TRUE` keeps the terms that are numeric in the model frame.
 Diagnostics of functional form only apply to those: linearity in the
@@ -69,7 +69,7 @@ predictors(fitLogit, numeric = TRUE)     # rank drops out
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #> Warning: only 16 distinct bins could be formed instead of the requested 20
 #> Warning: only 19 distinct bins could be formed instead of the requested 20
-pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+pharos::plotFacet(bins, dim = c(1, 3), FUN = panelBinnedResid,
                   xlim = "free", ylab = "mean residual")
 #> Warning: "bin" is not a graphical parameter
 #> Warning: "n" is not a graphical parameter

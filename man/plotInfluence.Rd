@@ -5,7 +5,7 @@
 \title{Influence Plot for Logistic Models}
 \usage{
 plotInfluence(
-  x,
+  fit,
   main = NULL,
   xlab = "fitted probability",
   ylab = NULL,
@@ -25,7 +25,7 @@ plotInfluence(
 )
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{main}{main title. \code{NULL} (default) derives one from the

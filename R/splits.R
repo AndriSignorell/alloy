@@ -5,7 +5,7 @@
 #' for every node of a fitted \code{rpart} tree.  Leaf nodes are represented
 #' by empty strings.
 #'
-#' @param x A fitted \code{rpart} object.
+#' @param fit A fitted \code{rpart} object.
 #'
 #' @return A character matrix with columns \code{"cutleft"} and
 #'   \code{"cutright"} and one row per node.
@@ -23,12 +23,12 @@
 #'
 #'
 #' @export
-splits <- function(x) {
+splits <- function(fit) {
   
-  if (!inherits(x, "rpart"))
-    stop("'x' must be an rpart object")
+  if (!inherits(fit, "rpart"))
+    stop("'fit' must be an rpart object")
   
-  out <- labels(x, collapse = FALSE)
+  out <- labels(fit, collapse = FALSE)
   # Mark leaf nodes
   is_leaf <- apply(out, 2L, `==`, "<leaf>")
   out[is_leaf] <- ""

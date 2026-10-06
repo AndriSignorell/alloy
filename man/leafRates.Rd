@@ -4,11 +4,11 @@
 \alias{leafRates}
 \title{Misclassification rates per leaf node}
 \usage{
-leafRates(x)
+leafRates(fit)
 }
 \arguments{
-\item{x}{A fitted \code{rpart} classification object (i.e.
-\code{x$method != "anova"}).}
+\item{fit}{A fitted \code{rpart} classification object (i.e.
+\code{fit$method != "anova"}).}
 }
 \value{
 An object of class \code{c("leafRates", "list")} with components:

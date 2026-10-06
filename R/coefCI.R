@@ -8,7 +8,6 @@
 #' @param conf.level Confidence level. Default is \code{0.95}.
 #' @param sides Type of interval: \code{"two.sided"}, \code{"left"}, or \code{"right"}.
 #' @param R Number of bootstrap samples.
-#' @param seed Optional random seed.
 #' @param ... Further arguments (unused).
 #'
 #' @details
@@ -37,7 +36,6 @@ coefCI <- function(fit,
                    conf.level = 0.95,
                    sides = c("two.sided", "left", "right"),
                    R = 2000,
-                   seed = NULL,
                    ...) {
   
   if (!inherits(fit, "lm"))
@@ -53,11 +51,12 @@ coefCI <- function(fit,
   if (sides == "left") alpha <- 2 * alpha
   if (sides == "right") alpha <- 2 * alpha
   
+  # the seed is drawn from R's stream, so that set.seed() controls the bootstrap
   res <- coef_boot_cpp(
     X, y,
     R = R,
     alpha = alpha,
-    seed = ifelse(is.null(seed), -1L, seed)
+    seed = sample.int(.Machine$integer.max, 1L)
   )
   
   rownames(res) <- colnames(X)

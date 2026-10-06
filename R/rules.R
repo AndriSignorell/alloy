@@ -4,10 +4,10 @@
 #' Extracts the decision path rules for selected nodes (or all nodes / leaves
 #' only) of a fitted \code{rpart} tree.
 #'
-#' @param x A fitted \code{rpart} object.
+#' @param fit A fitted \code{rpart} object.
 #' @param node Character or numeric vector of node ids to extract.  If
 #'   \code{NULL} (default) all nodes are returned.
-#' @param leafonly Logical.  If \code{TRUE} only terminal (leaf) nodes are
+#' @param leafOnly Logical.  If \code{TRUE} only terminal (leaf) nodes are
 #'   returned.  Default is \code{FALSE}.
 #'
 #' @return An object of class \code{"rules"}, a list with components
@@ -17,7 +17,7 @@
 #' @examples
 #' r <- rpart::rpart(Species ~ ., data = iris)
 #' rules(r)
-#' rules(r, leafonly = TRUE)
+#' rules(r, leafOnly = TRUE)
 #'
 #' @seealso \code{\link{node}}, \code{\link[rpart]{path.rpart}}
 
@@ -29,15 +29,15 @@
 #'
 #'
 #' @export
-rules <- function(x, node = NULL, leafonly = FALSE) {
+rules <- function(fit, node = NULL, leafOnly = FALSE) {
   
-  if (!inherits(x, "rpart"))
-    stop("'x' must be an rpart object")
+  if (!inherits(fit, "rpart"))
+    stop("'fit' must be an rpart object")
   
-  node <- if (is.null(node)) rownames(x$frame) else as.character(node)
-  frm  <- x$frame[node, ]
+  node <- if (is.null(node)) rownames(fit$frame) else as.character(node)
+  frm  <- fit$frame[node, ]
   
-  if (leafonly)
+  if (leafOnly)
     frm <- frm[frm$var == "<leaf>", ]
   
   if (nrow(frm) == 0L)
@@ -46,9 +46,9 @@ rules <- function(x, node = NULL, leafonly = FALSE) {
   structure(
     list(
       frame    = frm,
-      ylevels  = attr(x, "ylevels"),
-      ds.size  = x$frame[1L, ]$n,
-      path     = rpart::path.rpart(x, nodes = as.numeric(rownames(frm)),
+      ylevels  = attr(fit, "ylevels"),
+      ds.size  = fit$frame[1L, ]$n,
+      path     = rpart::path.rpart(fit, nodes = as.numeric(rownames(frm)),
                                    print.it = FALSE)
     ),
     class = "rules"

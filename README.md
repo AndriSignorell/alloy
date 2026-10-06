@@ -81,8 +81,8 @@ remotes::install_github("AndriSignorell/alloy")
 ### 🔹 Model Evaluation
 
 -   `roc()`, `bestCut()`, `confint.roc()`, `lift()`
--   `pseudoR2()` — McFadden, Cox-Snell, Nagelkerke, Tjur and others
--   `rSq()`, `coefCI()`, `coeffDiffCI()` — with parallel bootstrap
+-   `pseudoRSq()` — McFadden, Cox-Snell, Nagelkerke, Tjur and others
+-   `rSq()`, `coefCI()`, `coefDiffCI()` — with parallel bootstrap
 -   `vif()` — VIF and generalised VIF
 -   `varImp()`, `plot.varImp()`
 -   `splitTrainTest()`
@@ -95,7 +95,7 @@ remotes::install_github("AndriSignorell/alloy")
 ### 🔹 Model Comparison
 
 -   `tMod()` — several models side by side, in a table or a plot
--   `tmodSummary()` — the S3 generic behind it
+-   `tModSummary()` — the S3 generic behind it
 
 ### 🔹 Datasets
 

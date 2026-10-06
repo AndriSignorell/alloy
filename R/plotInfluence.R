@@ -52,7 +52,7 @@
 #' not, and the per-observation version understates the influence of a
 #' whole pattern.
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param metric the change statistic on the vertical axis,
 #'   \code{"chisq"} (default) or \code{"deviance"}. See Details.
@@ -107,7 +107,7 @@
 #' head(inf[order(-inf$cook), ])
 #'
 #' @export
-plotInfluence <- function(x,
+plotInfluence <- function(fit,
                           main = NULL,
                           xlab = "fitted probability",
                           ylab = NULL,
@@ -127,7 +127,7 @@ plotInfluence <- function(x,
 
   metric <- match.arg(metric)
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
   fit   <- parts$fit
 
   h  <- stats::hatvalues(fit)

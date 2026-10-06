@@ -10,7 +10,6 @@ rSq(
   sides = c("two.sided", "left", "right"),
   adjusted = TRUE,
   R = 2000,
-  seed = NULL,
   ...
 )
 }
@@ -27,10 +26,8 @@ lies, must be one of \code{"two.sided"} (default), \code{"left"} or
 \item{adjusted}{logical; if \code{TRUE} (default) the adjusted R-squared is
 reported, otherwise the ordinary one.}
 
-\item{R}{number of bootstrap replicates, defaults to 2000.}
-
-\item{seed}{integer seed for the bootstrap. If \code{NULL} (default) the
-seed is drawn from R's random number stream, so that \code{set.seed()}
+\item{R}{number of bootstrap replicates, defaults to 2000. The bootstrap
+draws its seed from R's random number stream, so that \code{set.seed()}
 governs the result.}
 
 \item{...}{further arguments, currently unused.}
@@ -91,9 +88,10 @@ rSq(fit)
 rSq(fit, adjusted = FALSE)
 ## [1] 0.8268
 
-rSq(fit, conf.level = 0.95, seed = 123)
+set.seed(123)
+rSq(fit, conf.level = 0.95)
 
-rSq(fit, conf.level = 0.95, sides = "left", R = 1000, seed = 123)
+rSq(fit, conf.level = 0.95, sides = "left", R = 1000)
 
 }
 \seealso{
@@ -101,7 +99,7 @@ rSq(fit, conf.level = 0.95, sides = "left", R = 1000, seed = 123)
 
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
-\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=pseudoRSq]{pseudoRSq()}},
 \code{\link[=refLevel]{refLevel()}},
 \code{\link[=response]{response()}},
 \code{\link[=varImp]{varImp()}},

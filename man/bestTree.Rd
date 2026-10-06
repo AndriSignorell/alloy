@@ -4,10 +4,10 @@
 \alias{bestTree}
 \title{Best tree size using the 1-SE rule}
 \usage{
-bestTree(x)
+bestTree(fit)
 }
 \arguments{
-\item{x}{A fitted \code{rpart} object.}
+\item{fit}{A fitted \code{rpart} object.}
 }
 \value{
 A list with components:

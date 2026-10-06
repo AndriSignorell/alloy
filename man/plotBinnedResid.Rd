@@ -5,7 +5,7 @@
 \title{Binned Residual Plot}
 \usage{
 plotBinnedResid(
-  x,
+  fit,
   var = NULL,
   main = NULL,
   xlab = NULL,
@@ -28,7 +28,7 @@ plotBinnedResid(
 )
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{var}{the binning variable. \code{NULL} (default) bins by the
@@ -123,10 +123,10 @@ plotBinnedResid(fitLogit, var = "gre")
 vars <- predictors(fitLogit)
 bins <- binnedResid(fitLogit, var = vars)
 pharos::plotFacet(
-  bins, dim = c(1, length(vars)), panelFun = panelBinnedResid,
+  bins, dim = c(1, length(vars)), FUN = panelBinnedResid,
   xlim = lapply(bins, function(b) range(b$x)),
   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-  stripLabels = vars, ylab = "mean residual")
+  strip = list(labels = vars), ylab = "mean residual")
   
   
 }

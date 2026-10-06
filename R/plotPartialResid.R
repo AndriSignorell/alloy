@@ -24,10 +24,10 @@
 #' suspect term and compare. If the smoother bends but the likelihood
 #' ratio test does not, the bend is noise.
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param term name of the predictor. \code{NULL} (default) uses the first
-#'   continuous term in the model; \code{\link{predictors}(x, numeric =
+#'   continuous term in the model; \code{\link{predictors}(fit, numeric =
 #'   TRUE)} lists the ones this plot can be drawn for.
 #' @param main main title. \code{NULL} (default) derives one from
 #'   \code{term}; \code{""}, \code{NA} or \code{FALSE} suppress it.
@@ -68,7 +68,7 @@
 #' anova(fitLogit, fitSpline, test = "LRT")
 #'
 #' @export
-plotPartialResid <- function(x,
+plotPartialResid <- function(fit,
                              term = NULL,
                              main = NULL,
                              xlab = NULL,
@@ -86,7 +86,7 @@ plotPartialResid <- function(x,
                              stamp = .useTheme,
                              ...) {
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
   fit   <- parts$fit
 
   term <- .resolveTerm(fit, term)

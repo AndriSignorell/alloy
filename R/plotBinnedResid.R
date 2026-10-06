@@ -34,7 +34,7 @@
 #'     to estimate a variance.}
 #' }
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param var the binning variable. \code{NULL} (default) bins by the
 #'   fitted probabilities; a character string names a variable in the
@@ -93,14 +93,14 @@
 #' vars <- predictors(fitLogit)
 #' bins <- binnedResid(fitLogit, var = vars)
 #' pharos::plotFacet(
-#'   bins, dim = c(1, length(vars)), panelFun = panelBinnedResid,
+#'   bins, dim = c(1, length(vars)), FUN = panelBinnedResid,
 #'   xlim = lapply(bins, function(b) range(b$x)),
 #'   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-#'   stripLabels = vars, ylab = "mean residual")
+#'   strip = list(labels = vars), ylab = "mean residual")
 #'   
 #'   
 #' @export
-plotBinnedResid <- function(x,
+plotBinnedResid <- function(fit,
                             var = NULL,
                             main = NULL,
                             xlab = NULL,
@@ -126,7 +126,7 @@ plotBinnedResid <- function(x,
   # the arithmetic lives in binnedResid(); this function is the drawing of
   # it, and the two must not be able to drift apart
   tab <- binnedResid(
-    x,
+    fit,
     var        = if (is.character(var)) var else eval.parent(mc$var),
     nBins      = nBins,
     conf.level = conf.level,

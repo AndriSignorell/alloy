@@ -20,7 +20,7 @@
 #' @importFrom utils getFromNamespace
 #'             
 #' @importFrom graphics hist par
-#' @importFrom DescToolsX brierScore cStat ordAssocs conf
+#' @importFrom DescToolsX brierScore cStat ordAssocs confusion
 #' @importFrom pharos fm style strAlign plotDot addOpacity boxedText fade pal getTheme .useTheme .resolveTitle .withGraphicsState .applyParFromDots .marTop .drawGrid band .drawBox plotQQ plotBubble abcCoords plotFacet
 #' @importFrom bedrock setNamesX unwhich isDichotomous appendX nDec checkConfLevel callIf
 #' 

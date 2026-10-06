@@ -40,7 +40,7 @@
       call         = x$call,
       nobs         = nrow(x$fitted.values),
       na.action    = if (is.null(x$na.action)) 0L else length(x$na.action),
-      PseudoR2     = pseudoR2(x, which = "all"),
+      PseudoR2     = pseudoRSq(x, which = "all"),
       response     = c(attr(resp, "response"), levels(resp)[1L]),
       conf.level   = conf.level,
       results      = "Coefficients"

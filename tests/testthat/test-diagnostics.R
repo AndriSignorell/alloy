@@ -250,7 +250,7 @@ test_that("in-sample calibration is perfect by construction", {
   # probabilities rather than a vector.
   raw <- fit
   class(raw) <- setdiff(class(raw), "FitMod")
-  expect_equal(cal$brier, brierScore(as.numeric(raw$y), fitted(raw)))
+  expect_equal(cal$brier, brierScore(fitted(raw), as.numeric(raw$y)))
 })
 
 

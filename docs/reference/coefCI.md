@@ -11,7 +11,6 @@ coefCI(
   conf.level = 0.95,
   sides = c("two.sided", "left", "right"),
   R = 2000,
-  seed = NULL,
   ...
 )
 ```
@@ -34,10 +33,6 @@ coefCI(
 
   Number of bootstrap samples.
 
-- seed:
-
-  Optional random seed.
-
 - ...:
 
   Further arguments (unused).
@@ -57,7 +52,7 @@ Confidence intervals are based on empirical quantiles.
 ## See also
 
 Other regression.utils:
-[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md),
 [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
 [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
 [`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
@@ -70,7 +65,7 @@ Other regression.utils:
 fit <- lm(mpg ~ wt + hp, data = mtcars)
 coefCI(fit)
 #>                     est         lci         uci
-#> (Intercept) 37.22727012 33.00397590 41.34911239
-#> wt          -3.87783074 -5.30145445 -2.49729823
-#> hp          -0.03177295 -0.05075428 -0.01993615
+#> (Intercept) 37.22727012 32.96484326 41.52749546
+#> wt          -3.87783074 -5.36771193 -2.46816651
+#> hp          -0.03177295 -0.04879222 -0.02009276
 ```

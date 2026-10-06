@@ -4,10 +4,10 @@
 \alias{quantileResid}
 \title{Randomized Quantile Residuals}
 \usage{
-quantileResid(x, nSim = 1L)
+quantileResid(fit, nSim = 1L)
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{nSim}{number of independent randomizations. \code{1} (default)

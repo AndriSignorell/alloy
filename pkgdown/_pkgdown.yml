@@ -66,10 +66,10 @@ reference:
   desc: |
     Goodness-of-fit measures, coefficient intervals, collinearity, and variable importance.
   contents:
-  - pseudoR2
+  - pseudoRSq
   - rSq
   - coefCI
-  - coeffDiffCI
+  - coefDiffCI
   - vif
   - varImp
   - plot.varImp
@@ -89,7 +89,7 @@ reference:
     Several fitted models side by side, in a table or a plot.
   contents:
   - tMod
-  - tmodSummary
+  - tModSummary
 - title: Data Splitting & Utilities
   desc: |
     Training and test sets, and methods filling gaps in other packages.

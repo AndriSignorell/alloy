@@ -22,7 +22,7 @@
 #' @param box.palette Character or list.  Default \code{"auto"} uses the
 #'   package palette.
 #' @param shadow.col Colour of node shadows.  Default \code{0} (none).
-#' @param node.labels Logical.  If \code{TRUE} (default), node ids are
+#' @param nodeLabels Logical.  If \code{TRUE} (default), node ids are
 #'   printed above each box.
 #' @param ... Further arguments passed to \code{rpart.plot}.
 #'
@@ -51,7 +51,7 @@ plot.rpart <- function(x      = stop("no 'x' arg"),
                        snip             = FALSE,
                        box.palette      = "auto",
                        shadow.col       = 0,
-                       node.labels      = TRUE,
+                       nodeLabels      = TRUE,
                        ...) {
 
   if (identical(box.palette, "auto"))
@@ -77,7 +77,7 @@ plot.rpart <- function(x      = stop("no 'x' arg"),
     ...
   )
 
-  if (node.labels) {
+  if (nodeLabels) {
     oldpar <- par(xpd = TRUE)
     on.exit(par(oldpar), add = TRUE)
     boxedText(

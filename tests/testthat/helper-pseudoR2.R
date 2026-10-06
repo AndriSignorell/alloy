@@ -1,4 +1,4 @@
-# Fixtures for the pseudoR2 tests
+# Fixtures for the pseudoRSq tests
 #
 # One grouped binomial data set, deterministic, with the situations that have
 # historically broken aggregation invariance: cells of very different size, a

@@ -56,10 +56,10 @@ bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #> Warning: only 19 distinct bins could be formed instead of the requested 20
 vars <- predictors(fitLogit)
 
-pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+pharos::plotFacet(bins, dim = c(1, 3), FUN = panelBinnedResid,
                   xlim = lapply(bins, function(b) range(b$x)),
                   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-                  stripLabels = vars, ylab = "mean residual")
+                  strip = list(labels = vars), ylab = "mean residual")
 #> Warning: "bin" is not a graphical parameter
 #> Warning: "n" is not a graphical parameter
 #> Warning: "se" is not a graphical parameter

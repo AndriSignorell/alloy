@@ -28,7 +28,7 @@
 #'     estimate a variance.}
 #' }
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param var the binning variable. \code{NULL} (default) bins by the
 #'   fitted probabilities; a character \emph{vector} names variables in the
@@ -81,7 +81,7 @@
 #' sort(sapply(bins, attr, "outside"), decreasing = TRUE)
 #'
 #' @export
-binnedResid <- function(x,
+binnedResid <- function(fit,
                         var = NULL,
                         nBins = NULL,
                         conf.level = 0.95,
@@ -90,7 +90,7 @@ binnedResid <- function(x,
   method     <- match.arg(method)
   conf.level <- checkConfLevel(conf.level)
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
 
   label <- if (is.character(var)) var else deparse1(substitute(var))
 
@@ -98,7 +98,7 @@ binnedResid <- function(x,
   if (is.character(var) && length(var) > 1L)
     return(stats::setNames(
       lapply(var, function(v)
-        binnedResid(x, var = v, nBins = nBins, conf.level = conf.level,
+        binnedResid(fit, var = v, nBins = nBins, conf.level = conf.level,
                     method = method)),
       var))
 
@@ -168,10 +168,10 @@ binnedResid <- function(x,
 #' bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #' vars <- predictors(fitLogit)
 #' 
-#' pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+#' pharos::plotFacet(bins, dim = c(1, 3), FUN = panelBinnedResid,
 #'                   xlim = lapply(bins, function(b) range(b$x)),
 #'                   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-#'                   stripLabels = vars, ylab = "mean residual")
+#'                   strip = list(labels = vars), ylab = "mean residual")
 #'
 #' @export
 panelBinnedResid <- function(x, y, lci, uci, col, pch = 16,

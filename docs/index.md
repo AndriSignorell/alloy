@@ -1,7 +1,6 @@
 # 📦 alloy
 
-**Title:** Unified Modeling Framework for Regression and
-Classification  
+**Title:** Unified Modeling Framework for Regression and Classification\
 **License:** GPL (≥ 2)
 
 ## 🧩 Overview
@@ -99,11 +98,11 @@ dispatches to more than thirty fitting functions:
   [`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
   [`confint.roc()`](https://andrisignorell.github.io/alloy/reference/confint.roc.md),
   [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
-- [`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md)
+- [`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md)
   — McFadden, Cox-Snell, Nagelkerke, Tjur and others
 - [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
   [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
-  [`coeffDiffCI()`](https://andrisignorell.github.io/alloy/reference/coeffDiffCI.md)
+  [`coefDiffCI()`](https://andrisignorell.github.io/alloy/reference/coefDiffCI.md)
   — with parallel bootstrap
 - [`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md) —
   VIF and generalised VIF
@@ -126,7 +125,7 @@ dispatches to more than thirty fitting functions:
 
 - [`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md) —
   several models side by side, in a table or a plot
-- [`tmodSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
+- [`tModSummary()`](https://andrisignorell.github.io/alloy/reference/tModSummary.md)
   — the S3 generic behind it
 
 ### 🔹 Datasets

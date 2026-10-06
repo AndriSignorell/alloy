@@ -33,7 +33,7 @@
 #' which a binary response does not have; read it as an indication of
 #' where the data are thin, not as a simultaneous confidence region.
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param newdata optional data frame for evaluating calibration out of
 #'   sample. \code{NULL} (default) uses the training data.
@@ -53,7 +53,7 @@
 #' @param smooth the loess smoother and its band. \code{TRUE} (default)
 #'   draws it with defaults, \code{FALSE}/\code{NA} suppresses it, a named
 #'   list is passed to \code{lines.loess} (e.g.
-#'   \code{list(bandArgs = FALSE)}).
+#'   \code{list(band = FALSE)}).
 #' @param rug marks for the individual predictions, events above and
 #'   non-events below the panel. \code{TRUE} (default), \code{FALSE}, or a
 #'   named list passed to \code{rug}.
@@ -98,7 +98,7 @@
 #' plotCalibration(fitTrain, newdata = Admit[-idx, ])
 #'
 #' @export
-plotCalibration <- function(x,
+plotCalibration <- function(fit,
                             newdata = NULL,
                             main = NULL,
                             xlab = "predicted probability",
@@ -121,7 +121,7 @@ plotCalibration <- function(x,
 
   conf.level <- checkConfLevel(conf.level)
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
 
   if (any(parts$m != 1))
     stop("calibration is defined for binary observations; ",
@@ -150,8 +150,8 @@ plotCalibration <- function(x,
   slope <- unname(stats::coef(
     stats::glm(y ~ eta, family = stats::binomial))[2L])
 
-  brier       <- brierScore(y, p)
-  brierScaled <- brierScore(y, p, scaled = TRUE)
+  brier       <- brierScore(p, y)
+  brierScaled <- brierScore(p, y, scaled = TRUE)
 
   # --- binned observed proportions --------------------------------------
   if (is.null(nBins)) nBins <- 10L
@@ -203,7 +203,7 @@ plotCalibration <- function(x,
       callIf(
         graphics::lines, smooth,
         defaults = list(x = lo, col = th$twin[1L],
-                        bandArgs = list(conf.level = conf.level))
+                        band = list(conf.level = conf.level))
       )
     }
 

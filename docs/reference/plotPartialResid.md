@@ -9,7 +9,7 @@ that assumption term by term.
 
 ``` r
 plotPartialResid(
-  x,
+  fit,
   term = NULL,
   main = NULL,
   xlab = NULL,
@@ -31,7 +31,7 @@ plotPartialResid(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial
@@ -41,7 +41,7 @@ plotPartialResid(
 
   name of the predictor. `NULL` (default) uses the first continuous term
   in the model;
-  [`predictors`](https://andrisignorell.github.io/alloy/reference/predictors.md)`(x, numeric = TRUE)`
+  [`predictors`](https://andrisignorell.github.io/alloy/reference/predictors.md)`(fit, numeric = TRUE)`
   lists the ones this plot can be drawn for.
 
 - main:

@@ -4,8 +4,8 @@
 #' Computes the number of correctly and incorrectly classified observations
 #' in each terminal (leaf) node of a classification tree.
 #'
-#' @param x A fitted \code{rpart} classification object (i.e.
-#'   \code{x$method != "anova"}).
+#' @param fit A fitted \code{rpart} classification object (i.e.
+#'   \code{fit$method != "anova"}).
 #'
 #' @return An object of class \code{c("leafRates", "list")} with components:
 #'   \describe{
@@ -29,16 +29,16 @@
 #'
 #'
 #' @export
-leafRates <- function(x) {
+leafRates <- function(fit) {
   
-  if (!inherits(x, "rpart"))
-    stop("'x' must be an rpart object")
-  if (x$method == "anova") {
+  if (!inherits(fit, "rpart"))
+    stop("'fit' must be an rpart object")
+  if (fit$method == "anova") {
     warning("leafRates is not available for regression trees.")
     return(NA_real_)
   }
   
-  xx <- x$frame$yval2[x$frame$var == "<leaf>", ]
+  xx <- fit$frame$yval2[fit$frame$var == "<leaf>", ]
   
   if (is.matrix(xx)) {
     z        <- matrix(0L, nrow(xx), 2L)
@@ -50,7 +50,7 @@ leafRates <- function(x) {
   }
   
   colnames(z) <- c("right", "wrong")
-  rownames(z) <- rownames(x$frame[x$frame$var == "<leaf>", ])
+  rownames(z) <- rownames(fit$frame[fit$frame$var == "<leaf>", ])
   
   structure(
     list(

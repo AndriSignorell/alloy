@@ -33,7 +33,7 @@ the return value.
 
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
-\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=pseudoRSq]{pseudoRSq()}},
 \code{\link[=rSq]{rSq()}},
 \code{\link[=refLevel]{refLevel()}},
 \code{\link[=varImp]{varImp()}},

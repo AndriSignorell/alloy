@@ -5,7 +5,7 @@
 #' of a fitted \code{rpart} tree, including split details, class counts,
 #' and probabilities.
 #'
-#' @param x A fitted \code{rpart} object (must have been fitted with
+#' @param fit A fitted \code{rpart} object (must have been fitted with
 #'   \code{model = TRUE} and \code{y = TRUE}).
 #' @param node Character or numeric vector of node ids.  If \code{NULL}
 #'   (default) all nodes are returned.
@@ -37,15 +37,15 @@
 #'
 #'
 #' @export
-node <- function(x, node = NULL, type = c("all", "split", "leaf"),
+node <- function(fit, node = NULL, type = c("all", "split", "leaf"),
                  digits = 3L) {
   
-  if (!inherits(x, "rpart"))
-    stop("'x' must be an rpart object")
+  if (!inherits(fit, "rpart"))
+    stop("'fit' must be an rpart object")
   
   type   <- match.arg(type)
-  ff     <- x$frame
-  ylevel <- attr(x, "ylevels")
+  ff     <- fit$frame
+  ylevel <- attr(fit, "ylevels")
   id     <- as.integer(rownames(ff))
   rows   <- seq_along(id)
   is.leaf <- ff$var == "<leaf>"
@@ -55,17 +55,17 @@ node <- function(x, node = NULL, type = c("all", "split", "leaf"),
   cuts <- character(0L)
   sname <- NULL
   if (!all(is.leaf)) {
-    sname <- rownames(x$splits)
-    cuts  <- character(nrow(x$splits))
-    temp  <- x$splits[, 2L]
+    sname <- rownames(fit$splits)
+    cuts  <- character(nrow(fit$splits))
+    temp  <- fit$splits[, 2L]
     for (i in seq_along(cuts)) {
       cuts[i] <- if (temp[i] == -1L)
-        paste("<", format(signif(x$splits[i, 4L], digits)))
+        paste("<", format(signif(fit$splits[i, 4L], digits)))
       else if (temp[i] == 1L)
-        paste("<", format(signif(x$splits[i, 4L], digits)))
+        paste("<", format(signif(fit$splits[i, 4L], digits)))
       else
         paste("splits as ",
-              paste(c("L", "-", "R")[x$csplit[x$splits[i, 4L], seq_len(temp[i])]],
+              paste(c("L", "-", "R")[fit$csplit[fit$splits[i, 4L], seq_len(temp[i])]],
                     collapse = "", sep = ""),
               collapse = "")
     }
@@ -79,7 +79,7 @@ node <- function(x, node = NULL, type = c("all", "split", "leaf"),
   tmp <- if (is.null(ff$yval2)) ff$yval[rows]
   else                    ff$yval2[rows, , drop = FALSE]
   tmp    <- unname(tmp)
-  tprint <- x$functions$summary(tmp, ff$dev[rows], ff$wt[rows], ylevel, digits)
+  tprint <- fit$functions$summary(tmp, ff$dev[rows], ff$wt[rows], ylevel, digits)
   nclass <- if (is.matrix(tmp)) (ncol(tmp) - 2L) / 2L else 0L
   
   # Determine which nodes to include
@@ -123,8 +123,8 @@ node <- function(x, node = NULL, type = c("all", "split", "leaf"),
       nlst[[k]]$primarysplits <- data.frame(
         split     = sname[j],
         direction = temp_j,
-        improve   = x$splits[j, 3L],
-        missing   = nn - x$splits[j, 1L],
+        improve   = fit$splits[j, 3L],
+        missing   = nn - fit$splits[j, 1L],
         stringsAsFactors = FALSE
       )
       
@@ -136,9 +136,9 @@ node <- function(x, node = NULL, type = c("all", "split", "leaf"),
         nlst[[k]]$surrogatesplits <- data.frame(
           split     = sname[j2],
           direction = temp_j2,
-          agree     = x$splits[j2, 3L],
-          adj       = x$splits[j2, 5L],
-          n_split   = x$splits[j2, 1L],
+          agree     = fit$splits[j2, 3L],
+          adj       = fit$splits[j2, 5L],
+          n_split   = fit$splits[j2, 1L],
           stringsAsFactors = FALSE
         )
       }

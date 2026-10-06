@@ -11,12 +11,12 @@ when contrasts have been set globally via
 ## Usage
 
 ``` r
-refLevel(x)
+refLevel(fit)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   A fitted model object with a `terms` attribute and a `model` data
   frame (e.g. objects of class `"lm"`, `"glm"`, `"lmerMod"`, or
@@ -31,7 +31,7 @@ predictors.
 
 ## Details
 
-The function inspects `attr(model.matrix(x), "contrasts")` for each
+The function inspects `attr(model.matrix(fit), "contrasts")` for each
 factor predictor.
 
 - If the contrast is stored as a *character string* (e.g.
@@ -52,7 +52,7 @@ Contrasts other than treatment contrasts (e.g. `contr.sum`,
 
 Other regression.utils:
 [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
-[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md),
 [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
 [`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
 [`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),

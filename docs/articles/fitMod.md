@@ -326,7 +326,7 @@ head(predict(fitLogit))
 #> 4 0.8216154 0.1783846
 #> 5 0.8816461 0.1183539
 #> 6 0.6300301 0.3699699
-pseudoR2(fitLogit)
+pseudoRSq(fitLogit)
 #>   McFadden 
 #> 0.08292194
 ```
@@ -706,7 +706,7 @@ is specified in the formula using `lme4` notation: `(1 | group)` for a
 random intercept, `(1 + x | group)` for random intercept and slope.
 
 [UCLA reference - linear mixed
-models](https://stats.oarc.ucla.edu/r/dae/linear-mixed-effects-models-using-r/)  
+models](https://stats.oarc.ucla.edu/r/dae/linear-mixed-effects-models-using-r/)\
 [UCLA reference - mixed logistic
 regression](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
 

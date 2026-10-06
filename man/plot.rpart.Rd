@@ -21,7 +21,7 @@
   snip = FALSE,
   box.palette = "auto",
   shadow.col = 0,
-  node.labels = TRUE,
+  nodeLabels = TRUE,
   ...
 )
 }
@@ -59,7 +59,7 @@ package palette.}
 
 \item{shadow.col}{Colour of node shadows.  Default \code{0} (none).}
 
-\item{node.labels}{Logical.  If \code{TRUE} (default), node ids are
+\item{nodeLabels}{Logical.  If \code{TRUE} (default), node ids are
 printed above each box.}
 
 \item{...}{Further arguments passed to \code{rpart.plot}.}

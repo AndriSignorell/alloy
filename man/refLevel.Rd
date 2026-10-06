@@ -4,10 +4,10 @@
 \alias{refLevel}
 \title{Reference level of factor predictors in a model}
 \usage{
-refLevel(x)
+refLevel(fit)
 }
 \arguments{
-\item{x}{A fitted model object with a \code{terms} attribute and a
+\item{fit}{A fitted model object with a \code{terms} attribute and a
 \code{model} data frame (e.g. objects of class \code{"lm"},
 \code{"glm"}, \code{"lmerMod"}, or \code{"glmerMod"}).}
 }
@@ -26,7 +26,7 @@ not 1 or when contrasts have been set globally via
 \code{\link[base]{options}}.
 }
 \details{
-The function inspects \code{attr(model.matrix(x), "contrasts")} for
+The function inspects \code{attr(model.matrix(fit), "contrasts")} for
 each factor predictor.
 
 \itemize{
@@ -61,7 +61,7 @@ refLevel(m2)
 
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
-\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=pseudoRSq]{pseudoRSq()}},
 \code{\link[=rSq]{rSq()}},
 \code{\link[=response]{response()}},
 \code{\link[=varImp]{varImp()}},

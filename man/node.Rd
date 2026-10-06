@@ -4,10 +4,10 @@
 \alias{node}
 \title{Structured node information for an rpart tree}
 \usage{
-node(x, node = NULL, type = c("all", "split", "leaf"), digits = 3L)
+node(fit, node = NULL, type = c("all", "split", "leaf"), digits = 3L)
 }
 \arguments{
-\item{x}{A fitted \code{rpart} object (must have been fitted with
+\item{fit}{A fitted \code{rpart} object (must have been fitted with
 \code{model = TRUE} and \code{y = TRUE}).}
 
 \item{node}{Character or numeric vector of node ids.  If \code{NULL}

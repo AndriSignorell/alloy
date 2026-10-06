@@ -39,7 +39,7 @@ character string, or `NA_character_` if it cannot be determined.
 
 Other regression.utils:
 [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
-[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md),
 [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
 [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
 [`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),

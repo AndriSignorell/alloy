@@ -7,7 +7,7 @@ a 0–100 range.
 ## Usage
 
 ``` r
-varImp(x, scale = c("max", "sum", "none"), sort = TRUE, ...)
+varImp(x, scale = c("max", "sum", "none"), sorted = TRUE, ...)
 ```
 
 ## Arguments
@@ -25,7 +25,7 @@ varImp(x, scale = c("max", "sum", "none"), sort = TRUE, ...)
   (scores sum to 100, interpretable as percentage share), or `"none"`
   (raw scores as returned by the underlying method).
 
-- sort:
+- sorted:
 
   Logical. If `TRUE` (default), rows are sorted in descending order of
   importance.
@@ -52,7 +52,7 @@ A `data.frame` of class `c("varImp", "data.frame")` with columns:
 
 Other regression.utils:
 [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
-[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md),
 [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md),
 [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
 [`response()`](https://andrisignorell.github.io/alloy/reference/response.md),

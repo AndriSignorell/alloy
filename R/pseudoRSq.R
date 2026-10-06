@@ -98,11 +98,11 @@
 #' @examples
 #' fit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
 #'
-#' pseudoR2(fit)
+#' pseudoRSq(fit)
 #' ## [1] 0.7178751
 #'
-#' pseudoR2(fit, which = c("Nagelkerke", "Tjur"))
-#' pseudoR2(fit, which = "all")
+#' pseudoRSq(fit, which = c("Nagelkerke", "Tjur"))
+#' pseudoRSq(fit, which = "all")
 #'
 #' # aggregated and disaggregated binomial data give the same result
 #' d.agg <- aggregate(cbind(am, n = 1) ~ cyl, data = mtcars, FUN = sum)
@@ -110,15 +110,15 @@
 #'               family = binomial)
 #' fitInd <- glm(am ~ factor(cyl), data = mtcars, family = binomial)
 #'
-#' rbind(aggregated = pseudoR2(fitAgg, which = "all"),
-#'       single = pseudoR2(fitInd, which = "all"))
+#' rbind(aggregated = pseudoRSq(fitAgg, which = "all"),
+#'       single = pseudoRSq(fitInd, which = "all"))
 #'
 #' @family regression.utils
 #' @concept model-evaluation
 #' @concept goodness-of-fit
 #'
 #' @export
-pseudoR2 <- function(fit, which = "McFadden") {
+pseudoRSq <- function(fit, which = "McFadden") {
 
   all <- identical(which, "all")
 

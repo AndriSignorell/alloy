@@ -21,7 +21,7 @@ can be acted upon - direct marketing, fraud triage, churn prevention."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.918</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,7 @@ can be acted upon - direct marketing, fraud triage, churn prevention.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lift</span><span class="op">(</span><span class="va">x</span>, resp <span class="op">=</span> <span class="cn">NULL</span>, nBins <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lift</span><span class="op">(</span><span class="va">x</span>, ref <span class="op">=</span> <span class="cn">NULL</span>, nBins <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># S3 method for class 'Lift'</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">x</span>, digits <span class="op">=</span> <span class="fl">3</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
@@ -74,10 +74,10 @@ can be acted upon - direct marketing, fraud triage, churn prevention.</p>
 <dd><p>Either a fitted binary classification model of class
 <code>"FitMod"</code> (in which case predicted probabilities and the response
 are extracted automatically), or a numeric vector of predicted
-probabilities / scores when <code>resp</code> is supplied.</p></dd>
+probabilities / scores when <code>ref</code> is supplied.</p></dd>
 
 
-<dt id="arg-resp">resp<a class="anchor" aria-label="anchor" href="#arg-resp"></a></dt>
+<dt id="arg-ref">ref<a class="anchor" aria-label="anchor" href="#arg-ref"></a></dt>
 <dd><p>Optional factor or binary vector of true class labels.  If
 <code>NULL</code> (default), <code>x</code> must be a <code>"FitMod"</code> object and
 the response is extracted via <code><a href="response.html">response</a></code>.</p></dd>
@@ -140,7 +140,7 @@ group and the columns:</p>
 a <code>"FitMod"</code> object - the positive class is therefore the second
 factor level of the response.  For models with non-standard probability
 output, supply the predictor vector explicitly via <code>x</code> and
-<code>resp</code>.</p>
+<code>ref</code>.</p>
 <p>Cases are ranked by decreasing score and cut into <code>nBins</code> groups of
 equal size.  Within group \(i\), lift is the hit rate divided by the
 overall base rate; cumulative lift uses the pooled hit rate over groups
@@ -192,7 +192,7 @@ probabilities are systematically biased.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Supply predictor and response directly</span></span></span>
 <span class="r-in"><span><span class="va">p</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitLogit</span><span class="op">)</span><span class="op">[</span>, <span class="fl">2</span><span class="op">]</span></span></span>
-<span class="r-in"><span><span class="fu">lift</span><span class="op">(</span><span class="va">p</span>, resp <span class="op">=</span> <span class="va">Admit</span><span class="op">$</span><span class="va">admit</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">lift</span><span class="op">(</span><span class="va">p</span>, ref <span class="op">=</span> <span class="va">Admit</span><span class="op">$</span><span class="va">admit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Lift table (positive class: 1, base rate: 0.318)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

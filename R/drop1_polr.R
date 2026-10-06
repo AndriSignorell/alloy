@@ -261,7 +261,7 @@
       call         = x$call,
       nobs         = nobs(x),
       na.action    = if (is.null(x$na.action)) 0L else length(x$na.action),
-      PseudoR2     = pseudoR2(x, which = "all"),
+      PseudoR2     = pseudoRSq(x, which = "all"),
       conf.level   = conf.level,
       output       = output,
       results      = if (output == "or") "Odds Ratios" else "Coefficients"

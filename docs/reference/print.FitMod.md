@@ -48,37 +48,37 @@ print(
 
   `"coef"`
 
-  :   Raw coefficients (default for `lm`, `glm`, `lmrob`, `polr`,
-      parametric survival).
+  : Raw coefficients (default for `lm`, `glm`, `lmrob`, `polr`,
+    parametric survival).
 
   `"or"`
 
-  :   Odds ratios - `exp(coef)` - for logistic and ordinal models.
+  : Odds ratios - `exp(coef)` - for logistic and ordinal models.
 
   `"irr"`
 
-  :   Incidence rate ratios - `exp(coef)` - for Poisson and negative
-      binomial models.
+  : Incidence rate ratios - `exp(coef)` - for Poisson and negative
+    binomial models.
 
   `"hr"`
 
-  :   Hazard ratios (default for `coxph`).
+  : Hazard ratios (default for `coxph`).
 
   `"lhr"`
 
-  :   Log hazard ratios for `coxph`.
+  : Log hazard ratios for `coxph`.
 
   `"tr"`
 
-  :   Time ratios - `exp(coef)` - (default for parametric survival
-      models).
+  : Time ratios - `exp(coef)` - (default for parametric survival
+    models).
 
   `"genuine"`
 
-  :   Passes through to the original
-      [`summary()`](https://rdrr.io/r/base/summary.html) /
-      [`print()`](https://rdrr.io/r/base/print.html) of the underlying
-      model object.
+  : Passes through to the original
+    [`summary()`](https://rdrr.io/r/base/summary.html) /
+    [`print()`](https://rdrr.io/r/base/print.html) of the underlying
+    model object.
 
   If `NULL` (default), an appropriate value is chosen automatically
   based on the model class.

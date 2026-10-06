@@ -10,8 +10,8 @@
 #' @param x Either a fitted binary classification model of class
 #'   \code{"FitMod"} (in which case predicted probabilities and the response
 #'   are extracted automatically), or a numeric vector of predicted
-#'   probabilities / scores when \code{resp} is supplied.
-#' @param resp Optional factor or binary vector of true class labels.  If
+#'   probabilities / scores when \code{ref} is supplied.
+#' @param ref Optional factor or binary vector of true class labels.  If
 #'   \code{NULL} (default), \code{x} must be a \code{"FitMod"} object and
 #'   the response is extracted via \code{\link{response}}.
 #' @param nBins Number of equally sized score groups.  The default \code{10}
@@ -38,7 +38,7 @@
 #' a \code{"FitMod"} object - the positive class is therefore the second
 #' factor level of the response.  For models with non-standard probability
 #' output, supply the predictor vector explicitly via \code{x} and
-#' \code{resp}.
+#' \code{ref}.
 #'
 #' Cases are ranked by decreasing score and cut into \code{nBins} groups of
 #' equal size.  Within group \eqn{i}, lift is the hit rate divided by the
@@ -67,7 +67,7 @@
 #'
 #' # Supply predictor and response directly
 #' p <- predict(fitLogit)[, 2]
-#' lift(p, resp = Admit$admit)
+#' lift(p, ref = Admit$admit)
 #'
 #' # Coarser grouping
 #' lift(fitLogit, nBins = 5)
@@ -82,11 +82,11 @@
 #'
 #'
 #' @export
-lift <- function(x, resp = NULL, nBins = 10) {
+lift <- function(x, ref = NULL, nBins = 10) {
 
-  if (is.null(resp)) {
+  if (is.null(ref)) {
     pred <- predict(x, type = "prob")[, 2]
-    resp <- response(x)
+    ref <- response(x)
   } else {
     pred <- x
   }
@@ -94,32 +94,32 @@ lift <- function(x, resp = NULL, nBins = 10) {
   if (!is.numeric(pred) || !length(pred))
     stop("Argument 'x' must be numeric and non-empty.")
 
-  if (length(pred) != length(resp))
-    stop("Arguments 'x' and 'resp' must have the same length.")
+  if (length(pred) != length(ref))
+    stop("Arguments 'x' and 'ref' must have the same length.")
 
   if (!is.numeric(nBins) || length(nBins) != 1L || is.na(nBins) || nBins < 2)
     stop("Argument 'nBins' must be a single integer >= 2.")
 
-  ok   <- !is.na(pred) & !is.na(resp)
+  ok   <- !is.na(pred) & !is.na(ref)
   pred <- pred[ok]
-  resp <- resp[ok]
+  ref <- ref[ok]
 
   if (!length(pred))
-    stop("No complete cases in 'x' and 'resp'.")
+    stop("No complete cases in 'x' and 'ref'.")
 
-  resp <- factor(resp)
+  ref <- factor(ref)
 
-  if (nlevels(resp) != 2L)
-    stop("Argument 'resp' must have exactly two levels.")
+  if (nlevels(ref) != 2L)
+    stop("Argument 'ref' must have exactly two levels.")
 
-  positive <- levels(resp)[2L]
-  y        <- as.integer(resp == positive)
+  positive <- levels(ref)[2L]
+  y        <- as.integer(ref == positive)
 
   nObs <- length(y)
   nPos <- sum(y)
 
   if (nPos == 0L || nPos == nObs)
-    stop("Argument 'resp' must contain both classes.")
+    stop("Argument 'ref' must contain both classes.")
 
   nBins <- min(as.integer(nBins), nObs)
 

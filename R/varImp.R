@@ -12,7 +12,7 @@
 #'   One of \code{"max"} (default: best predictor = 100, others relative),
 #'   \code{"sum"} (scores sum to 100, interpretable as percentage share), or
 #'   \code{"none"} (raw scores as returned by the underlying method).
-#' @param sort Logical.  If \code{TRUE} (default), rows are sorted in
+#' @param sorted Logical.  If \code{TRUE} (default), rows are sorted in
 #'   descending order of importance.
 #' @param ... Further arguments passed to the underlying importance method.
 #'
@@ -39,7 +39,7 @@
 #'
 #'
 #' @export
-varImp <- function(x, scale = c("max", "sum", "none"), sort = TRUE, ...) {
+varImp <- function(x, scale = c("max", "sum", "none"), sorted = TRUE, ...) {
   
   scale <- match.arg(scale)
   
@@ -151,7 +151,7 @@ varImp <- function(x, scale = c("max", "sum", "none"), sort = TRUE, ...) {
   )
   
   # Sort descending
-  if (sort)
+  if (sorted)
     imp <- imp[order(-imp$importance), ]
   
   rownames(imp) <- NULL

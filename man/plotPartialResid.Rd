@@ -5,7 +5,7 @@
 \title{Partial Residual Plot for Linearity in the Logit}
 \usage{
 plotPartialResid(
-  x,
+  fit,
   term = NULL,
   main = NULL,
   xlab = NULL,
@@ -25,11 +25,11 @@ plotPartialResid(
 )
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{term}{name of the predictor. \code{NULL} (default) uses the first
-continuous term in the model; \code{\link{predictors}(x, numeric =
+continuous term in the model; \code{\link{predictors}(fit, numeric =
 TRUE)} lists the ones this plot can be drawn for.}
 
 \item{main}{main title. \code{NULL} (default) derives one from

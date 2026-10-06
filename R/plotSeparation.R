@@ -20,7 +20,7 @@
 #' \eqn{\sum \hat p_i}, counted from the right. If it lands where the
 #' observed events start, the model gets the overall event rate right.
 #'
-#' @param x a fitted logistic model of class \code{"FitMod"} (fitted with
+#' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
 #'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param main main title. \code{NULL} (default) derives one from the
 #'   model formula; \code{""}, \code{NA} or \code{FALSE} suppress it.
@@ -62,7 +62,7 @@
 #' plotSeparation(fitLogit)
 #'
 #' @export
-plotSeparation <- function(x,
+plotSeparation <- function(fit,
                            main = NULL,
                            xlab = "observations ordered by predicted probability",
                            ylab = "",
@@ -74,7 +74,7 @@ plotSeparation <- function(x,
                            stamp = .useTheme,
                            ...) {
 
-  parts <- .logitParts(x)
+  parts <- .logitParts(fit)
 
   if (any(parts$m != 1))
     stop("the separation plot is defined for binary observations; ",

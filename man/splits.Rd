@@ -4,10 +4,10 @@
 \alias{splits}
 \title{Split labels for each node of an rpart tree}
 \usage{
-splits(x)
+splits(fit)
 }
 \arguments{
-\item{x}{A fitted \code{rpart} object.}
+\item{fit}{A fitted \code{rpart} object.}
 }
 \value{
 A character matrix with columns \code{"cutleft"} and

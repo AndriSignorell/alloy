@@ -5,7 +5,7 @@
 \alias{print.Lift}
 \title{Lift and gain table for a fitted model or predictor vector}
 \usage{
-lift(x, resp = NULL, nBins = 10)
+lift(x, ref = NULL, nBins = 10)
 
 \method{print}{Lift}(x, digits = 3, ...)
 }
@@ -13,9 +13,9 @@ lift(x, resp = NULL, nBins = 10)
 \item{x}{Either a fitted binary classification model of class
 \code{"FitMod"} (in which case predicted probabilities and the response
 are extracted automatically), or a numeric vector of predicted
-probabilities / scores when \code{resp} is supplied.}
+probabilities / scores when \code{ref} is supplied.}
 
-\item{resp}{Optional factor or binary vector of true class labels.  If
+\item{ref}{Optional factor or binary vector of true class labels.  If
 \code{NULL} (default), \code{x} must be a \code{"FitMod"} object and
 the response is extracted via \code{\link{response}}.}
 
@@ -55,7 +55,7 @@ As in \code{\link{roc}}, the second column of
 a \code{"FitMod"} object - the positive class is therefore the second
 factor level of the response.  For models with non-standard probability
 output, supply the predictor vector explicitly via \code{x} and
-\code{resp}.
+\code{ref}.
 
 Cases are ranked by decreasing score and cut into \code{nBins} groups of
 equal size.  Within group \eqn{i}, lift is the hit rate divided by the
@@ -86,7 +86,7 @@ lift(fitLogit)
 
 # Supply predictor and response directly
 p <- predict(fitLogit)[, 2]
-lift(p, resp = Admit$admit)
+lift(p, ref = Admit$admit)
 
 # Coarser grouping
 lift(fitLogit, nBins = 5)

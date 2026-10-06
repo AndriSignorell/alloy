@@ -14,7 +14,6 @@ rSq(
   sides = c("two.sided", "left", "right"),
   adjusted = TRUE,
   R = 2000,
-  seed = NULL,
   ...
 )
 ```
@@ -42,12 +41,8 @@ rSq(
 
 - R:
 
-  number of bootstrap replicates, defaults to 2000.
-
-- seed:
-
-  integer seed for the bootstrap. If `NULL` (default) the seed is drawn
-  from R's random number stream, so that
+  number of bootstrap replicates, defaults to 2000. The bootstrap draws
+  its seed from R's random number stream, so that
   [`set.seed()`](https://rdrr.io/r/base/Random.html) governs the result.
 
 - ...:
@@ -112,7 +107,7 @@ remains available via `conf.level = NA`.
 
 Other regression.utils:
 [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
-[`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md),
+[`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md),
 [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md),
 [`response()`](https://andrisignorell.github.io/alloy/reference/response.md),
 [`varImp()`](https://andrisignorell.github.io/alloy/reference/varImp.md),
@@ -131,11 +126,12 @@ rSq(fit, adjusted = FALSE)
 #> [1] 0.8267855
 ## [1] 0.8268
 
-rSq(fit, conf.level = 0.95, seed = 123)
+set.seed(123)
+rSq(fit, conf.level = 0.95)
 #>       est       lci       uci 
-#> 0.8148396 0.7309312 0.9064123 
+#> 0.8148396 0.7301815 0.9030843 
 
-rSq(fit, conf.level = 0.95, sides = "left", R = 1000, seed = 123)
+rSq(fit, conf.level = 0.95, sides = "left", R = 1000)
 #>       est       lci       uci 
-#> 0.8148396 0.7471338 1.0000000 
+#> 0.8148396 0.7456480 1.0000000 
 ```

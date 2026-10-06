@@ -7,12 +7,12 @@ probabilities.
 ## Usage
 
 ``` r
-node(x, node = NULL, type = c("all", "split", "leaf"), digits = 3L)
+node(fit, node = NULL, type = c("all", "split", "leaf"), digits = 3L)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   A fitted `rpart` object (must have been fitted with `model = TRUE` and
   `y = TRUE`).

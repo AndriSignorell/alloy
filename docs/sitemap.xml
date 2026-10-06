@@ -13,7 +13,7 @@
 <url><loc>https://andrisignorell.github.io/alloy/reference/binnedResid.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/BioChemists.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/coefCI.html</loc></url>
-<url><loc>https://andrisignorell.github.io/alloy/reference/coeffDiffCI.html</loc></url>
+<url><loc>https://andrisignorell.github.io/alloy/reference/coefDiffCI.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/confint.roc.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/Contraception.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/cParam.html</loc></url>
@@ -43,7 +43,7 @@
 <url><loc>https://andrisignorell.github.io/alloy/reference/predict.FitMod.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/predictors.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/print.FitMod.html</loc></url>
-<url><loc>https://andrisignorell.github.io/alloy/reference/pseudoR2.html</loc></url>
+<url><loc>https://andrisignorell.github.io/alloy/reference/pseudoRSq.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/quantileResid.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/reexports.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/refLevel.html</loc></url>
@@ -54,7 +54,7 @@
 <url><loc>https://andrisignorell.github.io/alloy/reference/splits.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/splitTrainTest.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/tMod.html</loc></url>
-<url><loc>https://andrisignorell.github.io/alloy/reference/tmodSummary.html</loc></url>
+<url><loc>https://andrisignorell.github.io/alloy/reference/tModSummary.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/varImp.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/vif.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/Whas100.html</loc></url>

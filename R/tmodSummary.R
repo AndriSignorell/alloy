@@ -11,7 +11,7 @@
 #' vector of model statistics). These are combined by \code{tMod()} to enable
 #' comparison across different model types.
 #'
-#' @name tmodSummary
+#' @name tModSummary
 #' 
 #' @param x A fitted model object
 #' @param ... Additional arguments passed to methods
@@ -36,22 +36,22 @@
 #'
 #'
 #' @export
-tmodSummary <- function(x, ...){
-  UseMethod("tmodSummary")
+tModSummary <- function(x, ...){
+  UseMethod("tModSummary")
 }
 
 #' @export
-#' @method tmodSummary default
+#' @method tModSummary default
 #' @keywords internal
-tmodSummary.default <- function(x, ...){
-  stop("No tmodSummary method for class: ", class(x)[1])
+tModSummary.default <- function(x, ...){
+  stop("No tModSummary method for class: ", class(x)[1])
 }
 
 
 #' @export
-#' @method tmodSummary lm
-#' @rdname tmodSummary
-tmodSummary.lm <- function(x, conf.level = 0.95, ...){
+#' @method tModSummary lm
+#' @rdname tModSummary
+tModSummary.lm <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   
@@ -117,9 +117,9 @@ tmodSummary.lm <- function(x, conf.level = 0.95, ...){
 
 
 #' @export
-#' @method tmodSummary lmrob
-#' @rdname tmodSummary
-tmodSummary.lmrob <- function(x, conf.level = 0.95, ...){
+#' @method tModSummary lmrob
+#' @rdname tModSummary
+tModSummary.lmrob <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   
@@ -192,9 +192,9 @@ tmodSummary.lmrob <- function(x, conf.level = 0.95, ...){
 
 
 #' @export
-#' @method tmodSummary glm
-#' @rdname tmodSummary
-tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
+#' @method tModSummary glm
+#' @rdname tModSummary
+tModSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
   
   sm <- summary(x)
   
@@ -241,7 +241,7 @@ tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
   # ============================
   if(x$family$family == "binomial"){
     
-    statsx <- pseudoR2(x, which = "all")
+    statsx <- pseudoRSq(x, which = "all")
     
     # Associations - one pass over the concordant/discordant pairs yields
     # all ordinal measures; [1] takes each point estimate. Keys are the
@@ -273,7 +273,7 @@ tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
     # GENERAL GLM
     # ============================
     
-    statsx <- pseudoR2(
+    statsx <- pseudoRSq(
       x,
       which = c("McFadden","McFaddenAdj","Nagelkerke","CoxSnell",
                 "AIC","BIC","logLik","logLik0","G2")
@@ -305,9 +305,9 @@ tmodSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
 
 
 #' @export
-#' @method tmodSummary coxph
-#' @rdname tmodSummary
-tmodSummary.coxph <- function(x, conf.level = 0.95, ...){
+#' @method tModSummary coxph
+#' @rdname tModSummary
+tModSummary.coxph <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   
@@ -356,9 +356,9 @@ tmodSummary.coxph <- function(x, conf.level = 0.95, ...){
 
 
 #' @export
-#' @method tmodSummary gam
-#' @rdname tmodSummary
-tmodSummary.gam <- function(x, conf.level = 0.95, ...){
+#' @method tModSummary gam
+#' @rdname tModSummary
+tModSummary.gam <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   
@@ -431,9 +431,9 @@ tmodSummary.gam <- function(x, conf.level = 0.95, ...){
 
 
 #' @export
-#' @method tmodSummary lmer
-#' @rdname tmodSummary
-tmodSummary.lmer <- function(x, conf.level = 0.95, ...){
+#' @method tModSummary lmer
+#' @rdname tModSummary
+tModSummary.lmer <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   

@@ -17,7 +17,7 @@ interval based on a parallel RcppParallel implementation."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.918</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -60,7 +60,6 @@ interval based on a parallel <span class="pkg">RcppParallel</span> implementatio
 <span>  sides <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"two.sided"</span>, <span class="st">"left"</span>, <span class="st">"right"</span><span class="op">)</span>,</span>
 <span>  adjusted <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  R <span class="op">=</span> <span class="fl">2000</span>,</span>
-<span>  seed <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -90,12 +89,8 @@ reported, otherwise the ordinary one.</p></dd>
 
 
 <dt id="arg-r">R<a class="anchor" aria-label="anchor" href="#arg-r"></a></dt>
-<dd><p>number of bootstrap replicates, defaults to 2000.</p></dd>
-
-
-<dt id="arg-seed">seed<a class="anchor" aria-label="anchor" href="#arg-seed"></a></dt>
-<dd><p>integer seed for the bootstrap. If <code>NULL</code> (default) the
-seed is drawn from R's random number stream, so that <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>
+<dd><p>number of bootstrap replicates, defaults to 2000. The bootstrap
+draws its seed from R's random number stream, so that <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>
 governs the result.</p></dd>
 
 
@@ -152,7 +147,7 @@ via <code>conf.level = NA</code>.</p>
     <div class="dont-index"><p><code><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></code>, <code><a href="https://rdrr.io/r/stats/summary.lm.html" class="external-link">summary.lm</a></code></p>
 <p>Other regression.utils:
 <code><a href="coefCI.html">coefCI()</a></code>,
-<code><a href="pseudoR2.html">pseudoR2()</a></code>,
+<code><a href="pseudoRSq.html">pseudoRSq()</a></code>,
 <code><a href="refLevel.html">refLevel()</a></code>,
 <code><a href="response.html">response()</a></code>,
 <code><a href="varImp.html">varImp()</a></code>,
@@ -171,13 +166,14 @@ via <code>conf.level = NA</code>.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.8267855</span>
 <span class="r-in"><span><span class="co">## [1] 0.8268</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">rSq</span><span class="op">(</span><span class="va">fit</span>, conf.level <span class="op">=</span> <span class="fl">0.95</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rSq</span><span class="op">(</span><span class="va">fit</span>, conf.level <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       est       lci       uci </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8148396 0.7309312 0.9064123 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8148396 0.7301815 0.9030843 </span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="fu">rSq</span><span class="op">(</span><span class="va">fit</span>, conf.level <span class="op">=</span> <span class="fl">0.95</span>, sides <span class="op">=</span> <span class="st">"left"</span>, R <span class="op">=</span> <span class="fl">1000</span>, seed <span class="op">=</span> <span class="fl">123</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rSq</span><span class="op">(</span><span class="va">fit</span>, conf.level <span class="op">=</span> <span class="fl">0.95</span>, sides <span class="op">=</span> <span class="st">"left"</span>, R <span class="op">=</span> <span class="fl">1000</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       est       lci       uci </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8148396 0.7471338 1.0000000 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.8148396 0.7456480 1.0000000 </span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

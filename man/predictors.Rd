@@ -4,10 +4,10 @@
 \alias{predictors}
 \title{Predictors of a Fitted Model}
 \usage{
-predictors(x, numeric = FALSE)
+predictors(fit, numeric = FALSE)
 }
 \arguments{
-\item{x}{a fitted model - anything with a \code{\link[stats]{terms}}
+\item{fit}{a fitted model - anything with a \code{\link[stats]{terms}}
 method, including \code{"FitMod"}, \code{"glm"} and \code{"lm"}.}
 
 \item{numeric}{logical; keep only terms that are numeric in the model
@@ -19,7 +19,7 @@ intercept-only model.
 }
 \description{
 Returns the names of the terms on the right hand side of a fitted
-model. The information is in \code{attr(terms(x), "term.labels")}; this
+model. The information is in \code{attr(terms(fit), "term.labels")}; this
 is the same thing under a name one can guess.
 }
 \details{
@@ -28,7 +28,7 @@ appears as it was written (\code{"log(insulin)"}), an interaction as
 \code{"a:b"}, and a variable used twice appears once per term. That is
 the right granularity for looping over diagnostics, because a diagnostic
 is per term. For the underlying variable names - what a data frame would
-have to contain - use \code{all.vars(formula(x))[-1]}.
+have to contain - use \code{all.vars(formula(fit))[-1]}.
 
 \code{numeric = TRUE} keeps the terms that are numeric in the model
 frame. Diagnostics of functional form only apply to those: linearity in
@@ -42,7 +42,7 @@ predictors(fitLogit, numeric = TRUE)     # rank drops out
 
 # the loop this exists for
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
-pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+pharos::plotFacet(bins, dim = c(1, 3), FUN = panelBinnedResid,
                   xlim = "free", ylab = "mean residual")
 
 }

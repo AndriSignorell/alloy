@@ -5,7 +5,7 @@
 \title{Binned Residuals}
 \usage{
 binnedResid(
-  x,
+  fit,
   var = NULL,
   nBins = NULL,
   conf.level = 0.95,
@@ -13,7 +13,7 @@ binnedResid(
 )
 }
 \arguments{
-\item{x}{a fitted logistic model of class \code{"FitMod"} (fitted with
+\item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
 \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{var}{the binning variable. \code{NULL} (default) bins by the

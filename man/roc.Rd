@@ -4,15 +4,15 @@
 \alias{roc}
 \title{ROC curve for a fitted model or predictor vector}
 \usage{
-roc(x, resp = NULL, ...)
+roc(x, ref = NULL, ...)
 }
 \arguments{
 \item{x}{Either a fitted binary classification model of class
 \code{"FitMod"} (in which case predicted probabilities and the response
 are extracted automatically), or a numeric vector of predicted
-probabilities / scores when \code{resp} is supplied.}
+probabilities / scores when \code{ref} is supplied.}
 
-\item{resp}{Optional factor or binary vector of true class labels.  If
+\item{ref}{Optional factor or binary vector of true class labels.  If
 \code{NULL} (default), \code{x} must be a \code{"FitMod"} object and
 the response is extracted via \code{\link{response}}.}
 
@@ -32,7 +32,7 @@ When \code{x} is a \code{"FitMod"} object, the second column of
 \code{predict(x, type = "prob")} is used as the predictor (i.e. the
 probability of the second factor level).  For models with non-standard
 probability output, supply the predictor vector explicitly via \code{x}
-and \code{resp}.
+and \code{ref}.
 }
 \examples{
 fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
@@ -41,7 +41,7 @@ plot(r)
 
 # Supply predictor and response directly
 p <- predict(fitLogit)[, 2]
-r2 <- roc(p, resp = Admit$admit)
+r2 <- roc(p, ref = Admit$admit)
 
 }
 \seealso{

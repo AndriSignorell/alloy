@@ -8,7 +8,7 @@
 #' not 1 or when contrasts have been set globally via
 #' \code{\link[base]{options}}.
 #'
-#' @param x A fitted model object with a \code{terms} attribute and a
+#' @param fit A fitted model object with a \code{terms} attribute and a
 #'   \code{model} data frame (e.g. objects of class \code{"lm"},
 #'   \code{"glm"}, \code{"lmerMod"}, or \code{"glmerMod"}).
 #'
@@ -18,7 +18,7 @@
 #'   no factor predictors.
 #'
 #' @details
-#' The function inspects \code{attr(model.matrix(x), "contrasts")} for
+#' The function inspects \code{attr(model.matrix(fit), "contrasts")} for
 #' each factor predictor.
 #'
 #' \itemize{
@@ -54,23 +54,23 @@
 #'
 #'
 #' @export
-refLevel <- function(x) {
+refLevel <- function(fit) {
   
-  if (!inherits(x, c("lm", "glm", "lmerMod", "glmerMod", "lmrob", "survreg", "coxph")))
-    stop("x must be a model object (lm, glm, lmer, ...)")
+  if (!inherits(fit, c("lm", "glm", "lmerMod", "glmerMod", "lmrob", "survreg", "coxph")))
+    stop("'fit' must be a model object (lm, glm, lmer, ...)")
   
   # Build contrast list once - reused for every predictor
-  cs <- attr(model.matrix(x), "contrasts")
+  cs <- attr(model.matrix(fit), "contrasts")
   
   # Return the reference level for a single factor variable
   refCat <- function(var) {
     ct  <- cs[[var]]
     
     # For survreg/tobit: levels are not in model$model - get from xlevels
-    lvl <- if (!is.null(x$xlevels[[var]]))
-      x$xlevels[[var]]
+    lvl <- if (!is.null(fit$xlevels[[var]]))
+      fit$xlevels[[var]]
     else
-      levels(x$model[[var]])
+      levels(fit$model[[var]])
     
     if (is.character(ct)) {
       if (ct == "contr.treatment")
@@ -94,8 +94,8 @@ refLevel <- function(x) {
   
   
   # Identify all factor predictors (exclude the response variable)
-  dc    <- attr(x[["terms"]], "dataClasses")
-  resp  <- all.vars(formula(x))[1L]
+  dc    <- attr(fit[["terms"]], "dataClasses")
+  resp  <- all.vars(formula(fit))[1L]
   fpred <- names(dc)[dc %in% c("factor", "ordered") & names(dc) != resp]
   
   # Keep only predictors that actually have contrast information

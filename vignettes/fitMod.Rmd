@@ -170,7 +170,7 @@ Predicted probabilities:
 
 ```{r}
 head(predict(fitLogit))
-pseudoR2(fitLogit)
+pseudoRSq(fitLogit)
 ```
 
 ---

@@ -4,7 +4,7 @@
 \alias{varImp}
 \title{Variable importance for machine learning models}
 \usage{
-varImp(x, scale = c("max", "sum", "none"), sort = TRUE, ...)
+varImp(x, scale = c("max", "sum", "none"), sorted = TRUE, ...)
 }
 \arguments{
 \item{x}{A fitted model of class \code{"FitMod"}.  Supported fitting
@@ -16,7 +16,7 @@ One of \code{"max"} (default: best predictor = 100, others relative),
 \code{"sum"} (scores sum to 100, interpretable as percentage share), or
 \code{"none"} (raw scores as returned by the underlying method).}
 
-\item{sort}{Logical.  If \code{TRUE} (default), rows are sorted in
+\item{sorted}{Logical.  If \code{TRUE} (default), rows are sorted in
 descending order of importance.}
 
 \item{...}{Further arguments passed to the underlying importance method.}
@@ -48,7 +48,7 @@ plot(vi)
 
 Other regression.utils:
 \code{\link[=coefCI]{coefCI()}},
-\code{\link[=pseudoR2]{pseudoR2()}},
+\code{\link[=pseudoRSq]{pseudoRSq()}},
 \code{\link[=rSq]{rSq()}},
 \code{\link[=refLevel]{refLevel()}},
 \code{\link[=response]{response()}},

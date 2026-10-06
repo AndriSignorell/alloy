@@ -6,12 +6,12 @@ leaves only) of a fitted `rpart` tree.
 ## Usage
 
 ``` r
-rules(x, node = NULL, leafonly = FALSE)
+rules(fit, node = NULL, leafOnly = FALSE)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   A fitted `rpart` object.
 
@@ -20,7 +20,7 @@ rules(x, node = NULL, leafonly = FALSE)
   Character or numeric vector of node ids to extract. If `NULL`
   (default) all nodes are returned.
 
-- leafonly:
+- leafOnly:
 
   Logical. If `TRUE` only terminal (leaf) nodes are returned. Default is
   `FALSE`.
@@ -65,7 +65,7 @@ rules(r)
 #>    Petal.Length>=2.45
 #>    Petal.Width>=1.75
 #> 
-rules(r, leafonly = TRUE)
+rules(r, leafOnly = TRUE)
 #> 
 #>  Rule number: 2 [yval=setosa cover=50 (33%) prob=1.00]
 #>    Petal.Length< 2.45

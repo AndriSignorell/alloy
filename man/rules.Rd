@@ -4,15 +4,15 @@
 \alias{rules}
 \title{Decision rules for an rpart tree}
 \usage{
-rules(x, node = NULL, leafonly = FALSE)
+rules(fit, node = NULL, leafOnly = FALSE)
 }
 \arguments{
-\item{x}{A fitted \code{rpart} object.}
+\item{fit}{A fitted \code{rpart} object.}
 
 \item{node}{Character or numeric vector of node ids to extract.  If
 \code{NULL} (default) all nodes are returned.}
 
-\item{leafonly}{Logical.  If \code{TRUE} only terminal (leaf) nodes are
+\item{leafOnly}{Logical.  If \code{TRUE} only terminal (leaf) nodes are
 returned.  Default is \code{FALSE}.}
 }
 \value{
@@ -27,7 +27,7 @@ only) of a fitted \code{rpart} tree.
 \examples{
 r <- rpart::rpart(Species ~ ., data = iris)
 rules(r)
-rules(r, leafonly = TRUE)
+rules(r, leafOnly = TRUE)
 
 }
 \seealso{

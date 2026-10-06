@@ -7,12 +7,12 @@ represented by empty strings.
 ## Usage
 
 ``` r
-splits(x)
+splits(fit)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   A fitted `rpart` object.
 

@@ -49,7 +49,7 @@ extracting coefficients, confidence intervals, and model statistics.
 \details{
 The function standardizes model output across different model classes
 (e.g. \code{lm}, \code{glm}, \code{coxph}, \code{gam}, \code{lmer}) using
-S3 methods implemented via \code{tmodSummary()}. This enables direct
+S3 methods implemented via \code{tModSummary()}. This enables direct
 comparison of model coefficients and fit statistics in tabular and
 graphical form.
 
@@ -76,10 +76,10 @@ if(requireNamespace("survival", quietly = TRUE)){
 }
 }
 \seealso{
-\code{\link{tmodSummary}}
+\code{\link{tModSummary}}
 
 Other model.comparison:
-\code{\link[=tmodSummary]{tmodSummary()}}
+\code{\link[=tModSummary]{tModSummary()}}
 }
 \concept{model-evaluation}
 \concept{model.comparison}

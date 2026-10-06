@@ -1,7 +1,7 @@
 #' Predictors of a Fitted Model
 #'
 #' Returns the names of the terms on the right hand side of a fitted
-#' model. The information is in \code{attr(terms(x), "term.labels")}; this
+#' model. The information is in \code{attr(terms(fit), "term.labels")}; this
 #' is the same thing under a name one can guess.
 #'
 #' @details
@@ -10,13 +10,13 @@
 #' \code{"a:b"}, and a variable used twice appears once per term. That is
 #' the right granularity for looping over diagnostics, because a diagnostic
 #' is per term. For the underlying variable names - what a data frame would
-#' have to contain - use \code{all.vars(formula(x))[-1]}.
+#' have to contain - use \code{all.vars(formula(fit))[-1]}.
 #'
 #' \code{numeric = TRUE} keeps the terms that are numeric in the model
 #' frame. Diagnostics of functional form only apply to those: linearity in
 #' the logit is not a question one can ask of a factor.
 #'
-#' @param x a fitted model - anything with a \code{\link[stats]{terms}}
+#' @param fit a fitted model - anything with a \code{\link[stats]{terms}}
 #'   method, including \code{"FitMod"}, \code{"glm"} and \code{"lm"}.
 #' @param numeric logical; keep only terms that are numeric in the model
 #'   frame. Default \code{FALSE}.
@@ -40,13 +40,13 @@
 #'
 #' # the loop this exists for
 #' bins <- binnedResid(fitLogit, var = predictors(fitLogit))
-#' pharos::plotFacet(bins, dim = c(1, 3), panelFun = panelBinnedResid,
+#' pharos::plotFacet(bins, dim = c(1, 3), FUN = panelBinnedResid,
 #'                   xlim = "free", ylab = "mean residual")
 #'
 #' @export
-predictors <- function(x, numeric = FALSE) {
+predictors <- function(fit, numeric = FALSE) {
 
-  fit <- .stripFitMod(x)
+  fit <- .stripFitMod(fit)
 
   labs <- attr(stats::terms(fit), "term.labels")
 

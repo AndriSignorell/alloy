@@ -45,9 +45,8 @@
 #'   \code{"right"}.
 #' @param adjusted logical; if \code{TRUE} (default) the adjusted R-squared is
 #'   reported, otherwise the ordinary one.
-#' @param R number of bootstrap replicates, defaults to 2000.
-#' @param seed integer seed for the bootstrap. If \code{NULL} (default) the
-#'   seed is drawn from R's random number stream, so that \code{set.seed()}
+#' @param R number of bootstrap replicates, defaults to 2000. The bootstrap
+#'   draws its seed from R's random number stream, so that \code{set.seed()}
 #'   governs the result.
 #' @param ... further arguments, currently unused.
 #'
@@ -75,9 +74,10 @@
 #' rSq(fit, adjusted = FALSE)
 #' ## [1] 0.8268
 #'
-#' rSq(fit, conf.level = 0.95, seed = 123)
+#' set.seed(123)
+#' rSq(fit, conf.level = 0.95)
 #'
-#' rSq(fit, conf.level = 0.95, sides = "left", R = 1000, seed = 123)
+#' rSq(fit, conf.level = 0.95, sides = "left", R = 1000)
 #'
 #' @export
 rSq <- function(fit,
@@ -85,7 +85,6 @@ rSq <- function(fit,
                 sides = c("two.sided", "left", "right"),
                 adjusted = TRUE,
                 R = 2000,
-                seed = NULL,
                 ...) {
 
   if(!inherits(fit, "lm"))
@@ -109,15 +108,14 @@ rSq <- function(fit,
     alpha <- 2 * alpha
 
   # draw the seed from R's stream, so that set.seed() controls the bootstrap
-  if(is.null(seed))
-    seed <- sample.int(.Machine$integer.max, 1L)
+  seed <- sample.int(.Machine$integer.max, 1L)
 
   res <- rsq_boot_cpp(X = stats::model.matrix(fit),
                       y = stats::model.response(stats::model.frame(fit)),
                       B = R,
                       alpha = alpha,
                       adjusted = adjusted,
-                      seed = as.integer(seed))
+                      seed = seed)
 
   # take the estimate from the fit rather than from the C++ routine, so that
   # both branches of the function report exactly the same value

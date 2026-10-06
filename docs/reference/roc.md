@@ -8,7 +8,7 @@ vector directly.
 ## Usage
 
 ``` r
-roc(x, resp = NULL, ...)
+roc(x, ref = NULL, ...)
 ```
 
 ## Arguments
@@ -18,9 +18,9 @@ roc(x, resp = NULL, ...)
   Either a fitted binary classification model of class `"FitMod"` (in
   which case predicted probabilities and the response are extracted
   automatically), or a numeric vector of predicted probabilities /
-  scores when `resp` is supplied.
+  scores when `ref` is supplied.
 
-- resp:
+- ref:
 
   Optional factor or binary vector of true class labels. If `NULL`
   (default), `x` must be a `"FitMod"` object and the response is
@@ -43,7 +43,7 @@ When `x` is a `"FitMod"` object, the second column of
 `predict(x, type = "prob")` is used as the predictor (i.e. the
 probability of the second factor level). For models with non-standard
 probability output, supply the predictor vector explicitly via `x` and
-`resp`.
+`ref`.
 
 ## See also
 
@@ -66,7 +66,6 @@ plot(r)
 
 # Supply predictor and response directly
 p <- predict(fitLogit)[, 2]
-r2 <- roc(p, resp = Admit$admit)
-#> Setting levels: control = 0, case = 1
-#> Setting direction: controls < cases
+r2 <- roc(p, ref = Admit$admit)
+#> Error in roc.default(p, ref = Admit$admit): No valid data provided.
 ```

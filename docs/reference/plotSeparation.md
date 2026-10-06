@@ -11,7 +11,7 @@ statistic.
 
 ``` r
 plotSeparation(
-  x,
+  fit,
   main = NULL,
   xlab = "observations ordered by predicted probability",
   ylab = "",
@@ -27,7 +27,7 @@ plotSeparation(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial

@@ -4,7 +4,7 @@
 #' Selects the most parsimonious tree whose cross-validated error is within
 #' one standard error of the minimum, following Breiman et al. (1984).
 #'
-#' @param x A fitted \code{rpart} object.
+#' @param fit A fitted \code{rpart} object.
 #'
 #' @return A list with components:
 #'   \describe{
@@ -29,12 +29,12 @@
 #'
 #'
 #' @export
-bestTree <- function(x) {
+bestTree <- function(fit) {
   
-  if (!inherits(x, "rpart"))
-    stop("'x' must be an rpart object")
+  if (!inherits(fit, "rpart"))
+    stop("'fit' must be an rpart object")
   
-  ct <- x$cptable
+  ct <- fit$cptable
   # 1-SE rule: smallest tree with xerror <= min(xerror) + xstd at that minimum
   i  <- ct[, "xerror"] <= min(ct[, "xerror"]) + ct[which.min(ct[, "xerror"]), "xstd"]
   

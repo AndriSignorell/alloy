@@ -386,7 +386,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     if (is_quasi) {
       cat("\tPseudo R\u00B2/AIC: not available (quasi model)")
     } else {
-      pr2 <- tryCatch(pseudoR2(x)["McFadden"], error = function(e) NA_real_)
+      pr2 <- tryCatch(pseudoRSq(x)["McFadden"], error = function(e) NA_real_)
       aic <- tryCatch(AIC(x), error = function(e) NA_real_)
       if (!is.na(pr2))
         cat("\tPseudo R\u00B2 (McFadden):", fm(pr2, digits = digits))
@@ -912,7 +912,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   
   if (!is.null(pred) && !is.null(resp)) {
     cat("\nConfusion matrix (training):\n")
-    cm <- conf(pred, resp)
+    cm <- confusion(pred, resp)
     print(cm$table)
     cat(sprintf("\nAccuracy: %s   Kappa: %s\n",
                 fm(cm$acc,   digits = digits),
