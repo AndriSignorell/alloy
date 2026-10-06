@@ -10,7 +10,7 @@ says the point moves the model.
 
 ``` r
 plotInfluence(
-  x,
+  fit,
   main = NULL,
   xlab = "fitted probability",
   ylab = NULL,
@@ -32,7 +32,7 @@ plotInfluence(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial

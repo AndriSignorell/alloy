@@ -19,7 +19,7 @@ checks that assumption term by term."><meta property="og:image" content="https:/
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.919</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,7 @@ checks that assumption term by term.</p>
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">plotPartialResid</span><span class="op">(</span></span>
-<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">fit</span>,</span>
 <span>  term <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  main <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  xlab <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -82,14 +82,14 @@ checks that assumption term by term.</p>
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>a fitted logistic model of class <code>"FitMod"</code> (fitted with
 <code>fitfn = "logit"</code>) or a binomial <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></code>.</p></dd>
 
 
 <dt id="arg-term">term<a class="anchor" aria-label="anchor" href="#arg-term"></a></dt>
 <dd><p>name of the predictor. <code>NULL</code> (default) uses the first
-continuous term in the model; <code><a href="predictors.html">predictors</a>(x, numeric =
+continuous term in the model; <code><a href="predictors.html">predictors</a>(fit, numeric =
 TRUE)</code> lists the ones this plot can be drawn for.</p></dd>
 
 

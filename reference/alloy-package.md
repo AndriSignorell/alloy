@@ -69,7 +69,7 @@ returns a numeric vector for regression and survival models, and a tidy
 
   Side-by-side comparison of multiple models.
 
-- [`pseudoR2`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md):
+- [`pseudoRSq`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md):
 
   Pseudo-R\\^2\\ measures for GLMs.
 
@@ -82,7 +82,7 @@ returns a numeric vector for regression and survival models, and a tidy
 
   Bootstrap CIs for coefficients and R\\^2\\.
 
-- [`conf`](https://andrisignorell.github.io/DescToolsX/reference/conf.html):
+- [`confusion`](https://andrisignorell.github.io/DescToolsX/reference/confusion.html):
 
   Confusion matrix and classification metrics.
 

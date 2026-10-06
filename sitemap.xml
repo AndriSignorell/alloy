@@ -21,7 +21,7 @@
 <url><loc>https://andrisignorell.github.io/alloy/reference/binnedResid.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/cParam.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/coefCI.html</loc></url>
-<url><loc>https://andrisignorell.github.io/alloy/reference/coeffDiffCI.html</loc></url>
+<url><loc>https://andrisignorell.github.io/alloy/reference/coefDiffCI.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/confint.roc.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/dot-drop1.polr.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/dot-response_binary.html</loc></url>
@@ -44,7 +44,7 @@
 <url><loc>https://andrisignorell.github.io/alloy/reference/predict.FitMod.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/predictors.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/print.FitMod.html</loc></url>
-<url><loc>https://andrisignorell.github.io/alloy/reference/pseudoR2.html</loc></url>
+<url><loc>https://andrisignorell.github.io/alloy/reference/pseudoRSq.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/quantileResid.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/rSq.html</loc></url>
 <url><loc>https://andrisignorell.github.io/alloy/reference/reexports.html</loc></url>

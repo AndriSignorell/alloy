@@ -10,7 +10,7 @@ predictions are off.
 
 ``` r
 plotCalibration(
-  x,
+  fit,
   newdata = NULL,
   main = NULL,
   xlab = "predicted probability",
@@ -35,7 +35,7 @@ plotCalibration(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial
@@ -84,7 +84,7 @@ plotCalibration(
 
   the loess smoother and its band. `TRUE` (default) draws it with
   defaults, `FALSE`/`NA` suppresses it, a named list is passed to
-  `lines.loess` (e.g. `list(bandArgs = FALSE)`).
+  `lines.loess` (e.g. `list(band = FALSE)`).
 
 - rug:
 

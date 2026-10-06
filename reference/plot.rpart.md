@@ -25,7 +25,7 @@ plot(
   snip = FALSE,
   box.palette = "auto",
   shadow.col = 0,
-  node.labels = TRUE,
+  nodeLabels = TRUE,
   ...
 )
 ```
@@ -96,7 +96,7 @@ plot(
 
   Colour of node shadows. Default `0` (none).
 
-- node.labels:
+- nodeLabels:
 
   Logical. If `TRUE` (default), node ids are printed above each box.
 

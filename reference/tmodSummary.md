@@ -8,25 +8,25 @@ standardized format.
 ## Usage
 
 ``` r
-tmodSummary(x, ...)
+tModSummary(x, ...)
 
 # S3 method for class 'lm'
-tmodSummary(x, conf.level = 0.95, ...)
+tModSummary(x, conf.level = 0.95, ...)
 
 # S3 method for class 'lmrob'
-tmodSummary(x, conf.level = 0.95, ...)
+tModSummary(x, conf.level = 0.95, ...)
 
 # S3 method for class 'glm'
-tmodSummary(x, conf.level = 0.95, useProfile = TRUE, ...)
+tModSummary(x, conf.level = 0.95, useProfile = TRUE, ...)
 
 # S3 method for class 'coxph'
-tmodSummary(x, conf.level = 0.95, ...)
+tModSummary(x, conf.level = 0.95, ...)
 
 # S3 method for class 'gam'
-tmodSummary(x, conf.level = 0.95, ...)
+tModSummary(x, conf.level = 0.95, ...)
 
 # S3 method for class 'lmer'
-tmodSummary(x, conf.level = 0.95, ...)
+tModSummary(x, conf.level = 0.95, ...)
 ```
 
 ## Arguments

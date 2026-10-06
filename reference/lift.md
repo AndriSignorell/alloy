@@ -10,7 +10,7 @@ prevention.
 ## Usage
 
 ``` r
-lift(x, resp = NULL, nBins = 10)
+lift(x, ref = NULL, nBins = 10)
 
 # S3 method for class 'Lift'
 print(x, digits = 3, ...)
@@ -23,9 +23,9 @@ print(x, digits = 3, ...)
   Either a fitted binary classification model of class `"FitMod"` (in
   which case predicted probabilities and the response are extracted
   automatically), or a numeric vector of predicted probabilities /
-  scores when `resp` is supplied.
+  scores when `ref` is supplied.
 
-- resp:
+- ref:
 
   Optional factor or binary vector of true class labels. If `NULL`
   (default), `x` must be a `"FitMod"` object and the response is
@@ -100,7 +100,7 @@ the second column of `predict(x, type = "prob")` is used as the
 predictor when `x` is a `"FitMod"` object - the positive class is
 therefore the second factor level of the response. For models with
 non-standard probability output, supply the predictor vector explicitly
-via `x` and `resp`.
+via `x` and `ref`.
 
 Cases are ranked by decreasing score and cut into `nBins` groups of
 equal size. Within group \\i\\, lift is the hit rate divided by the
@@ -161,7 +161,7 @@ lift(fitLogit)
 
 # Supply predictor and response directly
 p <- predict(fitLogit)[, 2]
-lift(p, resp = Admit$admit)
+lift(p, ref = Admit$admit)
 #> 
 #> Lift table (positive class: 1, base rate: 0.318)
 #> 

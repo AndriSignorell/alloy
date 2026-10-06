@@ -65,13 +65,13 @@ fraction of the cases can be acted upon.
 Goodness-of-fit measures, coefficient intervals, collinearity, and
 variable importance.
 
-- [`pseudoR2()`](https://andrisignorell.github.io/alloy/reference/pseudoR2.md)
+- [`pseudoRSq()`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md)
   : Pseudo R-Squared Measures for Regression Models
 - [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md) :
   R-squared of a Linear Model
 - [`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md)
   : Bootstrap Confidence Intervals for Linear Model Coefficients
-- [`coeffDiffCI()`](https://andrisignorell.github.io/alloy/reference/coeffDiffCI.md)
+- [`coefDiffCI()`](https://andrisignorell.github.io/alloy/reference/coefDiffCI.md)
   : Confidence Interval for the Difference of Two Regression
   Coefficients
 - [`vif()`](https://andrisignorell.github.io/alloy/reference/vif.md) :
@@ -108,7 +108,7 @@ Several fitted models side by side, in a table or a plot.
   [`print(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   [`plot(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   : Compare multiple statistical models
-- [`tmodSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
+- [`tModSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
   : Extract model summaries for model comparison
 
 ## Data Splitting & Utilities

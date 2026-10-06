@@ -6,12 +6,12 @@ one standard error of the minimum, following Breiman et al. (1984).
 ## Usage
 
 ``` r
-bestTree(x)
+bestTree(fit)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   A fitted `rpart` object.
 

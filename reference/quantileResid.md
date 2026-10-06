@@ -9,12 +9,12 @@ response in the first place.
 ## Usage
 
 ``` r
-quantileResid(x, nSim = 1L)
+quantileResid(fit, nSim = 1L)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial

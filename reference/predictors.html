@@ -6,9 +6,9 @@
     }
   };
 </script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Predictors of a Fitted Model — predictors"><meta name="description" content='Returns the names of the terms on the right hand side of a fitted
-model. The information is in attr(terms(x), "term.labels"); this
+model. The information is in attr(terms(fit), "term.labels"); this
 is the same thing under a name one can guess.'><meta property="og:description" content='Returns the names of the terms on the right hand side of a fitted
-model. The information is in attr(terms(x), "term.labels"); this
+model. The information is in attr(terms(fit), "term.labels"); this
 is the same thing under a name one can guess.'><meta property="og:image" content="https://andrisignorell.github.io/alloy/logo.png"></head><body>
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
@@ -17,7 +17,7 @@ is the same thing under a name one can guess.'><meta property="og:image" content
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.919</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -48,20 +48,20 @@ is the same thing under a name one can guess.'><meta property="og:image" content
 
     <div class="ref-description section level2">
     <p>Returns the names of the terms on the right hand side of a fitted
-model. The information is in <code>attr(terms(x), "term.labels")</code>; this
+model. The information is in <code>attr(terms(fit), "term.labels")</code>; this
 is the same thing under a name one can guess.</p>
     </div>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictors</span><span class="op">(</span><span class="va">x</span>, numeric <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">predictors</span><span class="op">(</span><span class="va">fit</span>, numeric <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>a fitted model - anything with a <code><a href="https://rdrr.io/r/stats/terms.html" class="external-link">terms</a></code>
 method, including <code>"FitMod"</code>, <code>"glm"</code> and <code>"lm"</code>.</p></dd>
 
@@ -83,7 +83,7 @@ appears as it was written (<code>"log(insulin)"</code>), an interaction as
 <code>"a:b"</code>, and a variable used twice appears once per term. That is
 the right granularity for looping over diagnostics, because a diagnostic
 is per term. For the underlying variable names - what a data frame would
-have to contain - use <code>all.vars(formula(x))[-1]</code>.</p>
+have to contain - use <code>all.vars(formula(fit))[-1]</code>.</p>
 <p><code>numeric = TRUE</code> keeps the terms that are numeric in the model
 frame. Diagnostics of functional form only apply to those: linearity in
 the logit is not a question one can ask of a factor.</p>
@@ -113,7 +113,7 @@ diagnostics that are computed per term;
 <span class="r-in"><span><span class="va">bins</span> <span class="op">&lt;-</span> <span class="fu"><a href="binnedResid.html">binnedResid</a></span><span class="op">(</span><span class="va">fitLogit</span>, var <span class="op">=</span> <span class="fu">predictors</span><span class="op">(</span><span class="va">fitLogit</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>only 16 distinct bins could be formed instead of the requested 20</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>only 19 distinct bins could be formed instead of the requested 20</span>
-<span class="r-in"><span><span class="fu">pharos</span><span class="fu">::</span><span class="fu"><a href="https://andrisignorell.github.io/pharos/reference/plotFacet.html" class="external-link">plotFacet</a></span><span class="op">(</span><span class="va">bins</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, panelFun <span class="op">=</span> <span class="va">panelBinnedResid</span>,</span></span>
+<span class="r-in"><span><span class="fu">pharos</span><span class="fu">::</span><span class="fu"><a href="https://andrisignorell.github.io/pharos/reference/plotFacet.html" class="external-link">plotFacet</a></span><span class="op">(</span><span class="va">bins</span>, dim <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, FUN <span class="op">=</span> <span class="va">panelBinnedResid</span>,</span></span>
 <span class="r-in"><span>                  xlim <span class="op">=</span> <span class="st">"free"</span>, ylab <span class="op">=</span> <span class="st">"mean residual"</span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>"bin" is not a graphical parameter</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>"n" is not a graphical parameter</span>

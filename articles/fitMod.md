@@ -325,7 +325,7 @@ head(predict(fitLogit))
 #> 4 0.8216154 0.1783846
 #> 5 0.8816461 0.1183539
 #> 6 0.6300301 0.3699699
-pseudoR2(fitLogit)
+pseudoRSq(fitLogit)
 #>   McFadden 
 #> 0.08292194
 ```

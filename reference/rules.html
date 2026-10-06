@@ -15,7 +15,7 @@ only) of a fitted rpart tree."><meta property="og:image" content="https://andris
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.919</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -51,14 +51,14 @@ only) of a fitted <code>rpart</code> tree.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rules</span><span class="op">(</span><span class="va">x</span>, node <span class="op">=</span> <span class="cn">NULL</span>, leafonly <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rules</span><span class="op">(</span><span class="va">fit</span>, node <span class="op">=</span> <span class="cn">NULL</span>, leafOnly <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg-x">x<a class="anchor" aria-label="anchor" href="#arg-x"></a></dt>
+<dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>A fitted <code>rpart</code> object.</p></dd>
 
 
@@ -67,7 +67,7 @@ only) of a fitted <code>rpart</code> tree.</p>
 <code>NULL</code> (default) all nodes are returned.</p></dd>
 
 
-<dt id="arg-leafonly">leafonly<a class="anchor" aria-label="anchor" href="#arg-leafonly"></a></dt>
+<dt id="arg-leafonly">leafOnly<a class="anchor" aria-label="anchor" href="#arg-leafonly"></a></dt>
 <dd><p>Logical.  If <code>TRUE</code> only terminal (leaf) nodes are
 returned.  Default is <code>FALSE</code>.</p></dd>
 
@@ -111,7 +111,7 @@ Returns <code>NA</code> if no nodes match the selection.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Petal.Length&gt;=2.45</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Petal.Width&gt;=1.75</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"><span><span class="fu">rules</span><span class="op">(</span><span class="va">r</span>, leafonly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">rules</span><span class="op">(</span><span class="va">r</span>, leafOnly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>  Rule number: 2 [yval=setosa cover=50 (33%) prob=1.00]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    Petal.Length&lt; 2.45</span>

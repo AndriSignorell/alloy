@@ -6,14 +6,14 @@ in each terminal (leaf) node of a classification tree.
 ## Usage
 
 ``` r
-leafRates(x)
+leafRates(fit)
 ```
 
 ## Arguments
 
-- x:
+- fit:
 
-  A fitted `rpart` classification object (i.e. `x$method != "anova"`).
+  A fitted `rpart` classification object (i.e. `fit$method != "anova"`).
 
 ## Value
 

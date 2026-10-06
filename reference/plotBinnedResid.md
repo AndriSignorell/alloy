@@ -10,7 +10,7 @@ curves \\-p\\ and \\1 - p\\.
 
 ``` r
 plotBinnedResid(
-  x,
+  fit,
   var = NULL,
   main = NULL,
   xlab = NULL,
@@ -35,7 +35,7 @@ plotBinnedResid(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial
@@ -176,10 +176,10 @@ bins <- binnedResid(fitLogit, var = vars)
 #> Warning: only 16 distinct bins could be formed instead of the requested 20
 #> Warning: only 19 distinct bins could be formed instead of the requested 20
 pharos::plotFacet(
-  bins, dim = c(1, length(vars)), panelFun = panelBinnedResid,
+  bins, dim = c(1, length(vars)), FUN = panelBinnedResid,
   xlim = lapply(bins, function(b) range(b$x)),
   ylim = range(unlist(lapply(bins, function(b) c(b$lci, b$uci)))),
-  stripLabels = vars, ylab = "mean residual")
+  strip = list(labels = vars), ylab = "mean residual")
 #> Warning: "bin" is not a graphical parameter
 #> Warning: "n" is not a graphical parameter
 #> Warning: "se" is not a graphical parameter

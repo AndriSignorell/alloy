@@ -11,7 +11,7 @@ several predictors can be prepared in one call.
 
 ``` r
 binnedResid(
-  x,
+  fit,
   var = NULL,
   nBins = NULL,
   conf.level = 0.95,
@@ -21,7 +21,7 @@ binnedResid(
 
 ## Arguments
 
-- x:
+- fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
   `fitfn = "logit"`) or a binomial
