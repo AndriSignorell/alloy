@@ -34,7 +34,7 @@
 
     <a class="navbar-brand me-2" href="index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -213,7 +213,7 @@
 <span><span class="fu"><a href="reference/fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># explicit, and reported as odds ratios</span></span>
-<span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, fitfn <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span>
+<span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, engine <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">fitLogit</span>, output <span class="op">=</span> <span class="st">"or"</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># the diagnostics a logistic model actually needs</span></span>

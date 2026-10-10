@@ -21,7 +21,7 @@ the package handles the rest.'><meta property="og:image" content="https://andris
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@ the package handles the rest.</p>
 
 
 <p>The entry point is <code><a href="fitMod.html">fitMod</a></code>, which accepts a standard R formula
-and a <code>fitfn</code> argument naming the model type.  When <code>fitfn</code> is omitted the
+and an <code>engine</code> argument naming the model type.  When <code>engine</code> is omitted the
 appropriate method is chosen automatically from the response variable type.</p>
 <p>Supported model families:</p><dl><dt>Continuous outcome</dt>
 <dd><p><code>lm</code>, <code>lmrob</code>, <code>gamma</code>, <code>tobit</code></p></dd>
@@ -157,7 +157,7 @@ coefficients and R\(^2\).</p></dd>
 
 
 <p>Modelers think in models, not in function calls.  <code>alloy</code> follows the
-principle that <code>fitMod(y ~ x, data, fitfn = "logit")</code> is preferable to
+principle that <code>fitMod(y ~ x, data, engine = "logit")</code> is preferable to
 <code>glm(y ~ x, data, family = "binomial")</code> – the intent is stated directly,
 and the package handles package-specific quirks, defaults, and post-processing
 transparently.  Output follows Stata conventions where applicable.</p>

@@ -14,8 +14,8 @@ pseudoRSq(fit, which = "McFadden")
 
 - fit:
 
-  a fitted model object of class `glm`, `multinom` (nnet), `polr` (MASS)
-  or `vglm` (VGAM)
+  a fitted model object of class `glm`, `multinom` (nnet), `polr`
+  (MASS), `vglm` (VGAM) or `betareg` (betareg)
 
 - which:
 
@@ -73,6 +73,11 @@ that are not defined for a given fit are omitted from the result.
   coefficient of discrimination, the mean fitted probability of the
   successes minus that of the failures, binomial responses only
 
+- `Ferrari`:
+
+  squared correlation between the linear predictor and the
+  link-transformed response, beta regression only
+
 - `AIC`, `BIC`:
 
   information criteria of the fitted model
@@ -98,8 +103,9 @@ handled correctly, and the original data need not be accessible. For
 model frame, preserving its analysis sample, weights and offsets. If
 that frame was not stored, it is rebuilt from the call, which does
 require the original data to be available. For `vglm` the null model is
-refitted with [`update`](https://rdrr.io/r/stats/update.html), which
-requires the original data as well.
+refitted with [`update`](https://rdrr.io/r/stats/update.html) in the
+environment of the model formula, which requires the original data as
+well.
 
 Where prior weights are present, the sample size entering Cox-Snell,
 Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than
@@ -125,6 +131,19 @@ For `vglm` objects the package VGAM must be installed and the model
 should have been fitted with `model = TRUE`, so that the model frame can
 be extracted.
 
+For beta regressions (`betareg`) the null model has an intercept in the
+mean and a constant precision. It is refitted on the response, weights
+and offsets of the full model, so the original data need not be
+accessible. The response is continuous, and the log-likelihood of a
+density is not bounded by zero: it is usually positive for a response in
+(0, 1). McFadden, its adjusted version and Nagelkerke are ratios of
+log-likelihoods that presuppose that bound, and are therefore not
+defined for these fits; note that this includes the default `which`.
+Available are `CoxSnell`, which only depends on the likelihood ratio,
+`Efron`, and `Ferrari`, the pseudo R-squared reported by betareg itself
+(not available for the extended-support distributions), besides the
+log-likelihoods and information criteria.
+
 ## References
 
 McFadden, D. (1974) Conditional logit analysis of qualitative choice
@@ -143,6 +162,9 @@ common limited dependent variable models. *Journal of Economic Surveys*,
 
 Tjur, T. (2009) Coefficients of determination in logistic regression
 models. *The American Statistician*, 63(4), 366-372.
+
+Ferrari, S. L. P., Cribari-Neto, F. (2004) Beta regression for modelling
+rates and proportions. *Journal of Applied Statistics*, 31(7), 799-815.
 
 ## See also
 

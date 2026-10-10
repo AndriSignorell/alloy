@@ -19,8 +19,10 @@ refLevel(fit)
 - fit:
 
   A fitted model object with a `terms` attribute and a `model` data
-  frame (e.g. objects of class `"lm"`, `"glm"`, `"lmerMod"`, or
-  `"glmerMod"`).
+  frame (e.g. objects of class `"lm"`, `"glm"`, `"lmerMod"`,
+  `"glmerMod"` or `"betareg"`). Mixed models fitted with
+  [`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  are accepted as well.
 
 ## Value
 
@@ -40,10 +42,16 @@ factor predictor.
 
 - If the contrast is stored as a *matrix*, the reference level is
   identified as the unique row whose entries are all zero (i.e. the row
-  that does not map to any dummy column).
+  that does not map to any dummy column). The matrix must be a treatment
+  coding, that is consist of 0 and 1 only, with a single 1 in every
+  other row.
 
 Contrasts other than treatment contrasts (e.g. `contr.sum`,
-`contr.helmert`) are not supported and trigger an informative error.
+`contr.helmert`) are not supported and trigger an informative error,
+whether they are stored by name or as a matrix.
+
+For beta regressions (`"betareg"`) the factor predictors of the mean and
+of the precision model are returned together.
 
 ## See also
 

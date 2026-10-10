@@ -70,8 +70,8 @@ An object of class `"TMod"` with components:
 ## Details
 
 The function standardizes model output across different model classes
-(e.g. `lm`, `glm`, `coxph`, `gam`, `lmer`) using S3 methods implemented
-via
+(e.g. `lm`, `glm`, `betareg`, `coxph`, `gam`, `lmer`) using S3 methods
+implemented via
 [`tModSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md).
 This enables direct comparison of model coefficients and fit statistics
 in tabular and graphical form.

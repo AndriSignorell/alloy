@@ -6,7 +6,7 @@ statistical models. The syntax is always the same:
 
 ``` r
 
-fitMod(formula, data, fitfn = "...")
+fitMod(formula, data, engine = "...")
 ```
 
 For background on the statistical methods, the [UCLA Statistical Methods
@@ -90,7 +90,7 @@ usethis::use_data(BioChemists)
 ``` r
 
 fitLm <- fitMod(Fertility ~ ., swiss)
-#> fitMod: using fitfn = 'lm'
+#> fitMod: using engine = 'lm'
 fitLm
 #> 
 #> Call:
@@ -137,7 +137,7 @@ Robust regression (MM-estimator):
 
 ``` r
 
-fitLmrob <- fitMod(Fertility ~ ., swiss, fitfn = "lmrob")
+fitLmrob <- fitMod(Fertility ~ ., swiss, engine = "lmrob")
 fitLmrob
 #> 
 #> Call:
@@ -161,7 +161,7 @@ fitLmrob
 
 ``` r
 
-fitGamma <- fitMod(Sepal.Length ~ ., iris, fitfn = "gamma")
+fitGamma <- fitMod(Sepal.Length ~ ., iris, engine = "gamma")
 fitGamma
 #> 
 #> Call:
@@ -189,7 +189,7 @@ fitGamma
 
 ``` r
 
-fitTobit <- fitMod(apt ~ read + math + prog, Apt, fitfn = "tobit")
+fitTobit <- fitMod(apt ~ read + math + prog, Apt, engine = "tobit")
 fitTobit
 #> 
 #> Call:
@@ -222,7 +222,7 @@ fitTobit
 
 ``` r
 
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 fitLogit
 #> 
 #> Call:
@@ -342,7 +342,7 @@ reference](https://stats.oarc.ucla.edu/stata/output/poisson-regression/)
 ``` r
 
 fitPois <- fitMod(daysabs ~ mathnce + langnce + gender, 
-                  data = Lahigh, fitfn = "poisson")
+                  data = Lahigh, engine = "poisson")
 fitPois
 #> 
 #> Call:
@@ -401,7 +401,7 @@ fitPois |> print(vcov = "HC0")
 ``` r
 
 fitQpois <- fitMod(daysabs ~ mathnce + langnce + gender,
-                   data = Lahigh, fitfn = "quasipoisson")
+                   data = Lahigh, engine = "quasipoisson")
 fitQpois
 #> 
 #> Call:
@@ -429,7 +429,7 @@ reference](https://stats.oarc.ucla.edu/sas/output/negative-binomial-regression/)
 ``` r
 
 fitNegbin <- fitMod(daysabs ~ mathnce + langnce + gender,
-                    data = Lahigh, fitfn = "negbin")
+                    data = Lahigh, engine = "negbin")
 fitNegbin
 #> 
 #> Call:
@@ -483,7 +483,7 @@ fitNegbin |> print(vcov = "HC3")
 ``` r
 
 fitZeroinfl <- fitMod(count ~ child + camper | persons,
-                      data = Fish, fitfn = "zeroinfl")
+                      data = Fish, engine = "zeroinfl")
 fitZeroinfl
 #> 
 #> Call:
@@ -515,7 +515,7 @@ fitZeroinfl
 
 ``` r
 
-fitPolr <- fitMod(apply ~ pared, data = Ologit, fitfn = "polr")
+fitPolr <- fitMod(apply ~ pared, data = Ologit, engine = "polr")
 fitPolr
 #> 
 #> Call:
@@ -565,7 +565,7 @@ reference](https://stats.oarc.ucla.edu/stata/output/multinomial-logistic-regress
 ``` r
 
 fitMult <- fitMod(ice_cream ~ video + puzzle + female,
-                  data = IceCream, fitfn = "multinom")
+                  data = IceCream, engine = "multinom")
 fitMult
 #> 
 #> Call:
@@ -612,7 +612,7 @@ reference](https://stats.oarc.ucla.edu/stata/examples/asa2/applied-survival-anal
 ``` r
 
 fitCox <- fitMod(Surv(foltime, folstatus) ~ gender + agex,
-                 data = Whas100, fitfn = "coxph")
+                 data = Whas100, engine = "coxph")
 fitCox
 #> 
 #> Call:
@@ -648,7 +648,7 @@ means increasing hazard, shape \< 1 decreasing hazard.
 ``` r
 
 fitWeibull <- fitMod(Surv(foltime, folstatus) ~ gender + age + bmi,
-                     data = Whas100, fitfn = "weibull")
+                     data = Whas100, engine = "weibull")
 fitWeibull
 #> 
 #> Weibull AFT model
@@ -714,14 +714,14 @@ regression](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/
 ``` r
 
 fitLmm <- fitMod(Reaction ~ Days + (1 | Subject),
-                 data = lme4::sleepstudy, fitfn = "lmMixed")
+                 data = lme4::sleepstudy, engine = "lmMixed")
 fitLmm
 #> 
 #> Linear mixed model
 #> 
 #> Call:
 #> fitMod(formula = Reaction ~ Days + (1 | Subject), data = lme4::sleepstudy, 
-#>     fitfn = "lmMixed")
+#>     engine = "lmMixed")
 #> 
 #> Fixed effects:
 #>              estimate  95%-lci      uci    p-val     
@@ -752,20 +752,21 @@ reference](https://stats.oarc.ucla.edu/r/dae/mixed-effects-logistic-regression/)
 ``` r
 
 fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
-                        data = alloy::Contraception, fitfn = "logitMixed")
+                        data = alloy::Contraception, engine = "logitMixed")
 fitLogitMixed
 #> 
 #> Mixed logistic regression
 #> 
 #> Call:
 #> fitMod(formula = use ~ age + urban + (1 | district), data = alloy::Contraception, 
-#>     fitfn = "logitMixed")
+#>     engine = "logitMixed")
 #> 
 #> Fixed effects:
-#>              estimate  95%-lci     uci    p-val     
-#> (Intercept)    -0.703   -0.870  -0.536  < 0.001  ***
-#> age             0.009   -0.002   0.020    0.095  .  
-#> urbanY          0.653    0.427   0.880  < 0.001  ***
+#>                  estimate  95%-lci     uci    p-val     
+#> (Intercept)        -0.703   -0.870  -0.536  < 0.001  ***
+#> age                 0.009   -0.002   0.020    0.095  .  
+#> urban  (ref: N)         .        .       .  < 0.001  ***
+#> urban Y             0.653    0.427   0.880  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -783,13 +784,14 @@ fitLogitMixed |> print(output = "or")
 #> 
 #> Call:
 #> fitMod(formula = use ~ age + urban + (1 | district), data = alloy::Contraception, 
-#>     fitfn = "logitMixed")
+#>     engine = "logitMixed")
 #> 
 #> Fixed effects (Odds Ratios):
-#>                 OR  95%-lci    uci    p-val     
-#> (Intercept)  0.495    0.419  0.585  < 0.001  ***
-#> age          1.009    0.998  1.020    0.095  .  
-#> urbanY       1.922    1.532  2.410  < 0.001  ***
+#>                     OR  95%-lci    uci    p-val     
+#> (Intercept)      0.495    0.419  0.585  < 0.001  ***
+#> age              1.009    0.998  1.020    0.095  .  
+#> urban  (ref: N)      .        .      .  < 0.001  ***
+#> urban Y          1.922    1.532  2.410  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -816,21 +818,22 @@ head(predict(fitLogitMixed, output = "both"))
 ``` r
 
 fitPoisMixed <- fitMod(incidence ~ period + (1 | herd),
-                       data = lme4::cbpp, fitfn = "poissonMixed")
+                       data = lme4::cbpp, engine = "poissonMixed")
 fitPoisMixed
 #> 
 #> Mixed Poisson regression
 #> 
 #> Call:
 #> fitMod(formula = incidence ~ period + (1 | herd), data = lme4::cbpp, 
-#>     fitfn = "poissonMixed")
+#>     engine = "poissonMixed")
 #> 
 #> Fixed effects:
-#>              estimate  95%-lci     uci    p-val     
-#> (Intercept)     1.277    0.903   1.651  < 0.001  ***
-#> period2        -1.125   -1.663  -0.586  < 0.001  ***
-#> period3        -1.319   -1.900  -0.738  < 0.001  ***
-#> period4        -1.945   -2.723  -1.167  < 0.001  ***
+#>                   estimate  95%-lci     uci    p-val     
+#> (Intercept)          1.277    0.903   1.651  < 0.001  ***
+#> period  (ref: 1)         .        .       .  < 0.001  ***
+#> period 2            -1.125   -1.663  -0.586  < 0.001  ***
+#> period 3            -1.319   -1.900  -0.738  < 0.001  ***
+#> period 4            -1.945   -2.723  -1.167  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -848,14 +851,15 @@ fitPoisMixed |> print(output = "irr")
 #> 
 #> Call:
 #> fitMod(formula = incidence ~ period + (1 | herd), data = lme4::cbpp, 
-#>     fitfn = "poissonMixed")
+#>     engine = "poissonMixed")
 #> 
 #> Fixed effects (Incidence Rate Ratios):
-#>                IRR  95%-lci    uci    p-val     
-#> (Intercept)  3.585    2.467  5.211  < 0.001  ***
-#> period2      0.325    0.189  0.556  < 0.001  ***
-#> period3      0.267    0.150  0.478  < 0.001  ***
-#> period4      0.143    0.066  0.311  < 0.001  ***
+#>                     IRR  95%-lci    uci    p-val     
+#> (Intercept)       3.585    2.467  5.211  < 0.001  ***
+#> period  (ref: 1)      .        .      .  < 0.001  ***
+#> period 2          0.325    0.189  0.556  < 0.001  ***
+#> period 3          0.267    0.150  0.478  < 0.001  ***
+#> period 4          0.143    0.066  0.311  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -874,7 +878,7 @@ fitPoisMixed |> print(output = "irr")
 ``` r
 
 fitNegbinMixed <- fitMod(incidence ~ period + (1 | herd),
-                         data = lme4::cbpp, fitfn = "negbinMixed")
+                         data = lme4::cbpp, engine = "negbinMixed")
 #> boundary (singular) fit: see help('isSingular')
 fitNegbinMixed
 #> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model failed to converge with max|grad| = 0.00688859 (tol = 0.002, component 1)
@@ -884,14 +888,15 @@ fitNegbinMixed
 #> 
 #> Call:
 #> fitMod(formula = incidence ~ period + (1 | herd), data = lme4::cbpp, 
-#>     fitfn = "negbinMixed")
+#>     engine = "negbinMixed")
 #> 
 #> Fixed effects:
-#>              estimate  95%-lci     uci    p-val     
-#> (Intercept)     1.403    0.933   1.872  < 0.001  ***
-#> period2        -1.209   -1.993  -0.424    0.003  ** 
-#> period3        -1.403   -2.217  -0.588  < 0.001  ***
-#> period4        -2.022   -2.997  -1.047  < 0.001  ***
+#>                   estimate  95%-lci     uci    p-val     
+#> (Intercept)          1.403    0.933   1.872  < 0.001  ***
+#> period  (ref: 1)         .        .       .  < 0.001  ***
+#> period 2            -1.209   -1.993  -0.424    0.003  ** 
+#> period 3            -1.403   -2.217  -0.588  < 0.001  ***
+#> period 4            -2.022   -2.997  -1.047  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -914,7 +919,7 @@ All ML models use the same
 ``` r
 
 fitSvm <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "svm")
+                 data = IceCream, engine = "svm")
 head(predict(fitSvm, output = "both"))
 #>     vanilla chocolate strawberry      class
 #> 1 0.5159623 0.1536322  0.3304055    vanilla
@@ -928,7 +933,7 @@ head(predict(fitSvm, output = "both"))
 ``` r
 
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                data = IceCream, fitfn = "randomForest")
+                data = IceCream, engine = "randomForest")
 head(predict(fitRf, output = "both"))
 #>   vanilla chocolate strawberry   class
 #> 1   0.484     0.266      0.250 vanilla
@@ -942,7 +947,7 @@ head(predict(fitRf, output = "both"))
 ``` r
 
 fitNnet <- fitMod(ice_cream ~ video + puzzle + female,
-                  data = IceCream, fitfn = "nnet")
+                  data = IceCream, engine = "nnet")
 head(predict(fitNnet, output = "both"))
 #>     vanilla    chocolate strawberry      class
 #> 1 0.7151025 0.0802329619  0.2046645    vanilla
@@ -956,7 +961,7 @@ head(predict(fitNnet, output = "both"))
 ``` r
 
 fitC5 <- fitMod(ice_cream ~ video + puzzle + female,
-                data = IceCream, fitfn = "C5.0")
+                data = IceCream, engine = "C5.0")
 #> Registered S3 method overwritten by 'rpart':
 #>   method     from 
 #>   plot.rpart alloy
@@ -973,7 +978,7 @@ head(predict(fitC5, output = "both"))
 ``` r
 
 fitNbayes <- fitMod(ice_cream ~ video + puzzle + female,
-                    data = IceCream, fitfn = "naiveBayes")
+                    data = IceCream, engine = "naiveBayes")
 head(predict(fitNbayes, output = "both"))
 #>     vanilla  chocolate strawberry      class
 #> 1 0.5826702 0.12326804  0.2940618    vanilla
@@ -987,7 +992,7 @@ head(predict(fitNbayes, output = "both"))
 ``` r
 
 fitLda <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "lda")
+                 data = IceCream, engine = "lda")
 head(predict(fitLda, output = "both"))
 #>     vanilla  chocolate strawberry      class
 #> 1 0.5413134 0.13510699  0.3235796    vanilla
@@ -1001,7 +1006,7 @@ head(predict(fitLda, output = "both"))
 ``` r
 
 fitGlmnet <- fitMod(ice_cream ~ video + puzzle + female,
-                    data = IceCream, fitfn = "glmnet")
+                    data = IceCream, engine = "glmnet")
 head(predict(fitGlmnet, output = "both"))
 #>     vanilla chocolate strawberry   class
 #> 1 0.4858372 0.2054552  0.3087076 vanilla
@@ -1015,7 +1020,7 @@ head(predict(fitGlmnet, output = "both"))
 ``` r
 
 fitXgb <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "xgboost")
+                 data = IceCream, engine = "xgboost")
 head(predict(fitXgb, output = "both"))
 #>     vanilla  chocolate strawberry      class
 #> 1 0.4408226 0.15315042  0.4060270    vanilla
@@ -1029,7 +1034,7 @@ head(predict(fitXgb, output = "both"))
 ``` r
 
 fitRpart <- fitMod(ice_cream ~ video + puzzle + female,
-                   data = IceCream, fitfn = "rpart")
+                   data = IceCream, engine = "rpart")
 head(predict(fitRpart, output = "both"))
 #>     vanilla  chocolate strawberry      class
 #> 1 0.2500000 0.16666667  0.5833333 strawberry

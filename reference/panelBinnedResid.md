@@ -50,7 +50,7 @@ for an overview of the diagnostics for logistic models in alloy.
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #> Warning: only 16 distinct bins could be formed instead of the requested 20
 #> Warning: only 19 distinct bins could be formed instead of the requested 20

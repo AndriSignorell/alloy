@@ -62,7 +62,7 @@ Other regression.utils:
 
 ``` r
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                IceCream, fitfn = "randomForest")
+                IceCream, engine = "randomForest")
 vi <- varImp(fitRf)
 vi
 #>   variable importance

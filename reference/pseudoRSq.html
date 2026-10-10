@@ -17,7 +17,7 @@ logistic, Poisson or ordinal regression."><meta property="og:image" content="htt
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,8 @@ logistic, Poisson or ordinal regression.</p>
 
 <dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>a fitted model object of class <code>glm</code>, <code>multinom</code>
-(<span class="pkg">nnet</span>), <code>polr</code> (<span class="pkg">MASS</span>) or <code>vglm</code> (<span class="pkg">VGAM</span>)</p></dd>
+(<span class="pkg">nnet</span>), <code>polr</code> (<span class="pkg">MASS</span>), <code>vglm</code> (<span class="pkg">VGAM</span>) or
+<code>betareg</code> (<span class="pkg">betareg</span>)</p></dd>
 
 
 <dt id="arg-which">which<a class="anchor" aria-label="anchor" href="#arg-which"></a></dt>
@@ -113,6 +114,10 @@ observed and fitted values</p></dd>
 probability of the successes minus that of the failures, binomial
 responses only</p></dd>
 
+<dt><code>Ferrari</code></dt>
+<dd><p>squared correlation between the linear predictor
+and the link-transformed response, beta regression only</p></dd>
+
 <dt><code>AIC</code>, <code>BIC</code></dt>
 <dd><p>information criteria of the fitted model</p></dd>
 
@@ -135,8 +140,9 @@ need not be accessible. For <code>polr</code> and <code>multinom</code>, the nul
 is refitted on the full model's model frame, preserving its analysis sample,
 weights and offsets. If that frame was not stored, it is rebuilt from the
 call, which does require the original data to be available. For
-<code>vglm</code> the null model is refitted with <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></code>,
-which requires the original data as well.</p>
+<code>vglm</code> the null model is refitted with <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></code>
+in the environment of the model formula, which requires the original data
+as well.</p>
 <p>Where prior weights are present, the sample size entering Cox-Snell,
 Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
 number of rows, and McKelvey-Zavoina, Efron and Tjur are computed with the
@@ -157,6 +163,18 @@ fits these values consequently differ from <code><a href="https://rdrr.io/r/stat
 <p>For <code>vglm</code> objects the package <span class="pkg">VGAM</span> must be installed and the
 model should have been fitted with <code>model = TRUE</code>, so that the model
 frame can be extracted.</p>
+<p>For beta regressions (<code>betareg</code>) the null model has an intercept in
+the mean and a constant precision. It is refitted on the response, weights
+and offsets of the full model, so the original data need not be
+accessible. The response is continuous, and the log-likelihood of a
+density is not bounded by zero: it is usually positive for a response in
+(0, 1). McFadden, its adjusted version and Nagelkerke are ratios of
+log-likelihoods that presuppose that bound, and are therefore not defined
+for these fits; note that this includes the default <code>which</code>.
+Available are <code>CoxSnell</code>, which only depends on the likelihood ratio,
+<code>Efron</code>, and <code>Ferrari</code>, the pseudo R-squared reported by
+<span class="pkg">betareg</span> itself (not available for the extended-support
+distributions), besides the log-likelihoods and information criteria.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -172,6 +190,9 @@ limited dependent variable models. <em>Journal of Economic Surveys</em>,
 10(3), 241-259.</p>
 <p>Tjur, T. (2009) Coefficients of determination in logistic regression models.
 <em>The American Statistician</em>, 63(4), 366-372.</p>
+<p>Ferrari, S. L. P., Cribari-Neto, F. (2004) Beta regression for modelling
+rates and proportions. <em>Journal of Applied Statistics</em>, 31(7),
+799-815.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

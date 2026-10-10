@@ -65,7 +65,7 @@ Invisibly returns `x`.
 
 ``` r
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                IceCream, fitfn = "randomForest")
+                IceCream, engine = "randomForest")
 plot(varImp(fitRf))
 
 ```

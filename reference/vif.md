@@ -15,7 +15,8 @@ vif(fit)
 - fit:
 
   A fitted model object. Currently supports objects of class `lm`,
-  `glm`, and `gls`.
+  `glm`, `gls` and `betareg`. For a beta regression the factors refer to
+  the mean model.
 
 ## Value
 

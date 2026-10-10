@@ -17,7 +17,7 @@ mixed-effects logistic regression with a district-level random effect."><meta pr
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -98,20 +98,21 @@ Dhaka: National Institute of Population Research and Training.</p>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fitLogitMixed</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">use</span> <span class="op">~</span> <span class="va">age</span> <span class="op">+</span> <span class="va">urban</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">district</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                        data <span class="op">=</span> <span class="va">Contraception</span>, fitfn <span class="op">=</span> <span class="st">"logitMixed"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                        data <span class="op">=</span> <span class="va">Contraception</span>, engine <span class="op">=</span> <span class="st">"logitMixed"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">fitLogitMixed</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Mixed logistic regression</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fitMod(formula = use ~ age + urban + (1 | district), data = Contraception, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     fitfn = "logitMixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     engine = "logitMixed")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed effects:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>              estimate  95%-lci     uci    p-val     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)    -0.703   -0.870  -0.536  &lt; 0.001  ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age             0.009   -0.002   0.020    0.095  .  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urbanY          0.653    0.427   0.880  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                  estimate  95%-lci     uci    p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)        -0.703   -0.870  -0.536  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age                 0.009   -0.002   0.020    0.095  .  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urban  (ref: N)         .        .       .  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urban Y             0.653    0.427   0.880  &lt; 0.001  ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -130,13 +131,14 @@ Dhaka: National Institute of Population Research and Training.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fitMod(formula = use ~ age + urban + (1 | district), data = Contraception, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     fitfn = "logitMixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     engine = "logitMixed")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed effects (Odds Ratios):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                 OR  95%-lci    uci    p-val     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  0.495    0.419  0.585  &lt; 0.001  ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age          1.009    0.998  1.020    0.095  .  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> urbanY       1.922    1.532  2.410  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                     OR  95%-lci    uci    p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)      0.495    0.419  0.585  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age              1.009    0.998  1.020    0.095  .  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urban  (ref: N)      .        .      .  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> urban Y          1.922    1.532  2.410  &lt; 0.001  ***</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

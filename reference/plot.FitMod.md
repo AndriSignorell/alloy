@@ -103,7 +103,7 @@ Other modelling:
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 op <- par(mfrow = c(2, 3))
 plot(fitLogit)
@@ -115,7 +115,7 @@ plot(fitLogit, which = 2)
 
 # other model types keep their own diagnostics
 plot(fitMod(Fertility ~ ., swiss))
-#> fitMod: using fitfn = 'lm'
+#> fitMod: using engine = 'lm'
 
 
 
