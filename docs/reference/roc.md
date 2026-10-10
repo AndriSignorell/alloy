@@ -58,7 +58,7 @@ Other roc:
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 r <- roc(fitLogit)
 #> Error in roc.default(fitLogit): No valid data provided.
 plot(r)

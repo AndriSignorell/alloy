@@ -16,13 +16,11 @@
   ci      <- cbind(est - z_alpha * se, est + z_alpha * se)
   
   # Reference levels for factor predictors
-  ref <- tryCatch(refLevel(x), error = function(e) character(0L))
+  ref <- tryCatch(.refLevels(x, strict = FALSE),
+                  error = function(e) character(0L))
   
   # Overall p-values via drop1 (Wald test)
-  anova_p <- tryCatch(
-    drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"],
-    error = function(e) setNamesX(rep(NA_real_, length(ref)), names(ref))
-  )
+  anova_p <- .drop1_p(x, names(ref))
   
   # Build output matrix
   ci_label <- sprintf(c("%s-lci", "uci"),
@@ -38,26 +36,7 @@
   colnames(out) <- c("estimate", ci_label, "p-val", "")
   
   # Insert variable-level summary rows and indent coefficient rows
-  for (i in seq_along(ref)) {
-    pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
-    rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
-    if (is.na(rnr)) next
-    
-    p <- anova_p[i]
-    summary_row <- c(
-      rep(".", 3L),
-      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
-      fm(p, fmt = "*")
-    )
-    out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
-    rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
-    dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
-    rownames(out)[dummy_rows] <- sub(
-      names(ref)[i],
-      paste0(names(ref)[i], " "),
-      rownames(out)[dummy_rows]
-    )
-  }
+  out <- .insert_ref_rows(out, ref, anova_p, pdigits)
   
   # --- header ---
   cat("\nCall:\n",

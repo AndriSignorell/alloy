@@ -9,7 +9,9 @@ refLevel(fit)
 \arguments{
 \item{fit}{A fitted model object with a \code{terms} attribute and a
 \code{model} data frame (e.g. objects of class \code{"lm"},
-\code{"glm"}, \code{"lmerMod"}, or \code{"glmerMod"}).}
+\code{"glm"}, \code{"lmerMod"}, \code{"glmerMod"} or
+\code{"betareg"}).  Mixed models fitted with \code{\link{fitMod}}
+are accepted as well.}
 }
 \value{
 A named character vector whose names are the factor predictor
@@ -35,11 +37,17 @@ each factor predictor.
 is returned as the reference.
 \item If the contrast is stored as a \emph{matrix}, the reference
 level is identified as the unique row whose entries are all zero
-(i.e. the row that does not map to any dummy column).
+(i.e. the row that does not map to any dummy column).  The
+matrix must be a treatment coding, that is consist of 0 and 1
+only, with a single 1 in every other row.
 }
 
 Contrasts other than treatment contrasts (e.g. \code{contr.sum},
-\code{contr.helmert}) are not supported and trigger an informative error.
+\code{contr.helmert}) are not supported and trigger an informative error,
+whether they are stored by name or as a matrix.
+
+For beta regressions (\code{"betareg"}) the factor predictors of the mean
+and of the precision model are returned together.
 }
 \examples{
 m <- lm(Sepal.Length ~ Species, data = iris)

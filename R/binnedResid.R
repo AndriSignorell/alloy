@@ -29,7 +29,7 @@
 #' }
 #'
 #' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
-#'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
+#'   \code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param var the binning variable. \code{NULL} (default) bins by the
 #'   fitted probabilities; a character \emph{vector} names variables in the
 #'   model frame (or, for a transformed term, in the data the model was
@@ -72,7 +72,7 @@
 #' @concept binary-outcome
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #'
 #' binnedResid(fitLogit, var = "gre")
 #'
@@ -164,7 +164,7 @@ binnedResid <- function(fit,
 #' @concept panel
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #' bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 #' vars <- predictors(fitLogit)
 #' 

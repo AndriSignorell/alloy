@@ -16,7 +16,8 @@ test_that("which = 'all' returns everything available, in vocabulary order", {
 
   res <- pseudoRSq(binaryFit(), which = "all")
 
-  expect_named(res, .pseudoR2Measures)
+  # Ferrari is defined for beta regressions only
+  expect_named(res, setdiff(.pseudoR2Measures, "Ferrari"))
   expect_false(anyNA(res))
 })
 
@@ -510,7 +511,7 @@ test_that("vglm reproduces the glm of the same model", {
   fit <- VGAM::vglm(vs ~ mpg + wt, family = VGAM::binomialff,
                     data = mtcars, model = TRUE)
 
-  measures <- setdiff(.pseudoR2Measures, c("AIC", "BIC"))
+  measures <- setdiff(.pseudoR2Measures, c("AIC", "BIC", "Ferrari"))
 
   expect_equal(
     pseudoRSq(fit, which = "all")[measures],

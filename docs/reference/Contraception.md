@@ -56,20 +56,21 @@ Training.
 
 ``` r
 fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
-                        data = Contraception, fitfn = "logitMixed")
+                        data = Contraception, engine = "logitMixed")
 fitLogitMixed
 #> 
 #> Mixed logistic regression
 #> 
 #> Call:
 #> fitMod(formula = use ~ age + urban + (1 | district), data = Contraception, 
-#>     fitfn = "logitMixed")
+#>     engine = "logitMixed")
 #> 
 #> Fixed effects:
-#>              estimate  95%-lci     uci    p-val     
-#> (Intercept)    -0.703   -0.870  -0.536  < 0.001  ***
-#> age             0.009   -0.002   0.020    0.095  .  
-#> urbanY          0.653    0.427   0.880  < 0.001  ***
+#>                  estimate  95%-lci     uci    p-val     
+#> (Intercept)        -0.703   -0.870  -0.536  < 0.001  ***
+#> age                 0.009   -0.002   0.020    0.095  .  
+#> urban  (ref: N)         .        .       .  < 0.001  ***
+#> urban Y             0.653    0.427   0.880  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -88,13 +89,14 @@ fitLogitMixed |> print(output = "or")
 #> 
 #> Call:
 #> fitMod(formula = use ~ age + urban + (1 | district), data = Contraception, 
-#>     fitfn = "logitMixed")
+#>     engine = "logitMixed")
 #> 
 #> Fixed effects (Odds Ratios):
-#>                 OR  95%-lci    uci    p-val     
-#> (Intercept)  0.495    0.419  0.585  < 0.001  ***
-#> age          1.009    0.998  1.020    0.095  .  
-#> urbanY       1.922    1.532  2.410  < 0.001  ***
+#>                     OR  95%-lci    uci    p-val     
+#> (Intercept)      0.495    0.419  0.585  < 0.001  ***
+#> age              1.009    0.998  1.020    0.095  .  
+#> urban  (ref: N)      .        .      .  < 0.001  ***
+#> urban Y          1.922    1.532  2.410  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 

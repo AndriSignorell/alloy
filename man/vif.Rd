@@ -8,7 +8,8 @@ vif(fit)
 }
 \arguments{
 \item{fit}{A fitted model object. Currently supports objects of class
-\code{lm}, \code{glm}, and \code{gls}.}
+\code{lm}, \code{glm}, \code{gls} and \code{betareg}. For a beta
+regression the factors refer to the mean model.}
 }
 \value{
 If all terms have 1 degree of freedom, a named numeric vector of VIFs.

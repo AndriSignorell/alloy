@@ -41,7 +41,7 @@ response <- function(x, ...) {
   }
   
   # glmnet: formula stored directly on the object      # <-- hier einfügen
-  if (!is.null(x$fitfn) && x$fitfn == "glmnet" && !is.null(x$formula)) {
+  if (!is.null(x$engine) && x$engine == "glmnet" && !is.null(x$formula)) {
     mf  <- model.frame(x$formula,
                        data = eval(x$call$data, envir = parent.frame()))
     res <- model.response(mf)

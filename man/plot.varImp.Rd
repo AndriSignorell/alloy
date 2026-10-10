@@ -43,7 +43,7 @@ by \code{\link{varImp}}.  Variables are ordered by importance
 }
 \examples{
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                IceCream, fitfn = "randomForest")
+                IceCream, engine = "randomForest")
 plot(varImp(fitRf))
 
 }

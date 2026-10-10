@@ -35,7 +35,7 @@ frame. Diagnostics of functional form only apply to those: linearity in
 the logit is not a question one can ask of a factor.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 predictors(fitLogit)
 predictors(fitLogit, numeric = TRUE)     # rank drops out

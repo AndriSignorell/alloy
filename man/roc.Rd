@@ -35,7 +35,7 @@ probability output, supply the predictor vector explicitly via \code{x}
 and \code{ref}.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 r <- roc(fitLogit)
 plot(r)
 

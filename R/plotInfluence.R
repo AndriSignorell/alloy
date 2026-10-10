@@ -53,7 +53,7 @@
 #' whole pattern.
 #'
 #' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
-#'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
+#'   \code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param metric the change statistic on the vertical axis,
 #'   \code{"chisq"} (default) or \code{"deviance"}. See Details.
 #' @param main main title. \code{NULL} (default) derives one from the
@@ -98,7 +98,7 @@
 #' @concept outlier-detection
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #'
 #' plotInfluence(fitLogit)
 #' plotInfluence(fitLogit, metric = "deviance", labels = 3)

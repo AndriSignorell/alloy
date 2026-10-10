@@ -35,25 +35,40 @@ d_cnt$y <- rpois(100, lambda = exp(0.3 * d_num$x1 + 0.5))
 # fitMod: auto-detection & validation
 # ==========================================================================
 
-test_that("auto-detection picks fitfn from the response type", {
+test_that("auto-detection picks engine from the response type", {
   expect_message(m <- fitMod(y ~ x1, d_num), "lm")
   expect_s3_class(m, "FitMod")
-  expect_identical(m$fitfn, "lm")
+  expect_identical(m$engine, "lm")
 
   expect_message(m <- fitMod(y ~ x1, d_bin), "logit")
-  expect_identical(m$fitfn, "logit")
+  expect_identical(m$engine, "logit")
 
   expect_message(m <- fitMod(y ~ x1, d_cnt), "poisson")
-  expect_identical(m$fitfn, "poisson")
+  expect_identical(m$engine, "poisson")
 
   skip_if_not_installed("nnet")
   expect_message(m <- fitMod(Species ~ ., iris), "multinom")
-  expect_identical(m$fitfn, "multinom")
+  expect_identical(m$engine, "multinom")
 })
 
-test_that("unknown fitfn gives an informative error", {
+test_that("engine is the third argument and leaves 'model' to the fitter", {
+  m <- fitMod(mpg ~ wt, mtcars, "lm")
+  expect_identical(m$engine, "lm")
+
+  # lm() has an argument 'model' of its own; it must arrive there
+  expect_null(fitMod(mpg ~ wt, mtcars, engine = "lm", model = FALSE)$model)
+  expect_s3_class(fitMod(mpg ~ wt, mtcars, engine = "lm")$model, "data.frame")
+
+  # subset and na.action stand before the dots and are still handed on
+  ms <- fitMod(mpg ~ wt, mtcars, engine = "lm", subset = cyl == 4)
+  expect_identical(nobs(ms), sum(mtcars$cyl == 4))
+  expect_identical(names(formals(fitMod)),
+                   c("formula", "data", "engine", "subset", "na.action", "..."))
+})
+
+test_that("unknown engine gives an informative error", {
   # fitMod() uses match.arg() against the registry names
-  expect_error(fitMod(y ~ x1, d_num, fitfn = "gurkensalat"),
+  expect_error(fitMod(y ~ x1, d_num, engine = "gurkensalat"),
                "should be one of")
 })
 
@@ -74,7 +89,7 @@ test_that("[BUG] one-sided formulas are rejected cleanly", {
 
 test_that("naiveBayes registry key works (docs used to say 'naive_bayes')", {
   skip_if_not_installed("naivebayes")
-  expect_no_error(fitMod(y ~ x1 + x2, d_bin, fitfn = "naiveBayes"))
+  expect_no_error(fitMod(y ~ x1 + x2, d_bin, engine = "naiveBayes"))
 })
 
 
@@ -89,7 +104,7 @@ test_that("[BUG] glmnet/xgboost: plain call without subset/na.action works", {
   # This is the exact scenario of the vignette examples.
   skip_if_not_installed("glmnet")
   expect_no_error(
-    suppressMessages(fitMod(y ~ x1 + x2, d_bin, fitfn = "glmnet"))
+    suppressMessages(fitMod(y ~ x1 + x2, d_bin, engine = "glmnet"))
   )
 })
 
@@ -97,14 +112,14 @@ test_that("[BUG] glmnet: formula without intercept keeps all predictors", {
   skip_if_not_installed("glmnet")
   # x2 has 3 levels -> without intercept: 3 dummies + x1 = 4 columns.
   # The unconditional [, -1L] drop used to discard the first dummy.
-  m <- suppressMessages(fitMod(y ~ x1 + x2 - 1, d_num, fitfn = "glmnet"))
+  m <- suppressMessages(fitMod(y ~ x1 + x2 - 1, d_num, engine = "glmnet"))
   expect_identical(ncol(m$x_train), 4L)
 })
 
 test_that("[BUG] glmnet: subset is honoured", {
   skip_if_not_installed("glmnet")
   m <- suppressMessages(
-    fitMod(y ~ x1 + x2, d_num, fitfn = "glmnet", subset = 1:50)
+    fitMod(y ~ x1 + x2, d_num, engine = "glmnet", subset = 1:50)
   )
   expect_identical(nrow(m$x_train), 50L)
 })
@@ -117,7 +132,7 @@ test_that("[BUG] glmnet: subset is honoured", {
 test_that("[BUG] GLM: same scale with and without newdata", {
   # without newdata: fitted() (response scale)
   # with newdata:    predict.glm default (link scale)  -> inconsistent
-  m  <- fitMod(y ~ x1, d_cnt, fitfn = "poisson")
+  m  <- fitMod(y ~ x1, d_cnt, engine = "poisson")
   p0 <- predict(m)
   p1 <- predict(m, newdata = d_cnt)
   expect_equal(unname(p0), unname(p1), tolerance = 1e-8)
@@ -126,7 +141,7 @@ test_that("[BUG] GLM: same scale with and without newdata", {
 test_that("[BUG] logit: prob columns carry the factor levels", {
   # The docs promise "column names match the factor levels", but the
   # prob branch used to hardcode "0"/"1".
-  m <- fitMod(y ~ x1, d_bin, fitfn = "logit")
+  m <- fitMod(y ~ x1, d_bin, engine = "logit")
   p <- predict(m)
   expect_identical(colnames(p), levels(d_bin$y))
 })
@@ -142,29 +157,29 @@ test_that("classification probs: rows sum to 1, columns = levels", {
 test_that("[BUG] binary multinom returns 2 prob columns", {
   # predict(multinom, type = "probs") returns a vector for 2 classes
   skip_if_not_installed("nnet")
-  m <- fitMod(y ~ x1, d_bin, fitfn = "multinom")
+  m <- fitMod(y ~ x1, d_bin, engine = "multinom")
   p <- predict(m)
   expect_identical(ncol(p), 2L)
   expect_identical(colnames(p), levels(d_bin$y))
 })
 
 test_that("[BUG] output = 'where' outside rpart does not return NULL silently", {
-  m <- fitMod(y ~ x1, d_bin, fitfn = "logit")
+  m <- fitMod(y ~ x1, d_bin, engine = "logit")
   expect_error(predict(m, output = "where"))
 })
 
 test_that("[BUG] rpart regression tree is predictable", {
-  # is_reg used to depend on fitfn alone -> anova trees ended up in the
+  # is_reg used to depend on engine alone -> anova trees ended up in the
   # classification branch (type = "prob" -> error)
   skip_if_not_installed("rpart")
-  m <- fitMod(y ~ x1 + x2, d_num, fitfn = "rpart")
+  m <- fitMod(y ~ x1 + x2, d_num, engine = "rpart")
   expect_no_error(p <- predict(m))
   expect_true(is.numeric(unlist(p)))
 })
 
 test_that("[BUG] xgboost regression returns no pseudo-probabilities", {
   skip_if_not_installed("xgboost")
-  m <- suppressMessages(fitMod(y ~ x1 + x2, d_num, fitfn = "xgboost"))
+  m <- suppressMessages(fitMod(y ~ x1 + x2, d_num, engine = "xgboost"))
   p <- predict(m)
   expect_false(identical(colnames(p), c("0", "1")))
 })
@@ -173,7 +188,7 @@ test_that("[BUG] glmnet: newdata with a subset of the factor levels", {
   # model.matrix() on newdata alone -> missing levels = missing dummy
   # columns -> column mismatch. Fix: store terms + xlev at fit time.
   skip_if_not_installed("glmnet")
-  m  <- suppressMessages(fitMod(y ~ x1 + x2, d_bin, fitfn = "glmnet"))
+  m  <- suppressMessages(fitMod(y ~ x1 + x2, d_bin, engine = "glmnet"))
   nd <- d_bin[d_bin$x2 == "a", ][1:5, ]
   nd$x2 <- droplevels(nd$x2)
   expect_no_error(p <- predict(m, newdata = nd))
@@ -182,7 +197,7 @@ test_that("[BUG] glmnet: newdata with a subset of the factor levels", {
 
 test_that("[BUG] glmnet: 's' is passed through", {
   skip_if_not_installed("glmnet")
-  m <- suppressMessages(fitMod(y ~ x1 + x2, d_bin, fitfn = "glmnet"))
+  m <- suppressMessages(fitMod(y ~ x1 + x2, d_bin, engine = "glmnet"))
 
   # reference directly via predict.cv.glmnet with lambda.min
   obj <- m
@@ -201,7 +216,7 @@ test_that("[BUG] tobit: predict() does not return NULL", {
   skip_if_not_installed("AER")
   d   <- d_num
   d$y <- pmax(d$y, 0)
-  m <- fitMod(y ~ x1 + x2, d, fitfn = "tobit")
+  m <- fitMod(y ~ x1 + x2, d, engine = "tobit")
   expect_false(is.null(predict(m)))
   expect_identical(length(predict(m)), nrow(d))
 })
@@ -222,7 +237,7 @@ test_that("[BUG] update() works without the fitting package attached", {
   set.seed(4711)
   d_nb   <- d_num
   d_nb$y <- rnbinom(100, mu = exp(0.3 * d_num$x1 + 0.5), size = 1.5)
-  expect_no_warning(m <- fitMod(y ~ x1 + x2, d_nb, fitfn = "negbin"))
+  expect_no_warning(m <- fitMod(y ~ x1 + x2, d_nb, engine = "negbin"))
   expect_no_error(update(m, . ~ . - x2))
 })
 
@@ -243,7 +258,7 @@ test_that("[BUG] .drop1.polr respects the method of the full model", {
              labels = c("low", "mid", "high"),
              ordered_result = TRUE)
 
-  m <- fitMod(y ~ x1 + x2, d, fitfn = "polr", method = "probit")
+  m <- fitMod(y ~ x1 + x2, d, engine = "polr", method = "probit")
 
   # reference: LR test consistently with probit
   full <- MASS::polr(y ~ x1 + x2, data = d, method = "probit", Hess = TRUE)
@@ -261,7 +276,7 @@ test_that("[BUG] .drop1.polr does not silently discard offsets", {
   d$y <- cut(d$x1 + rnorm(100), 3, ordered_result = TRUE)
   d$o <- runif(100)
   expect_error(
-    fitMod(y ~ x1 + x2 + offset(o), d, fitfn = "polr"),
+    fitMod(y ~ x1 + x2 + offset(o), d, engine = "polr"),
     regexp = "offset"
   )
 })

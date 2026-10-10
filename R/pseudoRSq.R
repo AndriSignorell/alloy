@@ -25,6 +25,8 @@
 #'   \item{\code{Tjur}}{coefficient of discrimination, the mean fitted
 #'     probability of the successes minus that of the failures, binomial
 #'     responses only}
+#'   \item{\code{Ferrari}}{squared correlation between the linear predictor
+#'     and the link-transformed response, beta regression only}
 #'   \item{\code{AIC}, \code{BIC}}{information criteria of the fitted model}
 #'   \item{\code{logLik}, \code{logLik0}}{log-likelihood of the fitted and of
 #'     the null model}
@@ -32,7 +34,8 @@
 #' }
 #'
 #' @param fit a fitted model object of class \code{glm}, \code{multinom}
-#'   (\pkg{nnet}), \code{polr} (\pkg{MASS}) or \code{vglm} (\pkg{VGAM})
+#'   (\pkg{nnet}), \code{polr} (\pkg{MASS}), \code{vglm} (\pkg{VGAM}) or
+#'   \code{betareg} (\pkg{betareg})
 #' @param which character vector naming the measures to return, or
 #'   \code{"all"} for everything available
 #'
@@ -51,8 +54,9 @@
 #' is refitted on the full model's model frame, preserving its analysis sample,
 #' weights and offsets. If that frame was not stored, it is rebuilt from the
 #' call, which does require the original data to be available. For
-#' \code{vglm} the null model is refitted with \code{\link[stats]{update}},
-#' which requires the original data as well.
+#' \code{vglm} the null model is refitted with \code{\link[stats]{update}}
+#' in the environment of the model formula, which requires the original data
+#' as well.
 #'
 #' Where prior weights are present, the sample size entering Cox-Snell,
 #' Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
@@ -77,6 +81,19 @@
 #' model should have been fitted with \code{model = TRUE}, so that the model
 #' frame can be extracted.
 #'
+#' For beta regressions (\code{betareg}) the null model has an intercept in
+#' the mean and a constant precision. It is refitted on the response, weights
+#' and offsets of the full model, so the original data need not be
+#' accessible. The response is continuous, and the log-likelihood of a
+#' density is not bounded by zero: it is usually positive for a response in
+#' (0, 1). McFadden, its adjusted version and Nagelkerke are ratios of
+#' log-likelihoods that presuppose that bound, and are therefore not defined
+#' for these fits; note that this includes the default \code{which}.
+#' Available are \code{CoxSnell}, which only depends on the likelihood ratio,
+#' \code{Efron}, and \code{Ferrari}, the pseudo R-squared reported by
+#' \pkg{betareg} itself (not available for the extended-support
+#' distributions), besides the log-likelihoods and information criteria.
+#'
 #' @references
 #' McFadden, D. (1974) Conditional logit analysis of qualitative choice
 #' behavior. In: Zarembka, P. (ed.) \emph{Frontiers in Econometrics},
@@ -94,6 +111,10 @@
 #'
 #' Tjur, T. (2009) Coefficients of determination in logistic regression models.
 #' \emph{The American Statistician}, 63(4), 366-372.
+#'
+#' Ferrari, S. L. P., Cribari-Neto, F. (2004) Beta regression for modelling
+#' rates and proportions. \emph{Journal of Applied Statistics}, 31(7),
+#' 799-815.
 #'
 #' @examples
 #' fit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
@@ -133,6 +154,8 @@ pseudoRSq <- function(fit, which = "McFadden") {
 
   if (info$type %in% c("glm", "vglm")) {
     res <- c(res, .extraMeasures(fit, info, res))
+  } else if (info$type == "betareg") {
+    res <- .betaregMeasures(fit, res)
   }
 
   res <- res[intersect(.pseudoR2Measures, names(res))]
@@ -166,7 +189,7 @@ pseudoRSq <- function(fit, which = "McFadden") {
 .pseudoR2Measures <- c(
   "McFadden", "McFaddenAdj", "CoxSnell", "Nagelkerke",
   "AldrichNelson", "VeallZimmermann", "McKelveyZavoina",
-  "Efron", "Tjur",
+  "Efron", "Tjur", "Ferrari",
   "AIC", "BIC", "logLik", "logLik0", "G2"
 )
 
@@ -193,6 +216,8 @@ pseudoRSq <- function(fit, which = "McFadden") {
     "multinom"
   } else if (inherits(x, "polr")) {
     "polr"
+  } else if (inherits(x, "betareg")) {
+    "betareg"
   } else {
     stop(gettextf(
       "no pseudo R-squared available for an object of class %s",
@@ -202,6 +227,10 @@ pseudoRSq <- function(fit, which = "McFadden") {
 
   if (type == "vglm" && !requireNamespace("VGAM", quietly = TRUE)) {
     stop("package 'VGAM' is required for vglm models", call. = FALSE)
+  }
+
+  if (type == "betareg" && !requireNamespace("betareg", quietly = TRUE)) {
+    stop("package 'betareg' is required for betareg models", call. = FALSE)
   }
 
   loglik <- stats::logLik(x)
@@ -296,12 +325,33 @@ pseudoRSq <- function(fit, which = "McFadden") {
     return(p0 - fit0$aic / 2)
   }
 
+  if (type == "betareg") {
+
+    # intercept in the mean, constant precision; .refit_betareg() keeps
+    # response, weights, offsets, links and distribution of the full fit
+    ones <- matrix(1, nrow = x[["n"]], ncol = 1L,
+                   dimnames = list(NULL, "(Intercept)"))
+
+    fit0 <- .refit_betareg(x, x = ones, z = ones)
+
+    if (!isTRUE(fit0$converged)) {
+      stop("the null model could not be refitted: it did not converge",
+           call. = FALSE)
+    }
+
+    return(fit0$loglik)
+  }
+
   fit0 <- tryCatch(
 
     if (type %in% c("multinom", "polr")) {
       .nullRefit(x, type)
     } else {
-      stats::update(x, . ~ 1)
+      # vglm: refit where the model was fitted, i.e. in the environment of
+      # its formula.  update() would evaluate the call in this frame, from
+      # which data local to the caller is not visible
+      eval(stats::update(x, . ~ 1, evaluate = FALSE),
+           envir = environment(stats::formula(x)))
     },
 
     error = function(e) {
@@ -419,6 +469,39 @@ pseudoRSq <- function(fit, which = "McFadden") {
       res["Tjur"] <- sum(w * y * yhat) / sum(w * y) -
         sum(w * (1 - y) * yhat) / sum(w * (1 - y))
     }
+  }
+
+  res
+}
+
+
+
+
+#' Measures of a beta regression
+#'
+#' The ratios of log-likelihoods are dropped from the core measures: the
+#' response is continuous, so the log-likelihoods are not bounded by zero and
+#' usually positive, which leaves McFadden and Nagelkerke without a meaning.
+#' Efron and the pseudo R-squared of Ferrari and Cribari-Neto are added, the
+#' latter as stored by betareg (NA for the extended-support distributions).
+#'
+#' @keywords internal
+#' @noRd
+.betaregMeasures <- function(x, core) {
+
+  res <- core[setdiff(names(core), c("McFadden", "McFaddenAdj", "Nagelkerke"))]
+
+  y <- x[["y"]] %||% stats::model.response(stats::model.frame(x))
+  yhat <- stats::fitted(x)
+  w <- x[["weights"]] %||% rep(1, length(y))
+
+  res["Efron"] <- 1 -
+    sum(w * (y - yhat)^2) / sum(w * (y - stats::weighted.mean(y, w))^2)
+
+  ferrari <- x[["pseudo.r.squared"]]
+
+  if (!is.null(ferrari) && !is.na(ferrari)) {
+    res["Ferrari"] <- ferrari
   }
 
   res

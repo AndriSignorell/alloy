@@ -7,7 +7,8 @@
 #'
 #' @details
 #' The function standardizes model output across different model classes
-#' (e.g. \code{lm}, \code{glm}, \code{coxph}, \code{gam}, \code{lmer}) using
+#' (e.g. \code{lm}, \code{glm}, \code{betareg}, \code{coxph}, \code{gam},
+#' \code{lmer}) using
 #' S3 methods implemented via \code{tModSummary()}. This enables direct
 #' comparison of model coefficients and fit statistics in tabular and
 #' graphical form.
@@ -179,7 +180,8 @@ print.TMod <- function(x, digits=3, naForm = "-", verbose = NULL, ...){
   
   if(!verbose){
     x[[2]] <- x[[2]][match(
-      c("adj.r.squared","AIC","N","NAs","n vars","n coef","MAE","RMSE","McFadden"),
+      c("adj.r.squared","AIC","N","NAs","n vars","n coef","MAE","RMSE","McFadden",
+        "Ferrari"),
       x[[2]]$stat, nomatch = 0), ]
   }
   

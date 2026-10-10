@@ -305,6 +305,60 @@ tModSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
 
 
 #' @export
+#' @method tModSummary betareg
+#' @rdname tModSummary
+tModSummary.betareg <- function(x, conf.level = 0.95, ...){
+  
+  # coefficients of all model parts in one table, the rows of the
+  # precision model prefixed with "(phi)_" as in coef()
+  cf <- .waldTable.betareg(x)
+  
+  z_alpha <- qnorm(1 - (1 - conf.level) / 2)
+  
+  coef <- data.frame(
+    name = rownames(cf),
+    est  = cf[,1],
+    se   = cf[,2],
+    stat = cf[,3],
+    p    = cf[,4],
+    lci  = cf[,1] - z_alpha * cf[,2],
+    uci  = cf[,1] + z_alpha * cf[,2],
+    row.names = NULL
+  )
+  
+  mf   <- model.frame(x)
+  pred <- fitted(x)
+  y    <- model.response(mf)
+  
+  statsx <- c(
+    # CoxSnell, Efron, Ferrari and the likelihood based statistics;
+    # McFadden et al. are not defined for a continuous response
+    pseudoRSq(x, which = "all"),
+    
+    N     = nobs(x),
+    # betareg keeps the omitted observations with the model frame only
+    NAs   = length(attr(mf, "na.action")),
+    
+    # regressors of the mean and of the precision model together
+    "n vars" = length(attr(terms(x, model = "full"), "term.labels")),
+    "n coef" = nrow(cf),
+    
+    numdf = attr(logLik(x), "df"),
+    
+    MAE  = DescToolsX::mae(y, pred),
+    MAPE = DescToolsX::mape(y, pred),
+    MSE  = DescToolsX::mse(y, pred),
+    RMSE = DescToolsX::rmse(y, pred)
+  )
+  
+  list(
+    coef   = coef,
+    statsx = statsx
+  )
+}
+
+
+#' @export
 #' @method tModSummary coxph
 #' @rdname tModSummary
 tModSummary.coxph <- function(x, conf.level = 0.95, ...){

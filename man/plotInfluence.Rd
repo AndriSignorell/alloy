@@ -26,7 +26,7 @@ plotInfluence(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{main}{main title. \code{NULL} (default) derives one from the
 model formula; \code{""}, \code{NA} or \code{FALSE} suppress it.}
@@ -126,7 +126,7 @@ model in trouble.
 }
 
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotInfluence(fitLogit)
 plotInfluence(fitLogit, metric = "deviance", labels = 3)

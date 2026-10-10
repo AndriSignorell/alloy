@@ -14,7 +14,7 @@
 }
 
 .diagFit <- function(d = .diagData())
-  fitMod(y ~ x1 + x2 + g, data = d, fitfn = "logit")
+  fitMod(y ~ x1 + x2 + g, data = d, engine = "logit")
 
 .nullDevice <- function(expr) {
   pdf(NULL)
@@ -123,8 +123,8 @@ test_that("binned residuals detect a misspecified functional form", {
   x <- runif(n, -3, 3)
   d <- data.frame(y = rbinom(n, 1L, plogis(-1 + 0.8 * x^2)), x = x)
 
-  bad  <- fitMod(y ~ x,      data = d, fitfn = "logit")
-  good <- fitMod(y ~ I(x^2), data = d, fitfn = "logit")
+  bad  <- fitMod(y ~ x,      data = d, engine = "logit")
+  good <- fitMod(y ~ I(x^2), data = d, engine = "logit")
 
   outside <- function(f)
     attr(.nullDevice(plotBinnedResid(f, var = "x", nBins = 20)), "outside")
@@ -138,7 +138,7 @@ test_that("a variable outside the model frame is found in the model data", {
 
   set.seed(3)
   d   <- data.frame(y = rbinom(200, 1L, 0.4), x = rnorm(200))
-  fit <- fitMod(y ~ I(x^2), data = d, fitfn = "logit")
+  fit <- fitMod(y ~ I(x^2), data = d, engine = "logit")
 
   expect_silent(.nullDevice(plotBinnedResid(fit, var = "x", nBins = 8)))
   expect_error(.nullDevice(plotBinnedResid(fit, var = "nope")), "nope")
@@ -157,10 +157,10 @@ test_that("predictors returns the term labels, optionally numeric only", {
   expect_identical(predictors(fit, numeric = TRUE), c("x1", "x2"))
 
   # transformed terms keep their written form, interactions come as one term
-  fit2 <- fitMod(y ~ I(x1^2) + x1:x2, data = d, fitfn = "logit")
+  fit2 <- fitMod(y ~ I(x1^2) + x1:x2, data = d, engine = "logit")
   expect_identical(predictors(fit2), c("I(x1^2)", "x1:x2"))
 
-  expect_identical(predictors(fitMod(y ~ 1, data = d, fitfn = "logit")),
+  expect_identical(predictors(fitMod(y ~ 1, data = d, engine = "logit")),
                    character(0))
 
   # works on the plain model too, not just on FitMod
@@ -258,7 +258,7 @@ test_that("calibration on new data uses the model's own factor coding", {
 
   d    <- .diagData(n = 600)
   idx  <- seq_len(400)
-  fit  <- fitMod(y ~ x1 + x2 + g, data = d[idx, ], fitfn = "logit")
+  fit  <- fitMod(y ~ x1 + x2 + g, data = d[idx, ], engine = "logit")
 
   cal <- .nullDevice(plotCalibration(fit, newdata = d[-idx, ]))
 
@@ -269,7 +269,7 @@ test_that("calibration on new data uses the model's own factor coding", {
   # must not silently flip the response coding
   d2 <- d[-idx, ]
   d2$y <- factor(d2$y, levels = c(1, 0))
-  fitF <- fitMod(factor(y) ~ x1 + x2 + g, data = d[idx, ], fitfn = "logit")
+  fitF <- fitMod(factor(y) ~ x1 + x2 + g, data = d[idx, ], engine = "logit")
   calF <- .nullDevice(plotCalibration(fitF, newdata = d2))
 
   expect_equal(calF$slope, cal$slope, tolerance = 1e-8)
@@ -422,7 +422,7 @@ test_that("the default title shortens on terms, not on characters", {
   d <- .diagData()
   d[paste0("z", 1:8)] <- matrix(rnorm(nrow(d) * 8), nrow(d))
 
-  wide <- fitMod(y ~ ., data = d, fitfn = "logit")
+  wide <- fitMod(y ~ ., data = d, engine = "logit")
   ttl  <- alloy:::.modelTitle(wide, "influence")
 
   expect_lt(nchar(ttl), 70L)
@@ -436,7 +436,7 @@ test_that("the default title shortens on terms, not on characters", {
 
   # an intercept-only model has nothing to shorten
   expect_match(alloy:::.modelTitle(
-    fitMod(y ~ 1, data = d, fitfn = "logit"), "separation"), "~ 1$")
+    fitMod(y ~ 1, data = d, engine = "logit"), "separation"), "~ 1$")
 })
 
 

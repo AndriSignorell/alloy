@@ -56,7 +56,7 @@
 #' @concept binary-outcome
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #'
 #' op <- par(mfrow = c(2, 3))
 #' plot(fitLogit)

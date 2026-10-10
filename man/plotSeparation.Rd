@@ -20,7 +20,7 @@ plotSeparation(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{main}{main title. \code{NULL} (default) derives one from the
 model formula; \code{""}, \code{NA} or \code{FALSE} suppress it.}
@@ -74,7 +74,7 @@ The marker on the axis sits at the expected number of events,
 observed events start, the model gets the overall event rate right.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotSeparation(fitLogit)
 

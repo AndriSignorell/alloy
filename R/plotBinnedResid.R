@@ -35,7 +35,7 @@
 #' }
 #'
 #' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
-#'   \code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.
+#'   \code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.
 #' @param var the binning variable. \code{NULL} (default) bins by the
 #'   fitted probabilities; a character string names a variable in the
 #'   model frame; a numeric or factor vector of length \eqn{n} is used
@@ -82,7 +82,7 @@
 #' @concept scatterplot
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #'
 #' plotBinnedResid(fitLogit)
 #'

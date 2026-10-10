@@ -8,7 +8,7 @@ quantileResid(fit, nSim = 1L)
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{nSim}{number of independent randomizations. \code{1} (default)
 returns a vector, larger values a matrix with one column per draw.}
@@ -59,7 +59,7 @@ structure use the binned residuals.
 }
 
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 set.seed(1)
 r <- quantileResid(fitLogit)

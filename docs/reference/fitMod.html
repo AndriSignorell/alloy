@@ -6,12 +6,12 @@
     }
   };
 </script><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet"><link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet"><script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Fit a statistical or machine-learning model with automatic method selection — fitMod"><meta name="description" content='A unified interface for fitting a wide range of regression and
-classification models.  When fitfn is omitted the appropriate
+classification models.  When engine is omitted the appropriate
 method is chosen automatically from the type of the response variable.
 The return value is always an object of class "FitMod" layered on
 top of the original model object, so all standard methods
 (predict, print, coef, ...) continue to work.'><meta property="og:description" content='A unified interface for fitting a wide range of regression and
-classification models.  When fitfn is omitted the appropriate
+classification models.  When engine is omitted the appropriate
 method is chosen automatically from the type of the response variable.
 The return value is always an object of class "FitMod" layered on
 top of the original model object, so all standard methods
@@ -23,7 +23,7 @@ top of the original model object, so all standard methods
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -54,7 +54,7 @@ top of the original model object, so all standard methods
 
     <div class="ref-description section level2">
     <p>A unified interface for fitting a wide range of regression and
-classification models.  When <code>fitfn</code> is omitted the appropriate
+classification models.  When <code>engine</code> is omitted the appropriate
 method is chosen automatically from the type of the response variable.
 The return value is always an object of class <code>"FitMod"</code> layered on
 top of the original model object, so all standard methods
@@ -63,7 +63,7 @@ top of the original model object, so all standard methods
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitMod</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, <span class="va">...</span>, <span class="va">subset</span>, <span class="va">na.action</span>, fitfn <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitMod</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, engine <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">subset</span>, <span class="va">na.action</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -78,8 +78,20 @@ top of the original model object, so all standard methods
 <dd><p>A data frame containing the variables in <code>formula</code>.</p></dd>
 
 
-<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional arguments passed to the underlying fitting function.</p></dd>
+<dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
+<dd><p>Character string naming the model to fit.  One of
+<code>"lm"</code>, <code>"logit"</code>, <code>"poisson"</code>, <code>"quasipoisson"</code>,
+<code>"gamma"</code>, <code>"beta"</code>, <code>"negbin"</code>, <code>"polr"</code>,
+<code>"lmrob"</code>,
+<code>"tobit"</code>, <code>"zeroinfl"</code>, <code>"multinom"</code>, <code>"nnet"</code>,
+<code>"rpart"</code>, <code>"C5.0"</code>, <code>"lda"</code>, <code>"qda"</code>,
+<code>"svm"</code>, <code>"naiveBayes"</code>, <code>"randomForest"</code>,
+<code>"glmnet"</code>, <code>"xgboost"</code>, <code>"coxph"</code>,
+<code>"weibull"</code>, <code>"exponential"</code>, <code>"lognormal"</code>,
+<code>"loglogistic"</code>, <code>"lmMixed"</code>, <code>"logitMixed"</code>,
+<code>"poissonMixed"</code>, <code>"negbinMixed"</code>, <code>"gammaMixed"</code>.
+If <code>NULL</code> (default) the engine is chosen automatically, see
+Details.</p></dd>
 
 
 <dt id="arg-subset">subset<a class="anchor" aria-label="anchor" href="#arg-subset"></a></dt>
@@ -97,18 +109,8 @@ default of the respective fitting function applies (usually
 <code><a href="https://rdrr.io/r/stats/na.fail.html" class="external-link">na.omit</a></code>).</p></dd>
 
 
-<dt id="arg-fitfn">fitfn<a class="anchor" aria-label="anchor" href="#arg-fitfn"></a></dt>
-<dd><p>Character string naming the fitting method.  One of
-<code>"lm"</code>, <code>"logit"</code>, <code>"poisson"</code>, <code>"quasipoisson"</code>,
-<code>"gamma"</code>, <code>"negbin"</code>, <code>"polr"</code>, <code>"lmrob"</code>,
-<code>"tobit"</code>, <code>"zeroinfl"</code>, <code>"multinom"</code>, <code>"nnet"</code>,
-<code>"rpart"</code>, <code>"C5.0"</code>, <code>"lda"</code>, <code>"qda"</code>,
-<code>"svm"</code>, <code>"naiveBayes"</code>, <code>"randomForest"</code>,
-<code>"glmnet"</code>, <code>"xgboost"</code>, <code>"coxph"</code>,
-<code>"weibull"</code>, <code>"exponential"</code>, <code>"lognormal"</code>,
-<code>"loglogistic"</code>, <code>"lmMixed"</code>, <code>"logitMixed"</code>,
-<code>"poissonMixed"</code>, <code>"negbinMixed"</code>, <code>"gammaMixed"</code>.
-If <code>NULL</code> (default) the method is chosen automatically.</p></dd>
+<dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
+<dd><p>Additional arguments passed to the underlying fitting function.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -132,8 +134,22 @@ non-negative integer response with <code>"poisson"</code>, and any other
 numeric response with <code>"lm"</code>.  Note that integer storage does not
 necessarily mean count data – data import functions often return
 integer columns for metric variables.  The chosen method is always
-reported via <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>; supply <code>fitfn</code> explicitly to
+reported via <code><a href="https://rdrr.io/r/base/message.html" class="external-link">message()</a></code>; supply <code>engine</code> explicitly to
 override the heuristic.</p>
+<p>Beta regression (<code>engine = "beta"</code>, fitted with
+<code><a href="https://rdrr.io/pkg/betareg/man/betareg.html" class="external-link">betareg</a></code>) models a response in the open interval
+(0, 1), typically a rate or proportion.  It is never selected
+automatically, since a numeric response in (0, 1) is no evidence
+against a linear model.  A two-part formula <code>y ~ x | z</code> adds
+regressors <code>z</code> for the precision parameter.  If the response
+contains the boundary values 0 or 1, <span class="pkg">betareg</span> (&gt;= 3.2-0) switches
+to the extended-support beta mixture (<code>dist = "xbetax"</code>), which
+additionally requires the packages <span class="pkg">statmod</span> and <span class="pkg">numDeriv</span>.
+The result carries two extra components: <code>waldTable</code>, the
+coefficient table of all model parts as a single matrix (rows named as
+in <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, attribute <code>"component"</code> giving the model part),
+and <code>drop1</code>, the likelihood-ratio tests for the terms of the mean
+and the precision model (the latter prefixed with <code>"(phi)_"</code>).</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
@@ -148,7 +164,7 @@ override the heuristic.</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Auto-detection: numeric response -&gt; lm</span></span></span>
 <span class="r-in"><span><span class="fu">fitMod</span><span class="op">(</span><span class="va">Sepal.Length</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using fitfn = 'lm'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using engine = 'lm'</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> stats::lm(formula = Sepal.Length ~ ., data = iris)</span>
@@ -172,7 +188,7 @@ override the heuristic.</p>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"nnet"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using fitfn = 'multinom'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using engine = 'multinom'</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> nnet::multinom(formula = Species ~ ., data = iris, model = TRUE, </span>
@@ -202,7 +218,7 @@ override the heuristic.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Explicit method</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"rpart"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
-<span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, fitfn <span class="op">=</span> <span class="st">"rpart"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">Species</span> <span class="op">~</span> <span class="va">.</span>, data <span class="op">=</span> <span class="va">iris</span>, engine <span class="op">=</span> <span class="st">"rpart"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Decision Tree</span>
@@ -227,17 +243,43 @@ override the heuristic.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Obs: 150</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Beta regression for a proportion, with a precision model after "|"</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"betareg"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="st">"GasolineYield"</span>, package <span class="op">=</span> <span class="st">"betareg"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">yield</span> <span class="op">~</span> <span class="va">gravity</span> <span class="op">+</span> <span class="va">temp</span> <span class="op">|</span> <span class="va">temp</span>, data <span class="op">=</span> <span class="va">GasolineYield</span>,</span></span>
+<span class="r-in"><span>         engine <span class="op">=</span> <span class="st">"beta"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> betareg::betareg(formula = yield ~ gravity + temp | temp, data = GasolineYield)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Mean model (logit link):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              estimate  95%-lci     uci    p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)    -6.946   -8.253  -5.640  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gravity         0.062    0.039   0.084  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> temp            0.009    0.007   0.011  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Precision model (log link):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>              estimate  95%-lci     uci  p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)     3.710    1.302   6.118  0.003  ** </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> temp            0.001   -0.006   0.008  0.869     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Obs (NAs): 32 (0)	Pseudo R²: 0.705   Log-lik: 49.977   AIC: -89.953</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mixed models</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"lme4"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">Reaction</span> <span class="op">~</span> <span class="va">Days</span> <span class="op">+</span> <span class="op">(</span><span class="fl">1</span> <span class="op">|</span> <span class="va">Subject</span><span class="op">)</span>, <span class="fu">lme4</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/lme4/man/sleepstudy.html" class="external-link">sleepstudy</a></span>,</span></span>
-<span class="r-in"><span>         fitfn <span class="op">=</span> <span class="st">"lmMixed"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>         engine <span class="op">=</span> <span class="st">"lmMixed"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Linear mixed model</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fitMod(formula = Reaction ~ Days + (1 | Subject), data = lme4::sleepstudy, </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     fitfn = "lmMixed")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     engine = "lmMixed")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Fixed effects:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>              estimate  95%-lci      uci    p-val     </span>

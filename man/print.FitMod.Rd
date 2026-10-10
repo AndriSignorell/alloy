@@ -33,7 +33,8 @@ table.  Supported values depend on the model type:
 \item{\code{"coef"}}{Raw coefficients (default for \code{lm},
 \code{glm}, \code{lmrob}, \code{polr}, parametric survival).}
 \item{\code{"or"}}{Odds ratios - \code{exp(coef)} - for logistic
-and ordinal models.}
+and ordinal models, and for the mean model of a beta regression
+with logit link.}
 \item{\code{"irr"}}{Incidence rate ratios - \code{exp(coef)} - for
 Poisson and negative binomial models.}
 \item{\code{"hr"}}{Hazard ratios (default for \code{coxph}).}
@@ -73,8 +74,11 @@ across all supported model types and loosely follows Stata conventions.
 }
 \details{
 Factor predictors are displayed with a header row showing the reference
-category and an overall p-value from \code{\link[stats]{drop1}}.
-Dummy-coded rows are indented below the header.
+category and an overall p-value from \code{\link[stats]{drop1}} (for
+\code{lmrob} a robust Wald test of the coefficients of the factor).
+Dummy-coded rows are indented below the header.  Factors without a
+treatment coding (ordered factors, sum contrasts, ...) have no reference
+category and are printed without a header row.
 
 For negative binomial models an additional overdispersion block is
 printed showing the parameter \eqn{\alpha = 1/\theta} (Stata
@@ -83,28 +87,34 @@ model.
 
 For quasi-Poisson and quasi-binomial models, pseudo-R\eqn{^2} and AIC
 are not available and a note is displayed instead.
+
+For beta regressions the mean model and the precision model are printed
+as two blocks.  The overall p-values of factor predictors are the
+likelihood-ratio tests stored by \code{\link{fitMod}}.  The pseudo-R\eqn{^2}
+is the one reported by \pkg{betareg} (squared correlation of the linear
+predictor and the link-transformed response).
 }
 \examples{
 fitLm <- fitMod(Fertility ~ ., swiss)
 print(fitLm)
 print(fitLm, vcov = "HC3")
 
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 print(fitLogit)
 print(fitLogit, output = "or")
 print(fitLogit, output = "or", vcov = "HC3")
 
 fitPois <- fitMod(daysabs ~ mathnce + langnce + gender,
-                  Lahigh, fitfn = "poisson")
+                  Lahigh, engine = "poisson")
 print(fitPois, output = "irr")
 
 fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-                 fitfn = "coxph")
+                 engine = "coxph")
 print(fitCox)
 print(fitCox, output = "lhr")
 
 fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-                 fitfn = "weibull")
+                 engine = "weibull")
 print(fitWei)
 print(fitWei, output = "coef")
 print(fitWei, output = "genuine")

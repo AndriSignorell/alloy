@@ -14,7 +14,7 @@ binnedResid(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{var}{the binning variable. \code{NULL} (default) bins by the
 fitted probabilities; a character \emph{vector} names variables in the
@@ -80,7 +80,7 @@ estimate a variance.}
 }
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 binnedResid(fitLogit, var = "gre")
 

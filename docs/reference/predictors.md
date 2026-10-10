@@ -58,7 +58,7 @@ Other modelling:
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 predictors(fitLogit)
 #> [1] "gre"  "gpa"  "rank"

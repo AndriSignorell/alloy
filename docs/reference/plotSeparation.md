@@ -30,7 +30,7 @@ plotSeparation(
 - fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
-  `fitfn = "logit"`) or a binomial
+  `engine = "logit"`) or a binomial
   [`glm`](https://rdrr.io/r/stats/glm.html).
 
 - main:
@@ -110,7 +110,7 @@ for an overview of the diagnostics for logistic models in alloy.
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotSeparation(fitLogit)
 

@@ -81,7 +81,7 @@ calibration.  A model can show excellent lift while its predicted
 probabilities are systematically biased.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 lift(fitLogit)
 
 # Supply predictor and response directly

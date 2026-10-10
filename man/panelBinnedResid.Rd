@@ -30,7 +30,7 @@ binned residual panel: the band, the zero line and the bin means. Pass
 the output of \code{\link{binnedResid}} as the samples.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 bins <- binnedResid(fitLogit, var = predictors(fitLogit))
 vars <- predictors(fitLogit)
 

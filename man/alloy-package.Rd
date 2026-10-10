@@ -15,7 +15,7 @@ the package handles the rest.
 \section{Main function}{
 
 The entry point is \code{\link{fitMod}}, which accepts a standard R formula
-and a \code{fitfn} argument naming the model type.  When \code{fitfn} is omitted the
+and an \code{engine} argument naming the model type.  When \code{engine} is omitted the
 appropriate method is chosen automatically from the response variable type.
 
 Supported model families:
@@ -77,7 +77,7 @@ The package ships with several benchmark datasets used in the vignette:
 \section{Design philosophy}{
 
 Modelers think in models, not in function calls.  \code{alloy} follows the
-principle that \code{fitMod(y ~ x, data, fitfn = "logit")} is preferable to
+principle that \code{fitMod(y ~ x, data, engine = "logit")} is preferable to
 \code{glm(y ~ x, data, family = "binomial")} – the intent is stated directly,
 and the package handles package-specific quirks, defaults, and post-processing
 transparently.  Output follows Stata conventions where applicable.

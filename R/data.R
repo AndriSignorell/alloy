@@ -228,7 +228,7 @@ NULL
 #'
 #' @examples
 #' fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
-#'                         data = Contraception, fitfn = "logitMixed")
+#'                         data = Contraception, engine = "logitMixed")
 #' fitLogitMixed
 #' fitLogitMixed |> print(output = "or")
 #'

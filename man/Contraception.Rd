@@ -33,7 +33,7 @@ mixed-effects logistic regression with a district-level random effect.
 }
 \examples{
 fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
-                        data = Contraception, fitfn = "logitMixed")
+                        data = Contraception, engine = "logitMixed")
 fitLogitMixed
 fitLogitMixed |> print(output = "or")
 

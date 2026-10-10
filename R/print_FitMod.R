@@ -19,7 +19,8 @@
 #'     \item{\code{"coef"}}{Raw coefficients (default for \code{lm},
 #'       \code{glm}, \code{lmrob}, \code{polr}, parametric survival).}
 #'     \item{\code{"or"}}{Odds ratios - \code{exp(coef)} - for logistic
-#'       and ordinal models.}
+#'       and ordinal models, and for the mean model of a beta regression
+#'       with logit link.}
 #'     \item{\code{"irr"}}{Incidence rate ratios - \code{exp(coef)} - for
 #'       Poisson and negative binomial models.}
 #'     \item{\code{"hr"}}{Hazard ratios (default for \code{coxph}).}
@@ -49,8 +50,11 @@
 #'
 #' @details
 #' Factor predictors are displayed with a header row showing the reference
-#' category and an overall p-value from \code{\link[stats]{drop1}}.
-#' Dummy-coded rows are indented below the header.
+#' category and an overall p-value from \code{\link[stats]{drop1}} (for
+#' \code{lmrob} a robust Wald test of the coefficients of the factor).
+#' Dummy-coded rows are indented below the header.  Factors without a
+#' treatment coding (ordered factors, sum contrasts, ...) have no reference
+#' category and are printed without a header row.
 #'
 #' For negative binomial models an additional overdispersion block is
 #' printed showing the parameter \eqn{\alpha = 1/\theta} (Stata
@@ -60,27 +64,33 @@
 #' For quasi-Poisson and quasi-binomial models, pseudo-R\eqn{^2} and AIC
 #' are not available and a note is displayed instead.
 #'
+#' For beta regressions the mean model and the precision model are printed
+#' as two blocks.  The overall p-values of factor predictors are the
+#' likelihood-ratio tests stored by \code{\link{fitMod}}.  The pseudo-R\eqn{^2}
+#' is the one reported by \pkg{betareg} (squared correlation of the linear
+#' predictor and the link-transformed response).
+#'
 #' @examples
 #' fitLm <- fitMod(Fertility ~ ., swiss)
 #' print(fitLm)
 #' print(fitLm, vcov = "HC3")
 #'
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #' print(fitLogit)
 #' print(fitLogit, output = "or")
 #' print(fitLogit, output = "or", vcov = "HC3")
 #'
 #' fitPois <- fitMod(daysabs ~ mathnce + langnce + gender,
-#'                   Lahigh, fitfn = "poisson")
+#'                   Lahigh, engine = "poisson")
 #' print(fitPois, output = "irr")
 #'
 #' fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-#'                  fitfn = "coxph")
+#'                  engine = "coxph")
 #' print(fitCox)
 #' print(fitCox, output = "lhr")
 #'
 #' fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-#'                  fitfn = "weibull")
+#'                  engine = "weibull")
 #' print(fitWei)
 #' print(fitWei, output = "coef")
 #' print(fitWei, output = "genuine")
@@ -133,6 +143,10 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     if (!is.null(vcov))
       message("Note: vcov is not supported for polr - standard SE used")
     .print_polr(x, digits, pdigits, conf.level, output = output, ...)
+  } else if (inherits(x, "betareg")) {
+    if (!is.null(vcov))
+      message("Note: vcov is not supported for betareg - standard SE used")
+    .print_betareg(x, digits, pdigits, conf.level, output = output, ...)
   } else if (inherits(x, "tobit")) {
     .print_tobit(x, digits, pdigits, conf.level, ...)
   } else if (inherits(x, "zeroinfl")) {
@@ -145,7 +159,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     .print_mixed(x, digits, pdigits, conf.level, output = output, ...)
   } else if (inherits(x, "lmerMod") || inherits(x, "glmerMod")) {
     .print_mixed(x, digits, pdigits, conf.level, output = output, ...)
-  } else if (x$fitfn %in% c("randomForest", "nnet", "rpart", "C5.0",
+  } else if (x$engine %in% c("randomForest", "nnet", "rpart", "C5.0",
                           "svm", "naiveBayes", "lda", "qda",
                           "glmnet", "xgboost")) {
     .print_ml(x, digits, pdigits, ...)
@@ -209,12 +223,12 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
       confint.default(x, level = conf.level)
   }
   
-  ref <- refLevel(x)
+  ref <- .refLevels(x, strict = FALSE)
   
   # --- overall p-values per predictor via drop1 ---
+  # lmrob has no drop1 method: robust Wald test per factor
   anova_p <- if (isLMROB) {
-    pvals <- xx$coefficients[names(ref), 4L]
-    setNamesX(pvals, names(ref))
+    .wald_terms(x, names(ref))
   } else if (isGLM) {
     drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"]
   } else {
@@ -282,26 +296,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     colnames(out) <- c(est_label, ci_label, "p-val", "")
     
     # Insert variable-level summary rows and indent coefficient rows
-    for (i in seq_along(ref)) {
-      pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
-      rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
-      if (is.na(rnr)) next
-      
-      p <- anova_p[i]
-      summary_row <- c(
-        rep(".", 3L),
-        fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
-        fm(p, fmt = "*")
-      )
-      out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
-      rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
-      dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
-      rownames(out)[dummy_rows] <- sub(
-        names(ref)[i],
-        paste0(names(ref)[i], " "),
-        rownames(out)[dummy_rows]
-      )
-    }
+    out <- .insert_ref_rows(out, ref, anova_p, pdigits)
     
     print(out, quote = FALSE, right = TRUE, print.gap = 2L)
     cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
@@ -468,6 +463,177 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
 
 
 #' @keywords internal
+.print_betareg <- function(x, digits = 3, pdigits = 3,
+                           conf.level = 0.95,
+                           output = c("coef", "or"), ...) {
+  
+  output <- match.arg(output)
+  xx     <- summary(x)
+  
+  # link is accessed by position: its components are named
+  # "mean"/"precision" or "mu"/"phi", depending on the distribution
+  links <- vapply(x[["link"]][1:2], function(l) l$name, character(1L))
+  
+  if (output == "or" && links[1L] != "logit")
+    stop("output = 'or' requires a logit link in the mean model ",
+         "(found: '", links[1L], "').")
+  
+  z_alpha  <- qnorm(1 - (1 - conf.level) / 2)
+  ci_label <- sprintf(c("%s-lci", "uci"),
+                      fm(conf.level, fmt = "%",
+                         digits = max(0L, nDec(as.character(signif(conf.level))) - 2L)))
+  
+  tab  <- x[["waldTable"]]
+  comp <- attr(tab, "component")
+  lrt  <- x[["drop1"]]      # NULL if the term tests were not available
+  
+  # Helper: format the coefficient block of one model part
+  .fmt_block <- function(part, expo = FALSE) {
+    
+    coefs <- tab[comp == part, , drop = FALSE]
+    
+    # rows and term tests of the precision model carry the prefix used
+    # by coef(); within its own block the plain names are shown
+    prefix <- if (part == "precision") "(phi)_" else ""
+    if (part == "precision")
+      rownames(coefs) <- sub(prefix, "", rownames(coefs), fixed = TRUE)
+    
+    est <- coefs[, "Estimate"]
+    se  <- coefs[, "Std. Error"]
+    val <- cbind(est, est - z_alpha * se, est + z_alpha * se)
+    if (expo)
+      val <- exp(val)
+    
+    out <- cbind(
+      fm(val, digits = digits),
+      fm(coefs[, "Pr(>|z|)"], fmt = "p",
+         pThreshold = 10^-pdigits, digits = pdigits),
+      fm(coefs[, "Pr(>|z|)"], fmt = "*")
+    )
+    dimnames(out) <- list(rownames(coefs),
+                          c(if (expo) "OR" else "estimate", ci_label,
+                            "p-val", ""))
+    
+    ref     <- .refLevels(x, strict = FALSE, part = part)
+    anova_p <- if (is.null(lrt)) rep(NA_real_, length(ref))
+               else lrt[paste0(prefix, names(ref)), "p-value"]
+    
+    .insert_ref_rows(out, ref, anova_p, pdigits)
+  }
+  
+  # --- header ---
+  cat("\nCall:\n",
+      paste(deparse(xx$call), sep = "\n", collapse = "\n"),
+      "\n", sep = "")
+  
+  # --- mean model ---
+  cat(sprintf("\nMean model (%s link)%s:\n", links[1L],
+              if (output == "or") ", odds ratios" else ""))
+  print(.fmt_block("mean", expo = output == "or"),
+        quote = FALSE, right = TRUE, print.gap = 2L)
+  
+  # --- precision model ---
+  cat(sprintf("\nPrecision model (%s link):\n", links[2L]))
+  print(.fmt_block("precision"),
+        quote = FALSE, right = TRUE, print.gap = 2L)
+  
+  cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
+  
+  # --- footer ---
+  # betareg keeps the omitted observations with the model frame only
+  n_na <- length(attr(model.frame(x), "na.action"))
+  cat(sprintf("\nObs (NAs): %d (%d)", nobs(x), n_na))
+  
+  pr2 <- x[["pseudo.r.squared"]]
+  if (!is.null(pr2) && !is.na(pr2))
+    cat("\tPseudo R\u00B2:", fm(pr2, digits = digits))
+  cat(sprintf("   Log-lik: %s   AIC: %s",
+              fm(as.numeric(logLik(x)), digits = digits),
+              fm(AIC(x), digits = digits)))
+  
+  # extended-support variants (response with boundary values 0 or 1)
+  if (!identical(x[["dist"]], "beta"))
+    cat(sprintf("\nDistribution: %s   Exceedence \u03bd: %s", x[["dist"]],
+                fm(x[["nu"]], digits = digits)))
+  
+  cat("\n\n")
+  invisible(xx)
+}
+
+
+# Wald chi-square test per model term: joint test of all coefficients
+# belonging to the term, from coef() and vcov().  For lmrob this is the
+# robust Wald test of anova.lmrob().
+#' @keywords internal
+.wald_terms <- function(x, terms) {
+  
+  b    <- coef(x)
+  V    <- vcov(x)
+  asgn <- attr(model.matrix(x), "assign")
+  labs <- attr(stats::terms(x), "term.labels")
+  
+  vapply(terms, function(term) {
+    idx <- which(asgn == match(term, labs))
+    idx <- idx[!is.na(b[idx])]
+    if (length(idx) == 0L)
+      return(NA_real_)
+    stat <- drop(b[idx] %*% solve(V[idx, idx, drop = FALSE], b[idx]))
+    pchisq(stat, df = length(idx), lower.tail = FALSE)
+  }, numeric(1L), USE.NAMES = FALSE)
+}
+
+
+# Overall p-value per model term from the likelihood-ratio tests of
+# drop1(), NA where no test is available.  The p-value column is located
+# by its prefix, its name differs between the methods ("Pr(>Chi)" in
+# stats and survival, "Pr(Chi)" in lme4): indexing an anova table by a
+# name it does not have returns NULL instead of failing.
+#' @keywords internal
+.drop1_p <- function(x, terms) {
+  
+  none <- rep(NA_real_, length(terms))
+  
+  tryCatch({
+    tab <- drop1(x, test = "Chisq")
+    col <- grep("^Pr\\(", names(tab))[1L]
+    if (is.na(col)) none else tab[terms, col]
+  }, error = function(e) none)
+}
+
+
+# Insert a header row per factor predictor (reference level and overall
+# p-value) into a formatted coefficient table and separate the level from
+# the variable name in the rows of its dummies.
+#' @keywords internal
+.insert_ref_rows <- function(out, ref, anova_p, pdigits) {
+  
+  for (i in seq_along(ref)) {
+    pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
+    rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
+    if (is.na(rnr)) next
+    
+    p <- anova_p[i]
+    summary_row <- c(
+      rep(".", 3L),
+      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
+      fm(p, fmt = "*")
+    )
+    out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
+    rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
+    dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
+    rownames(out)[dummy_rows] <- sub(
+      names(ref)[i],
+      paste0(names(ref)[i], " "),
+      rownames(out)[dummy_rows]
+    )
+  }
+  
+  out
+}
+
+
+
+#' @keywords internal
 .print_coxph <- function(x, digits = 3, pdigits = 3,
                          conf.level = 0.95,
                          output = c("hr", "lhr"), ...) {
@@ -485,13 +651,11 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
                          digits = max(0L, nDec(as.character(signif(conf.level))) - 2L)))
   
   # Reference levels for factor predictors
-  ref <- tryCatch(refLevel(x), error = function(e) character(0L))
+  ref <- tryCatch(.refLevels(x, strict = FALSE),
+                  error = function(e) character(0L))
   
   # Overall p-values via drop1
-  anova_p <- tryCatch(
-    drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"],
-    error = function(e) setNamesX(rep(NA_real_, length(ref)), names(ref))
-  )
+  anova_p <- .drop1_p(x, names(ref))
   
   # --- build output matrix ---
   if (output == "hr") {
@@ -517,26 +681,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   colnames(out) <- c(est_label, ci_label, "p-val", "")
   
   # Insert variable-level summary rows and indent coefficient rows
-  for (i in seq_along(ref)) {
-    pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
-    rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
-    if (is.na(rnr)) next
-    
-    p <- anova_p[i]
-    summary_row <- c(
-      rep(".", 3L),
-      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
-      fm(p, fmt = "*")
-    )
-    out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
-    rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
-    dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
-    rownames(out)[dummy_rows] <- sub(
-      names(ref)[i],
-      paste0(names(ref)[i], " "),
-      rownames(out)[dummy_rows]
-    )
-  }
+  out <- .insert_ref_rows(out, ref, anova_p, pdigits)
   
   # --- header ---
   cat("\nCall:\n",
@@ -590,13 +735,11 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
                          digits = max(0L, nDec(as.character(signif(conf.level))) - 2L)))
   
   # Reference levels for factor predictors
-  ref <- tryCatch(refLevel(x), error = function(e) character(0L))
+  ref <- tryCatch(.refLevels(x, strict = FALSE),
+                  error = function(e) character(0L))
   
   # Overall p-values via drop1
-  anova_p <- tryCatch(
-    drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"],
-    error = function(e) setNamesX(rep(NA_real_, length(ref)), names(ref))
-  )
+  anova_p <- .drop1_p(x, names(ref))
   
   # --- build output matrix ---
   est <- coefs[, "Value"]
@@ -625,26 +768,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   colnames(out) <- c(est_label, ci_label, "p-val", "")
   
   # Insert variable-level summary rows and indent coefficient rows
-  for (i in seq_along(ref)) {
-    pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
-    rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
-    if (is.na(rnr)) next
-    
-    p <- anova_p[i]
-    summary_row <- c(
-      rep(".", 3L),
-      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
-      fm(p, fmt = "*")
-    )
-    out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
-    rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
-    dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
-    rownames(out)[dummy_rows] <- sub(
-      names(ref)[i],
-      paste0(names(ref)[i], " "),
-      rownames(out)[dummy_rows]
-    )
-  }
+  out <- .insert_ref_rows(out, ref, anova_p, pdigits)
   
   # --- header ---
   dist_label <- switch(x$dist,
@@ -711,7 +835,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   
   # Unwrap FitMod.lme4 wrapper
   obj   <- if (inherits(x, "FitMod.lme4")) x$model else x
-  fitfn <- x$fitfn
+  engine <- x$engine
   isGLMM <- inherits(obj, "glmerMod")
   
   # --- fixed effects ---
@@ -755,35 +879,14 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   colnames(out) <- c(est_label, ci_label, "p-val", "")
   
   # Reference levels for factor predictors
-  ref <- tryCatch(refLevel(obj), error = function(e) character(0L))
+  ref <- tryCatch(.refLevels(obj, strict = FALSE),
+                  error = function(e) character(0L))
   
   # Overall p-values via drop1
-  anova_p <- tryCatch(
-    drop1(obj, test = "Chisq")[names(ref), "Pr(>Chi)"],
-    error = function(e) setNamesX(rep(NA_real_, length(ref)), names(ref))
-  )
+  anova_p <- .drop1_p(obj, names(ref))
   
   # Insert variable-level summary rows and indent coefficient rows
-  for (i in seq_along(ref)) {
-    pat <- sprintf("^%s", gsub("[^a-zA-Z0-9_]", " ", names(ref)[i]))
-    rnr <- grep(pat, gsub("[^a-zA-Z0-9_]", " ", rownames(out)))[1L]
-    if (is.na(rnr)) next
-    
-    p <- anova_p[i]
-    summary_row <- c(
-      rep(".", 3L),
-      fm(p, fmt = "p", pThreshold = 10^-pdigits, digits = pdigits),
-      fm(p, fmt = "*")
-    )
-    out <- appendX(out, rbind(summary_row), after = rnr - 1L, rows = TRUE)
-    rownames(out)[rnr] <- sprintf("%s (ref: %s)", names(ref)[i], ref[i])
-    dummy_rows <- grep(sprintf("^%s", names(ref)[i]), rownames(out))
-    rownames(out)[dummy_rows] <- sub(
-      names(ref)[i],
-      paste0(names(ref)[i], " "),
-      rownames(out)[dummy_rows]
-    )
-  }
+  out <- .insert_ref_rows(out, ref, anova_p, pdigits)
   
   # --- random effects ---
   vc    <- lme4::VarCorr(obj)
@@ -806,7 +909,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   }, error = function(e) NA_real_)
   
   # --- header ---
-  model_label <- switch(fitfn,
+  model_label <- switch(engine,
                         lmMixed      = "Linear mixed model",
                         logitMixed   = "Mixed logistic regression",
                         poissonMixed = "Mixed Poisson regression",
@@ -862,7 +965,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
 #' @keywords internal
 .print_ml <- function(x, digits = 3, pdigits = 3, ...) {
   
-  fitfn <- x$fitfn
+  engine <- x$engine
   
   # Unwrap FitMod wrapper
   obj <- x
@@ -870,7 +973,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   if (inherits(obj, "FitMod.xgboost")) obj <- obj$model
   
   # --- header ---
-  model_label <- switch(fitfn,
+  model_label <- switch(engine,
                         randomForest = "Random Forest",
                         nnet         = "Neural Network",
                         rpart        = "Decision Tree",
@@ -881,7 +984,7 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
                         qda          = "Quadratic Discriminant Analysis",
                         glmnet       = "Regularised Regression (glmnet)",
                         xgboost      = "XGBoost",
-                        fitfn
+                        engine
   )
   
   cat(sprintf("\n%s\n", model_label))

@@ -4,14 +4,26 @@
 \alias{fitMod}
 \title{Fit a statistical or machine-learning model with automatic method selection}
 \usage{
-fitMod(formula, data, ..., subset, na.action, fitfn = NULL)
+fitMod(formula, data, engine = NULL, subset, na.action, ...)
 }
 \arguments{
 \item{formula}{A two-sided model formula.}
 
 \item{data}{A data frame containing the variables in \code{formula}.}
 
-\item{...}{Additional arguments passed to the underlying fitting function.}
+\item{engine}{Character string naming the model to fit.  One of
+\code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
+\code{"gamma"}, \code{"beta"}, \code{"negbin"}, \code{"polr"},
+\code{"lmrob"},
+\code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
+\code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
+\code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
+\code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
+\code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
+\code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
+\code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
+If \code{NULL} (default) the engine is chosen automatically, see
+Details.}
 
 \item{subset}{An optional vector specifying a subset of observations.
 Only supported for fitting functions that accept a \code{subset}
@@ -24,17 +36,7 @@ for \code{"glmnet"} and \code{"xgboost"}).  If not supplied, the
 default of the respective fitting function applies (usually
 \code{\link[stats]{na.omit}}).}
 
-\item{fitfn}{Character string naming the fitting method.  One of
-\code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
-\code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
-\code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
-\code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-\code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
-\code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
-\code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
-\code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
-\code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
-If \code{NULL} (default) the method is chosen automatically.}
+\item{...}{Additional arguments passed to the underlying fitting function.}
 }
 \value{
 An object of class \code{c("FitMod", <original class>)}.
@@ -48,7 +50,7 @@ for new data with the factor levels of the training data.
 }
 \description{
 A unified interface for fitting a wide range of regression and
-classification models.  When \code{fitfn} is omitted the appropriate
+classification models.  When \code{engine} is omitted the appropriate
 method is chosen automatically from the type of the response variable.
 The return value is always an object of class \code{"FitMod"} layered on
 top of the original model object, so all standard methods
@@ -63,8 +65,23 @@ non-negative integer response with \code{"poisson"}, and any other
 numeric response with \code{"lm"}.  Note that integer storage does not
 necessarily mean count data -- data import functions often return
 integer columns for metric variables.  The chosen method is always
-reported via \code{message()}; supply \code{fitfn} explicitly to
+reported via \code{message()}; supply \code{engine} explicitly to
 override the heuristic.
+
+Beta regression (\code{engine = "beta"}, fitted with
+\code{\link[betareg]{betareg}}) models a response in the open interval
+(0, 1), typically a rate or proportion.  It is never selected
+automatically, since a numeric response in (0, 1) is no evidence
+against a linear model.  A two-part formula \code{y ~ x | z} adds
+regressors \code{z} for the precision parameter.  If the response
+contains the boundary values 0 or 1, \pkg{betareg} (>= 3.2-0) switches
+to the extended-support beta mixture (\code{dist = "xbetax"}), which
+additionally requires the packages \pkg{statmod} and \pkg{numDeriv}.
+The result carries two extra components: \code{waldTable}, the
+coefficient table of all model parts as a single matrix (rows named as
+in \code{coef()}, attribute \code{"component"} giving the model part),
+and \code{drop1}, the likelihood-ratio tests for the terms of the mean
+and the precision model (the latter prefixed with \code{"(phi)_"}).
 }
 \examples{
 # Auto-detection: numeric response -> lm
@@ -77,13 +94,20 @@ if (requireNamespace("nnet", quietly = TRUE)) {
 
 # Explicit method
 if (requireNamespace("rpart", quietly = TRUE)) {
-  fitMod(Species ~ ., data = iris, fitfn = "rpart")
+  fitMod(Species ~ ., data = iris, engine = "rpart")
+}
+
+# Beta regression for a proportion, with a precision model after "|"
+if (requireNamespace("betareg", quietly = TRUE)) {
+  data("GasolineYield", package = "betareg")
+  fitMod(yield ~ gravity + temp | temp, data = GasolineYield,
+         engine = "beta")
 }
 
 # Mixed models
 if (requireNamespace("lme4", quietly = TRUE)) {
   fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
-         fitfn = "lmMixed")
+         engine = "lmMixed")
 }
 
 }

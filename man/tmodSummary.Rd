@@ -5,6 +5,7 @@
 \alias{tModSummary.lm}
 \alias{tModSummary.lmrob}
 \alias{tModSummary.glm}
+\alias{tModSummary.betareg}
 \alias{tModSummary.coxph}
 \alias{tModSummary.gam}
 \alias{tModSummary.lmer}
@@ -17,6 +18,8 @@ tModSummary(x, ...)
 \method{tModSummary}{lmrob}(x, conf.level = 0.95, ...)
 
 \method{tModSummary}{glm}(x, conf.level = 0.95, useProfile = TRUE, ...)
+
+\method{tModSummary}{betareg}(x, conf.level = 0.95, ...)
 
 \method{tModSummary}{coxph}(x, conf.level = 0.95, ...)
 

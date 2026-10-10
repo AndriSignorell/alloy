@@ -22,7 +22,7 @@
   if (!inherits(fit, "glm") ||
       !(fit$family$family %in% c("binomial", "quasibinomial")))
     stop(gettextf(
-      "'%s' must be a fitted logistic model (fitfn = \"logit\")", argName),
+      "'%s' must be a fitted logistic model (engine = \"logit\")", argName),
       domain = NA)
 
   p <- stats::fitted(fit)

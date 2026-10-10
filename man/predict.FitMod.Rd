@@ -21,12 +21,12 @@ fitted values on the training data are returned.}
 
 \item{output}{Character string controlling the output for classification
 models.  One of \code{"prob"} (default), \code{"class"}, or
-\code{"both"}.  For \code{fitfn = "rpart"} additionally
+\code{"both"}.  For \code{engine = "rpart"} additionally
 \code{"where"} (row index of the predicted leaf in the tree frame) or
 \code{"leaf"} (node label of the predicted leaf) are available.
 Ignored for regression and survival models.}
 
-\item{s}{For \code{fitfn = "glmnet"} only: the value of the penalty
+\item{s}{For \code{engine = "glmnet"} only: the value of the penalty
 parameter \eqn{\lambda} at which predictions are made.  Passed to
 \code{\link[glmnet]{predict.cv.glmnet}}.  Default is
 \code{"lambda.1se"}.}
@@ -37,6 +37,10 @@ If not supplied, \code{"response"} is used, so that predictions are
 returned on the response scale both with and without \code{newdata}.
 For Cox models the default is \code{"risk"}; for parametric survival
 models (incl. \code{tobit}) the default is \code{"response"}.
+For \code{engine = "beta"} all types of
+\code{\link[betareg]{predict.betareg}} are available, e.g.
+\code{"link"}, \code{"precision"}, \code{"variance"} or
+\code{"quantile"} (with \code{at} passed via \code{...}).
 Ignored for classification models (use \code{output} instead).}
 
 \item{...}{Further arguments passed to the underlying predict method.}
@@ -95,12 +99,12 @@ handled transparently via an internal helper.  Note that for
 predictions, consistent with the fitted-values semantics of all other
 methods.
 
-For \code{fitfn = "glmnet"} and \code{"xgboost"}, design matrices for
+For \code{engine = "glmnet"} and \code{"xgboost"}, design matrices for
 \code{newdata} are rebuilt from the \code{terms} and factor levels of
 the training data, so new data may contain a subset of the training
 factor levels.
 
-For \code{fitfn = "logit"}, calling \code{predict(object)} returns a
+For \code{engine = "logit"}, calling \code{predict(object)} returns a
 two-column probability \code{data.frame} (like all other classifiers).
 To obtain the linear predictor (log-odds), use
 \code{predict(object, type = "link")}.
@@ -111,26 +115,26 @@ fitLm <- fitMod(Fertility ~ ., swiss)
 head(predict(fitLm))
 
 # Binary classification - probabilities
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 head(predict(fitLogit))
 head(predict(fitLogit, output = "both"))
 
 # Multinomial classification
 if (requireNamespace("nnet", quietly = TRUE)) {
   fitMult <- fitMod(ice_cream ~ video + puzzle + female,
-                    IceCream, fitfn = "multinom")
+                    IceCream, engine = "multinom")
   head(predict(fitMult, output = "both"))
 }
 
 # Cox model - risk scores
 if (requireNamespace("survival", quietly = TRUE)) {
   fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-                   fitfn = "coxph")
+                   engine = "coxph")
   head(predict(fitCox))
 
   # Parametric survival - expected survival time
   fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-                   fitfn = "weibull")
+                   engine = "weibull")
   head(predict(fitWei))
 }
 

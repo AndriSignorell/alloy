@@ -2,7 +2,7 @@
 #' Fit a statistical or machine-learning model with automatic method selection
 #'
 #' A unified interface for fitting a wide range of regression and
-#' classification models.  When \code{fitfn} is omitted the appropriate
+#' classification models.  When \code{engine} is omitted the appropriate
 #' method is chosen automatically from the type of the response variable.
 #' The return value is always an object of class \code{"FitMod"} layered on
 #' top of the original model object, so all standard methods
@@ -10,7 +10,19 @@
 #'
 #' @param formula A two-sided model formula.
 #' @param data A data frame containing the variables in \code{formula}.
-#' @param ... Additional arguments passed to the underlying fitting function.
+#' @param engine Character string naming the model to fit.  One of
+#'   \code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
+#'   \code{"gamma"}, \code{"beta"}, \code{"negbin"}, \code{"polr"},
+#'   \code{"lmrob"},
+#'   \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
+#'   \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
+#'   \code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
+#'   \code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
+#'   \code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
+#'   \code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
+#'   \code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
+#'   If \code{NULL} (default) the engine is chosen automatically, see
+#'   Details.
 #' @param subset An optional vector specifying a subset of observations.
 #'   Only supported for fitting functions that accept a \code{subset}
 #'   argument (and for \code{"glmnet"} and \code{"xgboost"}, where it is
@@ -20,17 +32,7 @@
 #'   for \code{"glmnet"} and \code{"xgboost"}).  If not supplied, the
 #'   default of the respective fitting function applies (usually
 #'   \code{\link[stats]{na.omit}}).
-#' @param fitfn Character string naming the fitting method.  One of
-#'   \code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
-#'   \code{"gamma"}, \code{"negbin"}, \code{"polr"}, \code{"lmrob"},
-#'   \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
-#'   \code{"rpart"}, \code{"C5.0"}, \code{"lda"}, \code{"qda"},
-#'   \code{"svm"}, \code{"naiveBayes"}, \code{"randomForest"},
-#'   \code{"glmnet"}, \code{"xgboost"}, \code{"coxph"},
-#'   \code{"weibull"}, \code{"exponential"}, \code{"lognormal"},
-#'   \code{"loglogistic"}, \code{"lmMixed"}, \code{"logitMixed"},
-#'   \code{"poissonMixed"}, \code{"negbinMixed"}, \code{"gammaMixed"}.
-#'   If \code{NULL} (default) the method is chosen automatically.
+#' @param ... Additional arguments passed to the underlying fitting function.
 #'
 #' @details
 #' Automatic method selection uses the following heuristic: a dichotomous
@@ -41,8 +43,23 @@
 #' numeric response with \code{"lm"}.  Note that integer storage does not
 #' necessarily mean count data -- data import functions often return
 #' integer columns for metric variables.  The chosen method is always
-#' reported via \code{message()}; supply \code{fitfn} explicitly to
+#' reported via \code{message()}; supply \code{engine} explicitly to
 #' override the heuristic.
+#'
+#' Beta regression (\code{engine = "beta"}, fitted with
+#' \code{\link[betareg]{betareg}}) models a response in the open interval
+#' (0, 1), typically a rate or proportion.  It is never selected
+#' automatically, since a numeric response in (0, 1) is no evidence
+#' against a linear model.  A two-part formula \code{y ~ x | z} adds
+#' regressors \code{z} for the precision parameter.  If the response
+#' contains the boundary values 0 or 1, \pkg{betareg} (>= 3.2-0) switches
+#' to the extended-support beta mixture (\code{dist = "xbetax"}), which
+#' additionally requires the packages \pkg{statmod} and \pkg{numDeriv}.
+#' The result carries two extra components: \code{waldTable}, the
+#' coefficient table of all model parts as a single matrix (rows named as
+#' in \code{coef()}, attribute \code{"component"} giving the model part),
+#' and \code{drop1}, the likelihood-ratio tests for the terms of the mean
+#' and the precision model (the latter prefixed with \code{"(phi)_"}).
 #'
 #' @return An object of class \code{c("FitMod", <original class>)}.
 #'   For \code{xgboost} and \code{lme4} models, a list of class
@@ -64,20 +81,27 @@
 #'
 #' # Explicit method
 #' if (requireNamespace("rpart", quietly = TRUE)) {
-#'   fitMod(Species ~ ., data = iris, fitfn = "rpart")
+#'   fitMod(Species ~ ., data = iris, engine = "rpart")
+#' }
+#'
+#' # Beta regression for a proportion, with a precision model after "|"
+#' if (requireNamespace("betareg", quietly = TRUE)) {
+#'   data("GasolineYield", package = "betareg")
+#'   fitMod(yield ~ gravity + temp | temp, data = GasolineYield,
+#'          engine = "beta")
 #' }
 #'
 #' # Mixed models
 #' if (requireNamespace("lme4", quietly = TRUE)) {
 #'   fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
-#'          fitfn = "lmMixed")
+#'          engine = "lmMixed")
 #' }
 #'
 #' @family modelling
 #' @concept regression
 #' @concept classification
 #' @export
-fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
+fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
   
   # --- validate inputs ---
   if (!inherits(formula, "formula"))
@@ -91,16 +115,16 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   cl <- match.call()
   
   # --- auto-detect fitting function if needed ---
-  if (is.null(fitfn)) {
+  if (is.null(engine)) {
     resp  <- eval(formula[[2L]], envir = data, enclos = parent.frame())
-    fitfn <- .guess_fitfn(resp)
-    message("fitMod: using fitfn = '", fitfn, "'")
+    engine <- .guess_engine(resp)
+    message("fitMod: using engine = '", engine, "'")
   } else {
-    fitfn <- match.arg(fitfn, names(.fitfn_registry))
+    engine <- match.arg(engine, names(.engine_registry))
   }
   
   # --- look up registry entry, ensure package is available ---
-  entry <- .fitfn_registry[[fitfn]]
+  entry <- .engine_registry[[engine]]
   .require_pkg(entry$pkg)
   
   # --- glmnet / xgboost: no formula interface, convert to x/y ---
@@ -108,7 +132,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   # the call afterwards (the target functions do not accept them)
   design <- NULL
   
-  if (fitfn == "glmnet") {
+  if (engine == "glmnet") {
     design <- .build_design(cl, parent.frame())
     
     if (!("family" %in% names(cl)))
@@ -123,7 +147,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
       if (nm %in% names(cl)) cl[[nm]] <- NULL
   }
   
-  if (fitfn == "xgboost") {
+  if (engine == "xgboost") {
     design <- .build_design(cl, parent.frame())
     
     if (!("objective" %in% names(cl)))
@@ -137,7 +161,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   
   # --- apply registry defaults and strip fitMod-specific args ---
   cl       <- .apply_defaults(cl, entry$defaults)
-  cl$fitfn <- NULL
+  cl$engine <- NULL
   
   # Namespaced call head (pkg::fn): the fitting function is found even if
   # its package is not attached, the call stored by the fitter via
@@ -149,10 +173,10 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   res <- eval(cl, parent.frame())
   
   # --- xgboost: wrap in list since xgboost objects don't support $<- ---
-  if (fitfn == "xgboost") {
+  if (engine == "xgboost") {
     res <- list(
       model          = res,
-      fitfn          = fitfn,
+      engine          = engine,
       formula        = formula,
       terms          = design$terms,
       xlev           = design$xlev,
@@ -167,11 +191,11 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   }
   
   # --- lme4: wrap in list since S4 objects don't support $<- ---
-  if (fitfn %in% c("lmMixed", "logitMixed", "poissonMixed",
+  if (engine %in% c("lmMixed", "logitMixed", "poissonMixed",
                    "negbinMixed", "gammaMixed")) {
     res <- list(
       model = res,
-      fitfn = fitfn,
+      engine = engine,
       call  = match.call()
     )
     class(res) <- c("FitMod", "FitMod.lme4")
@@ -179,16 +203,16 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   }
   
   # --- post-process on the natural class, before FitMod is prepended ---
-  res <- .postprocess(res, fitfn)
+  res <- .postprocess(res, engine)
   
   # --- attach FitMod class and metadata (all other models) ---
   class(res) <- c("FitMod", class(res))
-  res$fitfn  <- fitfn
+  res$engine  <- engine
   
   # --- store glmnet-specific data for predict ---
   # cv.glmnet's own stored call embeds the full x matrix; replace it with
   # the compact fitMod call (update() then refits via fitMod, by design)
-  if (fitfn == "glmnet") {
+  if (engine == "glmnet") {
     res[["formula"]]        <- formula
     res[["terms"]]          <- design$terms
     res[["xlev"]]           <- design$xlev
@@ -210,7 +234,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 # NOTE: the former fix_call field is obsolete -- the namespaced call head
 # (pkg::fn) makes the stored calls valid without repair.
 
-.fitfn_registry <- list(
+.engine_registry <- list(
   
   lm = list(
     pkg      = "stats",
@@ -242,12 +266,20 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
     defaults = list(family = quote(Gamma(link = "log")))
   ),
   
+  # response in (0, 1); "y ~ x | z" adds a precision model.  No defaults
+  # needed: betareg() already keeps the model frame and the response
+  beta = list(
+    pkg      = "betareg",
+    fn       = "betareg",
+    defaults = list()
+  ),
+
   negbin = list(
     pkg      = "MASS",
     fn       = "glm.nb",
     defaults = list()
   ),
-  
+
   polr = list(
     pkg      = "MASS",
     fn       = "polr",
@@ -420,7 +452,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 # -------------------------------------------------------------------------
 
 #' @keywords internal
-.guess_fitfn <- function(resp) {
+.guess_engine <- function(resp) {
   
   if (all(is.na(resp)))
     stop("Response contains only missing values.")
@@ -444,7 +476,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
   stop(
     "Cannot guess fitting function for response of class '",
     paste(class(resp), collapse = "/"), "'. ",
-    "Please provide 'fitfn' explicitly."
+    "Please provide 'engine' explicitly."
   )
 }
 
@@ -541,12 +573,12 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 # -------------------------------------------------------------------------
 
 #' @keywords internal
-.postprocess <- function(res, fitfn) {
+.postprocess <- function(res, engine) {
   UseMethod(".postprocess")
 }
 
 #' @keywords internal
-.postprocess.multinom <- function(res, fitfn) {
+.postprocess.multinom <- function(res, engine) {
   # Wald z-test p-values (2-tailed); lower.tail avoids underflow to
   # exactly 0 for large |z|
   sm <- suppressMessages(summary(res))
@@ -557,14 +589,13 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 }
 
 #' @keywords internal
-.postprocess.polr <- function(res, fitfn) {
+.postprocess.polr <- function(res, engine) {
   res[["drop1"]] <- .drop1.polr(res)
-  res[["ci"]]    <- confint.default(res)
   res
 }
 
 #' @keywords internal
-.postprocess.rpart <- function(res, fitfn) {
+.postprocess.rpart <- function(res, engine) {
   # Record variables actually used in tree splits
   frame  <- res$frame
   leaves <- frame$var == "<leaf>"
@@ -573,7 +604,7 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 }
 
 #' @keywords internal
-.postprocess.nnet <- function(res, fitfn) {
+.postprocess.nnet <- function(res, engine) {
   if (identical(res$convergence, 1L))
     warning(
       "nnet() did not converge; consider increasing 'maxit' ",
@@ -583,10 +614,35 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
 }
 
 #' @keywords internal
-.postprocess.default <- function(res, fitfn) res
+.postprocess.betareg <- function(res, engine) {
+  res[["waldTable"]] <- .waldTable.betareg(res)
+  # the fit itself is valid even if a refit of a reduced model fails:
+  # report this instead of aborting fitMod()
+  res[["drop1"]] <- tryCatch(
+    .drop1.betareg(res),
+    error = function(e) {
+      warning("fitMod: no term-wise likelihood-ratio tests for this ",
+              "beta regression (", conditionMessage(e), ").", call. = FALSE)
+      NULL
+    }
+  )
+  res
+}
+
+#' @keywords internal
+.postprocess.default <- function(res, engine) res
 
 
 
+# Likelihood-ratio tests for the terms of a multinomial model.
+#
+# The reduced models are refitted on the response and the design matrix of
+# the full fit, with the columns of the term removed (as .drop1.polr and
+# .drop1.betareg do).  They use exactly the observations of the full fit,
+# and transformed terms such as log(x) or poly(x, 2) need no special
+# treatment: a refit through the formula on model.frame(object) fails for
+# them, the frame holds a column "log(x)" but no variable x.
+# All other arguments of the original call (maxit, decay, ...) are kept.
 #' @keywords internal
 .drop1.multinom <- function(object, scope, test = c("Chisq", "none"), ...) {
   
@@ -594,61 +650,82 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
     stop("'object' must be of class 'multinom'.")
   
   test <- match.arg(test)
+  labs <- attr(object$terms, "term.labels")
   
   if (missing(scope))
     scope <- drop.scope(object)
   else {
     if (!is.character(scope))
       scope <- attr(terms(update.formula(object, scope)), "term.labels")
-    if (!all(scope %in% attr(object$terms, "term.labels")))
+    if (!all(scope %in% labs))
       stop("'scope' is not a subset of the term labels.")
   }
   
-  # Isolated evaluation environment on top of the formula environment:
-  # provides the fitting function and the training data for the refits
-  # without writing into the user's workspace and without consuming
-  # RNG state for temp names (reproducibility after set.seed()).
-  # model.frame(object) is already stripped to exactly the rows used
-  # during fitting.
+  mf     <- model.frame(object)
+  X      <- model.matrix(object)
+  asgn   <- attr(X, "assign")
+  hasInt <- attr(object$terms, "intercept") == 1L
+  wts    <- model.weights(mf)
+  off    <- model.offset(mf)
+  
+  # Data of the refits: the actual objects, not symbols that would have
+  # to be looked up again (cf. the weights issue in .drop1.polr)
+  refitData <- data.frame(.row = seq_len(nrow(mf)))
+  refitData[[".y"]]   <- model.response(mf)
+  refitData[[".off"]] <- off
+  
+  # The remaining arguments of the call are evaluated in an isolated
+  # environment on top of the formula environment, which also provides
+  # the fitting function for calls with an unqualified head
   env <- environment(formula(object))
   if (is.null(env))
     env <- parent.frame()
   
   evalEnv <- new.env(parent = env)
   assign("multinom", getFromNamespace("multinom", "nnet"), envir = evalEnv)
-  assign(".drop1_data", model.frame(object), envir = evalEnv)
   
-  ns <- length(scope)
+  refit <- function(drop) {
+    # the intercept column is supplied by the formula
+    keep <- asgn != 0L & !drop
+    refitData[[".X"]] <- X[, keep, drop = FALSE]
+    
+    rhs <- c(if (any(keep)) ".X", if (!is.null(off)) "offset(.off)")
+    if (length(rhs) == 0L)
+      rhs <- "1"
+    
+    call <- update(object, evaluate = FALSE)
+    call$formula   <- stats::reformulate(rhs, response = ".y",
+                                         intercept = hasInt)
+    call$data      <- refitData
+    call$weights   <- wts
+    call$subset    <- NULL
+    call$na.action <- NULL
+    call$contrasts <- NULL
+    call$trace     <- FALSE
+    
+    eval(call, envir = evalEnv)
+  }
   
   # Result matrix
   has_chisq <- test == "Chisq"
-  col_names <- if (has_chisq) c("Df", "AIC", "LR stat.", "p-value")
-  else           c("Df", "AIC")
-  
   ans <- matrix(
     NA_real_,
-    nrow     = ns + 1L,
-    ncol     = length(col_names),
-    dimnames = list(c("<none>", scope), col_names)
+    nrow     = length(scope) + 1L,
+    ncol     = if (has_chisq) 4L else 2L,
+    dimnames = list(c("<none>", scope),
+                    c("Df", "AIC", if (has_chisq) c("LR stat.", "p-value")))
   )
   ans[1L, "Df"]  <- object$edf
   ans[1L, "AIC"] <- object$AIC
   
-  # Extract LR stat and p-value column names from anova output robustly
-  .anova_cols <- function(av) {
-    nms <- names(av)
-    list(
-      stat = nms[length(nms) - 1L],
-      pval = nms[length(nms)]
-    )
-  }
-  
-  for (i in seq_len(ns)) {
-    tt   <- scope[i]
-    call <- update(object, as.formula(paste("~ . -", tt)), evaluate = FALSE)
-    call$data <- as.name(".drop1_data")
+  for (i in seq_along(scope)) {
     
-    nfit <- eval(call, envir = evalEnv)
+    drop <- asgn == match(scope[i], labs)
+    
+    # a model without any parameter cannot be fitted
+    if (!hasInt && !any(asgn != 0L & !drop)) next
+    
+    nfit <- refit(drop)
     
     ans[i + 1L, "Df"] <- nfit$edf
     
@@ -661,13 +738,157 @@ fitMod <- function(formula, data, ..., subset, na.action, fitfn = NULL) {
     ans[i + 1L, "AIC"] <- nfit$AIC
     
     if (has_chisq) {
-      av   <- anova(object, nfit)
-      cols <- .anova_cols(av)
-      ans[i + 1L, "LR stat."] <- av[2L, cols$stat]
-      ans[i + 1L, "p-value"]  <- av[2L, cols$pval]
+      lr <- nfit$deviance - object$deviance
+      ans[i + 1L, c("LR stat.", "p-value")] <-
+        c(lr, pchisq(lr, df = object$edf - nfit$edf, lower.tail = FALSE))
     }
   }
   
   as.data.frame(ans)
 }
 
+
+# -------------------------------------------------------------------------
+# Beta regression: coefficient table and term-wise tests
+# -------------------------------------------------------------------------
+
+# coef(summary()) of a betareg object is a list with one matrix per model
+# part, not a matrix.  The parts are stacked into a single matrix whose
+# rows are named as in coef(); the attribute "component" keeps the part.
+# The list names depend on the distribution: "mean"/"precision" for the
+# classic beta, "mu"/"phi"/"nu" for the extended-support variants.
+#' @keywords internal
+.waldTable.betareg <- function(object) {
+  
+  tabs <- coef(summary(object))
+  part <- unname(c(mean = "mean", mu = "mean", precision = "precision",
+                   phi = "precision", nu = "nu")[names(tabs)])
+  
+  # a constant precision on the identity link (the default for a
+  # one-part formula) is already named "(phi)"
+  for (i in which(part == "precision")) {
+    rn <- rownames(tabs[[i]])
+    rownames(tabs[[i]]) <- ifelse(rn == "(phi)", rn, paste0("(phi)_", rn))
+  }
+  
+  res <- do.call(rbind, unname(tabs))
+  attr(res, "component") <- rep(part, vapply(tabs, nrow, integer(1L)))
+  res
+}
+
+
+# Refit a beta regression on other design matrices for the mean (x) and
+# the precision model (z), everything else as in the full fit: response,
+# weights, offsets, links, estimator and distribution.  Used for the
+# reduced models of .drop1.betareg and for the null model of pseudoRSq().
+# Nothing is evaluated again in the formula environment, and exactly the
+# observations of the full fit are used.  The result is the plain list of
+# betareg.fit(), with components loglik and converged.
+#' @keywords internal
+.refit_betareg <- function(object, x, z) {
+  
+  n <- NROW(x)
+  y <- object[["y"]]
+  if (is.null(y))
+    y <- model.response(model.frame(object))
+  
+  control       <- object[["control"]]
+  control$start <- NULL      # start values of the full model do not fit
+  
+  # link and offset are accessed by position, their names differ between
+  # the distributions (see .waldTable.betareg)
+  offset <- lapply(
+    list(mu = object[["offset"]][[1L]], phi = object[["offset"]][[2L]]),
+    function(o) if (is.null(o)) rep.int(0, n) else o
+  )
+  
+  suppressWarnings(betareg::betareg.fit(
+    x = x, y = y, z = z,
+    weights  = object[["weights"]],
+    offset   = offset,
+    link     = object[["link"]][[1L]],
+    link.phi = object[["link"]][[2L]],
+    type     = object[["type"]],
+    control  = control,
+    dist     = object[["dist"]],
+    # nu is estimated for "xbetax" and only fixed for "xbeta"
+    nu       = if (identical(object[["dist"]], "xbeta")) object[["nu"]]
+  ))
+}
+
+
+# Likelihood-ratio tests for the terms of the mean and of the precision
+# model (rows of the latter prefixed with "(phi)_", as in coef()).
+# drop1() itself fails on betareg objects, there is no extractAIC method.
+#
+# The reduced models are refitted with .refit_betareg() on the design
+# matrices of the full fit with the columns of the term removed, as
+# drop1.glm does with glm.fit(), so subset, weights, missing values and
+# transformed terms need no special treatment.
+#
+# Layout as in .drop1.multinom: Df is the number of parameters of the
+# respective model, rows without a usable refit stay NA.
+#' @keywords internal
+.drop1.betareg <- function(object, test = c("Chisq", "none")) {
+  
+  test  <- match.arg(test)
+  parts <- c(mean = "mean", precision = "precision")
+  
+  tl    <- lapply(parts, function(p)
+    attr(terms(object, model = p), "term.labels"))
+  mm    <- lapply(parts, function(p) model.matrix(object, model = p))
+  scope <- lapply(parts, function(p) drop.scope(terms(object, model = p)))
+  
+  ll0  <- logLik(object)
+  edf0 <- attr(ll0, "df")
+  ll0  <- as.numeric(ll0)
+  
+  has_chisq <- test == "Chisq"
+  labels    <- c(scope$mean, paste0("(phi)_", scope$precision,
+                                    recycle0 = TRUE))
+  ans <- matrix(
+    NA_real_,
+    nrow     = length(labels) + 1L,
+    ncol     = if (has_chisq) 4L else 2L,
+    dimnames = list(c("<none>", labels),
+                    c("Df", "AIC", if (has_chisq) c("LR stat.", "p-value")))
+  )
+  ans[1L, c("Df", "AIC")] <- c(edf0, -2 * ll0 + 2 * edf0)
+  
+  failed <- character(0L)
+  i      <- 1L
+  
+  for (p in parts) for (tt in scope[[p]]) {
+    
+    i    <- i + 1L
+    drop <- attr(mm[[p]], "assign") == match(tt, tl[[p]])
+    red  <- mm
+    red[[p]] <- mm[[p]][, !drop, drop = FALSE]
+    
+    # a model part without any parameter cannot be fitted
+    if (ncol(red[[p]]) == 0L) next
+    
+    edf <- edf0 - sum(drop)
+    ans[i, "Df"] <- edf
+    
+    nfit <- .refit_betareg(object, red$mean, red$precision)
+    if (!isTRUE(nfit$converged)) {
+      failed <- c(failed, rownames(ans)[i])
+      next
+    }
+    
+    ans[i, "AIC"] <- -2 * nfit$loglik + 2 * edf
+    
+    if (has_chisq) {
+      lr <- 2 * (ll0 - nfit$loglik)
+      ans[i, c("LR stat.", "p-value")] <-
+        c(lr, pchisq(lr, df = sum(drop), lower.tail = FALSE))
+    }
+  }
+  
+  if (length(failed))
+    warning("fitMod: the reduced beta regression did not converge for ",
+            paste(failed, collapse = ", "), ".", call. = FALSE)
+  
+  as.data.frame(ans)
+}

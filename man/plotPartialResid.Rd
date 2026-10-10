@@ -26,7 +26,7 @@ plotPartialResid(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{term}{name of the predictor. \code{NULL} (default) uses the first
 continuous term in the model; \code{\link{predictors}(fit, numeric =
@@ -87,13 +87,13 @@ suspect term and compare. If the smoother bends but the likelihood
 ratio test does not, the bend is noise.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotPartialResid(fitLogit, term = "gre")
 
 # confirm a suspected bend against a spline fit
 fitSpline <- fitMod(admit ~ splines::ns(gre, 3) + gpa + rank, Admit,
-                    fitfn = "logit")
+                    engine = "logit")
 anova(fitLogit, fitSpline, test = "LRT")
 
 }

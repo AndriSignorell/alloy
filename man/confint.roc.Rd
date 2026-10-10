@@ -32,7 +32,7 @@ Computes confidence intervals for sensitivity, specificity, or other
 coordinates of an ROC curve via \code{\link[pROC]{ci.coords}}.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 r <- roc(fitLogit)
 confint(r)                    # CI at best cut-point
 confint(r, x = 0.5)          # CI at specificity = 0.5

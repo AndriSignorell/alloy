@@ -38,7 +38,7 @@ plotCalibration(
 - fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
-  `fitfn = "logit"`) or a binomial
+  `engine = "logit"`) or a binomial
   [`glm`](https://rdrr.io/r/stats/glm.html).
 
 - newdata:
@@ -164,14 +164,14 @@ for an overview of the diagnostics for logistic models in alloy.
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotCalibration(fitLogit)
 
 
 # out of sample, where intercept and slope carry information
 idx <- sample(nrow(Admit), nrow(Admit) * 0.7)
-fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], fitfn = "logit")
+fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], engine = "logit")
 plotCalibration(fitTrain, newdata = Admit[-idx, ])
 
 ```

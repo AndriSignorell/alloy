@@ -6,7 +6,8 @@
 #' GVIFs are returned along with a scaled version \code{GVIF^(1/(2*Df))}.
 #'
 #' @param fit A fitted model object. Currently supports objects of class
-#'   \code{lm}, \code{glm}, and \code{gls}.
+#'   \code{lm}, \code{glm}, \code{gls} and \code{betareg}. For a beta
+#'   regression the factors refer to the mean model.
 #'
 #' @return
 #' If all terms have 1 degree of freedom, a named numeric vector of VIFs.
@@ -46,25 +47,32 @@
 #' @export
 vif <- function(fit) {
   
-  if (!inherits(fit, c("lm", "glm", "gls"))) {
+  if (!inherits(fit, c("lm", "glm", "gls", "betareg"))) {
     stop("Unsupported model type.", call. = FALSE)
   }
   
-  if (any(is.na(coef(fit))))
+  # betareg: coefficients, covariance, design matrix and terms of the
+  # mean model (its methods cover all parameters by default)
+  isBeta  <- inherits(fit, "betareg")
+  extract <- function(f) if (isBeta) f(fit, model = "mean") else f(fit)
+  
+  cf <- extract(coef)
+  
+  if (any(is.na(cf)))
     stop("There are aliased coefficients in the model.", call. = FALSE)
   
-  v <- vcov(fit)
-  mm <- model.matrix(fit)
+  v <- extract(vcov)
+  mm <- extract(model.matrix)
   assign <- attr(mm, "assign")
   
-  if (names(coef(fit))[1] == "(Intercept)") {
+  if (names(cf)[1] == "(Intercept)") {
     v <- v[-1, -1, drop = FALSE]
     assign <- assign[-1]
   } else {
     warning("No intercept: VIFs may not be sensible.")
   }
   
-  terms <- attr(terms(fit), "term.labels")
+  terms <- attr(extract(stats::terms), "term.labels")
   n.terms <- length(terms)
   
   if (n.terms < 2)

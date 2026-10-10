@@ -29,7 +29,7 @@ plotCalibration(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{fitfn = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
 
 \item{newdata}{optional data frame for evaluating calibration out of
 sample. \code{NULL} (default) uses the training data.}
@@ -115,13 +115,13 @@ which a binary response does not have; read it as an indication of
 where the data are thin, not as a simultaneous confidence region.
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 plotCalibration(fitLogit)
 
 # out of sample, where intercept and slope carry information
 idx <- sample(nrow(Admit), nrow(Admit) * 0.7)
-fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], fitfn = "logit")
+fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], engine = "logit")
 plotCalibration(fitTrain, newdata = Admit[-idx, ])
 
 }

@@ -53,7 +53,8 @@ print(
 
   `"or"`
 
-  : Odds ratios - `exp(coef)` - for logistic and ordinal models.
+  : Odds ratios - `exp(coef)` - for logistic and ordinal models, and for
+    the mean model of a beta regression with logit link.
 
   `"irr"`
 
@@ -114,8 +115,11 @@ Invisibly returns the result of `summary(x)`.
 
 Factor predictors are displayed with a header row showing the reference
 category and an overall p-value from
-[`drop1`](https://rdrr.io/r/stats/add1.html). Dummy-coded rows are
-indented below the header.
+[`drop1`](https://rdrr.io/r/stats/add1.html) (for `lmrob` a robust Wald
+test of the coefficients of the factor). Dummy-coded rows are indented
+below the header. Factors without a treatment coding (ordered factors,
+sum contrasts, ...) have no reference category and are printed without a
+header row.
 
 For negative binomial models an additional overdispersion block is
 printed showing the parameter \\\alpha = 1/\theta\\ (Stata convention)
@@ -123,6 +127,13 @@ with a one-sided likelihood-ratio test against the Poisson model.
 
 For quasi-Poisson and quasi-binomial models, pseudo-R\\^2\\ and AIC are
 not available and a note is displayed instead.
+
+For beta regressions the mean model and the precision model are printed
+as two blocks. The overall p-values of factor predictors are the
+likelihood-ratio tests stored by
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md).
+The pseudo-R\\^2\\ is the one reported by betareg (squared correlation
+of the linear predictor and the link-transformed response).
 
 ## See also
 
@@ -139,7 +150,7 @@ Other modelling:
 
 ``` r
 fitLm <- fitMod(Fertility ~ ., swiss)
-#> fitMod: using fitfn = 'lm'
+#> fitMod: using engine = 'lm'
 print(fitLm)
 #> 
 #> Call:
@@ -177,7 +188,7 @@ print(fitLm, vcov = "HC3")
 #> Obs (NAs): 47 (0)    R²/R²adj: 0.707/0.671
 #> 
 
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 print(fitLogit)
 #> 
 #> Call:
@@ -240,7 +251,7 @@ print(fitLogit, output = "or", vcov = "HC3")
 #> 
 
 fitPois <- fitMod(daysabs ~ mathnce + langnce + gender,
-                  Lahigh, fitfn = "poisson")
+                  Lahigh, engine = "poisson")
 print(fitPois, output = "irr")
 #> 
 #> Call:
@@ -261,7 +272,7 @@ print(fitPois, output = "irr")
 #> 
 
 fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-                 fitfn = "coxph")
+                 engine = "coxph")
 print(fitCox)
 #> 
 #> Call:
@@ -294,7 +305,7 @@ print(fitCox, output = "lhr")
 #> 
 
 fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-                 fitfn = "weibull")
+                 engine = "weibull")
 print(fitWei)
 #> 
 #> Weibull AFT model

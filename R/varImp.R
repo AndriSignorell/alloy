@@ -26,7 +26,7 @@
 #'
 #' @examples
 #' fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-#'                 IceCream, fitfn = "randomForest")
+#'                 IceCream, engine = "randomForest")
 #' vi <- varImp(fitRf)
 #' vi
 #' plot(vi)
@@ -46,14 +46,14 @@ varImp <- function(x, scale = c("max", "sum", "none"), sorted = TRUE, ...) {
   if (!inherits(x, "FitMod"))
     stop("x must be a FitMod object")
   
-  fitfn <- x$fitfn
+  engine <- x$engine
   obj   <- if (inherits(x, "FitMod.xgboost")) x$model else {
     o <- x
     class(o) <- class(o)[class(o) != "FitMod"]
     o
   }
   
-  imp <- switch(fitfn,
+  imp <- switch(engine,
                 
                 rpart = {
                   vi <- obj$variable.importance
@@ -138,8 +138,8 @@ varImp <- function(x, scale = c("max", "sum", "none"), sorted = TRUE, ...) {
                 },
                 
                 stop(sprintf(
-                  "varImp is not supported for fitfn = '%s'. Supported: rpart, C5.0, randomForest, nnet, glmnet, xgboost.",
-                  fitfn
+                  "varImp is not supported for engine = '%s'. Supported: rpart, C5.0, randomForest, nnet, glmnet, xgboost.",
+                  engine
                 ))
   )
   
@@ -183,7 +183,7 @@ varImp <- function(x, scale = c("max", "sum", "none"), sorted = TRUE, ...) {
 #'
 #' @examples
 #' fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-#'                 IceCream, fitfn = "randomForest")
+#'                 IceCream, engine = "randomForest")
 #' plot(varImp(fitRf))
 #'
 #' @seealso \code{\link{varImp}}

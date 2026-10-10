@@ -35,14 +35,14 @@ predict(
 - output:
 
   Character string controlling the output for classification models. One
-  of `"prob"` (default), `"class"`, or `"both"`. For `fitfn = "rpart"`
+  of `"prob"` (default), `"class"`, or `"both"`. For `engine = "rpart"`
   additionally `"where"` (row index of the predicted leaf in the tree
   frame) or `"leaf"` (node label of the predicted leaf) are available.
   Ignored for regression and survival models.
 
 - s:
 
-  For `fitfn = "glmnet"` only: the value of the penalty parameter
+  For `engine = "glmnet"` only: the value of the penalty parameter
   \\\lambda\\ at which predictions are made. Passed to
   [`predict.cv.glmnet`](https://glmnet.stanford.edu/reference/predict.cv.glmnet.html).
   Default is `"lambda.1se"`.
@@ -54,8 +54,11 @@ predict(
   used, so that predictions are returned on the response scale both with
   and without `newdata`. For Cox models the default is `"risk"`; for
   parametric survival models (incl. `tobit`) the default is
-  `"response"`. Ignored for classification models (use `output`
-  instead).
+  `"response"`. For `engine = "beta"` all types of
+  [`predict.betareg`](https://rdrr.io/pkg/betareg/man/predict.betareg.html)
+  are available, e.g. `"link"`, `"precision"`, `"variance"` or
+  `"quantile"` (with `at` passed via `...`). Ignored for classification
+  models (use `output` instead).
 
 - ...:
 
@@ -120,11 +123,11 @@ transparently via an internal helper. Note that for `randomForest` this
 returns in-sample (not out-of-bag) predictions, consistent with the
 fitted-values semantics of all other methods.
 
-For `fitfn = "glmnet"` and `"xgboost"`, design matrices for `newdata`
+For `engine = "glmnet"` and `"xgboost"`, design matrices for `newdata`
 are rebuilt from the `terms` and factor levels of the training data, so
 new data may contain a subset of the training factor levels.
 
-For `fitfn = "logit"`, calling `predict(object)` returns a two-column
+For `engine = "logit"`, calling `predict(object)` returns a two-column
 probability `data.frame` (like all other classifiers). To obtain the
 linear predictor (log-odds), use `predict(object, type = "link")`.
 
@@ -144,13 +147,13 @@ Other modelling:
 ``` r
 # Regression
 fitLm <- fitMod(Fertility ~ ., swiss)
-#> fitMod: using fitfn = 'lm'
+#> fitMod: using engine = 'lm'
 head(predict(fitLm))
 #>   Courtelary     Delemont Franches-Mnt      Moutier   Neuveville   Porrentruy 
 #>     74.61530     82.50994     85.91826     76.82039     64.70241     90.50011 
 
 # Binary classification - probabilities
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 head(predict(fitLogit))
 #>           0         1
 #> 1 0.8273735 0.1726265
@@ -171,7 +174,7 @@ head(predict(fitLogit, output = "both"))
 # Multinomial classification
 if (requireNamespace("nnet", quietly = TRUE)) {
   fitMult <- fitMod(ice_cream ~ video + puzzle + female,
-                    IceCream, fitfn = "multinom")
+                    IceCream, engine = "multinom")
   head(predict(fitMult, output = "both"))
 }
 #>     vanilla  chocolate strawberry      class
@@ -185,12 +188,12 @@ if (requireNamespace("nnet", quietly = TRUE)) {
 # Cox model - risk scores
 if (requireNamespace("survival", quietly = TRUE)) {
   fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-                   fitfn = "coxph")
+                   engine = "coxph")
   head(predict(fitCox))
 
   # Parametric survival - expected survival time
   fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-                   fitfn = "weibull")
+                   engine = "weibull")
   head(predict(fitWei))
 }
 #> [1] 4994.958 1033.530 2558.231 1526.986 2419.490 1444.172

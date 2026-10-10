@@ -26,7 +26,7 @@ library(lme4)      # für mixed models
 range of statistical models. The syntax is always the same:
   
 ```r
-fitMod(formula, data, fitfn = "...")
+fitMod(formula, data, engine = "...")
 ```
 
 For background on the statistical methods, the 
@@ -120,14 +120,14 @@ fitLm |> print(vcov = "HC3")
 Robust regression (MM-estimator):
   
 ```{r}
-fitLmrob <- fitMod(Fertility ~ ., swiss, fitfn = "lmrob")
+fitLmrob <- fitMod(Fertility ~ ., swiss, engine = "lmrob")
 fitLmrob
 ```
 
 ### Gamma regression (`gamma`)
 
 ```{r}
-fitGamma <- fitMod(Sepal.Length ~ ., iris, fitfn = "gamma")
+fitGamma <- fitMod(Sepal.Length ~ ., iris, engine = "gamma")
 fitGamma
 ```
 
@@ -136,7 +136,7 @@ fitGamma
 [UCLA reference](https://stats.oarc.ucla.edu/stata/dae/tobit-analysis/)
 
 ```{r}
-fitTobit <- fitMod(apt ~ read + math + prog, Apt, fitfn = "tobit")
+fitTobit <- fitMod(apt ~ read + math + prog, Apt, engine = "tobit")
 fitTobit
 ```
 
@@ -149,7 +149,7 @@ fitTobit
 [UCLA reference](https://stats.oarc.ucla.edu/r/dae/logit-regression/)
 
 ```{r}
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 fitLogit
 ```
 
@@ -183,7 +183,7 @@ pseudoRSq(fitLogit)
 
 ```{r}
 fitPois <- fitMod(daysabs ~ mathnce + langnce + gender, 
-                  data = Lahigh, fitfn = "poisson")
+                  data = Lahigh, engine = "poisson")
 fitPois
 fitPois |> print(output = "irr")
 fitPois |> print(vcov = "HC0")
@@ -193,7 +193,7 @@ fitPois |> print(vcov = "HC0")
 
 ```{r}
 fitQpois <- fitMod(daysabs ~ mathnce + langnce + gender,
-                   data = Lahigh, fitfn = "quasipoisson")
+                   data = Lahigh, engine = "quasipoisson")
 fitQpois
 ```
 
@@ -203,7 +203,7 @@ fitQpois
 
 ```{r}
 fitNegbin <- fitMod(daysabs ~ mathnce + langnce + gender,
-                    data = Lahigh, fitfn = "negbin")
+                    data = Lahigh, engine = "negbin")
 fitNegbin
 fitNegbin |> print(vcov = "HC3")
 ```
@@ -214,7 +214,7 @@ fitNegbin |> print(vcov = "HC3")
 
 ```{r}
 fitZeroinfl <- fitMod(count ~ child + camper | persons,
-                      data = Fish, fitfn = "zeroinfl")
+                      data = Fish, engine = "zeroinfl")
 fitZeroinfl
 ```
 
@@ -227,7 +227,7 @@ fitZeroinfl
 [UCLA reference](https://stats.oarc.ucla.edu/r/faq/ologit-coefficients/)
 
 ```{r}
-fitPolr <- fitMod(apply ~ pared, data = Ologit, fitfn = "polr")
+fitPolr <- fitMod(apply ~ pared, data = Ologit, engine = "polr")
 fitPolr
 fitPolr |> print(output = "or")
 head(predict(fitPolr, output = "both"))
@@ -239,7 +239,7 @@ head(predict(fitPolr, output = "both"))
 
 ```{r}
 fitMult <- fitMod(ice_cream ~ video + puzzle + female,
-                  data = IceCream, fitfn = "multinom")
+                  data = IceCream, engine = "multinom")
 fitMult
 head(predict(fitMult, output = "both"))
 ```
@@ -254,7 +254,7 @@ head(predict(fitMult, output = "both"))
 
 ```{r}
 fitCox <- fitMod(Surv(foltime, folstatus) ~ gender + agex,
-                 data = Whas100, fitfn = "coxph")
+                 data = Whas100, engine = "coxph")
 fitCox
 head(predict(fitCox))
 ```
@@ -269,7 +269,7 @@ means increasing hazard, shape < 1 decreasing hazard.
 
 ```{r}
 fitWeibull <- fitMod(Surv(foltime, folstatus) ~ gender + age + bmi,
-                     data = Whas100, fitfn = "weibull")
+                     data = Whas100, engine = "weibull")
 fitWeibull
 fitWeibull |> print(output = "coef")   # log Time Ratios
 head(predict(fitWeibull))
@@ -292,7 +292,7 @@ intercept and slope.
 
 ```{r}
 fitLmm <- fitMod(Reaction ~ Days + (1 | Subject),
-                 data = lme4::sleepstudy, fitfn = "lmMixed")
+                 data = lme4::sleepstudy, engine = "lmMixed")
 fitLmm
 head(predict(fitLmm))
 ```
@@ -303,7 +303,7 @@ head(predict(fitLmm))
 
 ```{r}
 fitLogitMixed <- fitMod(use ~ age + urban + (1 | district),
-                        data = alloy::Contraception, fitfn = "logitMixed")
+                        data = alloy::Contraception, engine = "logitMixed")
 fitLogitMixed
 fitLogitMixed |> print(output = "or")
 head(predict(fitLogitMixed, output = "both"))
@@ -313,7 +313,7 @@ head(predict(fitLogitMixed, output = "both"))
 
 ```{r}
 fitPoisMixed <- fitMod(incidence ~ period + (1 | herd),
-                       data = lme4::cbpp, fitfn = "poissonMixed")
+                       data = lme4::cbpp, engine = "poissonMixed")
 fitPoisMixed
 fitPoisMixed |> print(output = "irr")
 ```
@@ -322,7 +322,7 @@ fitPoisMixed |> print(output = "irr")
 
 ```{r}
 fitNegbinMixed <- fitMod(incidence ~ period + (1 | herd),
-                         data = lme4::cbpp, fitfn = "negbinMixed")
+                         data = lme4::cbpp, engine = "negbinMixed")
 fitNegbinMixed
 ```
 
@@ -335,55 +335,55 @@ All ML models use the same `predict()` interface with
 
 ```{r}
 fitSvm <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "svm")
+                 data = IceCream, engine = "svm")
 head(predict(fitSvm, output = "both"))
 ```
 
 ```{r}
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                data = IceCream, fitfn = "randomForest")
+                data = IceCream, engine = "randomForest")
 head(predict(fitRf, output = "both"))
 ```
 
 ```{r}
 fitNnet <- fitMod(ice_cream ~ video + puzzle + female,
-                  data = IceCream, fitfn = "nnet")
+                  data = IceCream, engine = "nnet")
 head(predict(fitNnet, output = "both"))
 ```
 
 ```{r}
 fitC5 <- fitMod(ice_cream ~ video + puzzle + female,
-                data = IceCream, fitfn = "C5.0")
+                data = IceCream, engine = "C5.0")
 head(predict(fitC5, output = "both"))
 ```
 
 ```{r}
 fitNbayes <- fitMod(ice_cream ~ video + puzzle + female,
-                    data = IceCream, fitfn = "naiveBayes")
+                    data = IceCream, engine = "naiveBayes")
 head(predict(fitNbayes, output = "both"))
 ```
 
 ```{r}
 fitLda <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "lda")
+                 data = IceCream, engine = "lda")
 head(predict(fitLda, output = "both"))
 ```
 
 ```{r}
 fitGlmnet <- fitMod(ice_cream ~ video + puzzle + female,
-                    data = IceCream, fitfn = "glmnet")
+                    data = IceCream, engine = "glmnet")
 head(predict(fitGlmnet, output = "both"))
 ```
 
 ```{r}
 fitXgb <- fitMod(ice_cream ~ video + puzzle + female,
-                 data = IceCream, fitfn = "xgboost")
+                 data = IceCream, engine = "xgboost")
 head(predict(fitXgb, output = "both"))
 ```
 
 ```{r}
 fitRpart <- fitMod(ice_cream ~ video + puzzle + female,
-                   data = IceCream, fitfn = "rpart")
+                   data = IceCream, engine = "rpart")
 head(predict(fitRpart, output = "both"))
 ```
 

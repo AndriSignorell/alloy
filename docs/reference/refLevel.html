@@ -23,7 +23,7 @@ options."><meta property="og:image" content="https://andrisignorell.github.io/al
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -73,7 +73,9 @@ not 1 or when contrasts have been set globally via
 <dl><dt id="arg-fit">fit<a class="anchor" aria-label="anchor" href="#arg-fit"></a></dt>
 <dd><p>A fitted model object with a <code>terms</code> attribute and a
 <code>model</code> data frame (e.g. objects of class <code>"lm"</code>,
-<code>"glm"</code>, <code>"lmerMod"</code>, or <code>"glmerMod"</code>).</p></dd>
+<code>"glm"</code>, <code>"lmerMod"</code>, <code>"glmerMod"</code> or
+<code>"betareg"</code>).  Mixed models fitted with <code><a href="fitMod.html">fitMod</a></code>
+are accepted as well.</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -92,9 +94,14 @@ each factor predictor.</p>
 is returned as the reference.</p></li>
 <li><p>If the contrast is stored as a <em>matrix</em>, the reference
 level is identified as the unique row whose entries are all zero
-(i.e. the row that does not map to any dummy column).</p></li>
+(i.e. the row that does not map to any dummy column).  The
+matrix must be a treatment coding, that is consist of 0 and 1
+only, with a single 1 in every other row.</p></li>
 </ul><p>Contrasts other than treatment contrasts (e.g. <code>contr.sum</code>,
-<code>contr.helmert</code>) are not supported and trigger an informative error.</p>
+<code>contr.helmert</code>) are not supported and trigger an informative error,
+whether they are stored by name or as a matrix.</p>
+<p>For beta regressions (<code>"betareg"</code>) the factor predictors of the mean
+and of the precision model are returned together.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>

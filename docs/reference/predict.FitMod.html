@@ -21,7 +21,7 @@ consistent column names across all model types."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -87,14 +87,14 @@ fitted values on the training data are returned.</p></dd>
 <dt id="arg-output">output<a class="anchor" aria-label="anchor" href="#arg-output"></a></dt>
 <dd><p>Character string controlling the output for classification
 models.  One of <code>"prob"</code> (default), <code>"class"</code>, or
-<code>"both"</code>.  For <code>fitfn = "rpart"</code> additionally
+<code>"both"</code>.  For <code>engine = "rpart"</code> additionally
 <code>"where"</code> (row index of the predicted leaf in the tree frame) or
 <code>"leaf"</code> (node label of the predicted leaf) are available.
 Ignored for regression and survival models.</p></dd>
 
 
 <dt id="arg-s">s<a class="anchor" aria-label="anchor" href="#arg-s"></a></dt>
-<dd><p>For <code>fitfn = "glmnet"</code> only: the value of the penalty
+<dd><p>For <code>engine = "glmnet"</code> only: the value of the penalty
 parameter \(\lambda\) at which predictions are made.  Passed to
 <code><a href="https://glmnet.stanford.edu/reference/predict.cv.glmnet.html" class="external-link">predict.cv.glmnet</a></code>.  Default is
 <code>"lambda.1se"</code>.</p></dd>
@@ -107,6 +107,10 @@ If not supplied, <code>"response"</code> is used, so that predictions are
 returned on the response scale both with and without <code>newdata</code>.
 For Cox models the default is <code>"risk"</code>; for parametric survival
 models (incl. <code>tobit</code>) the default is <code>"response"</code>.
+For <code>engine = "beta"</code> all types of
+<code><a href="https://rdrr.io/pkg/betareg/man/predict.betareg.html" class="external-link">predict.betareg</a></code> are available, e.g.
+<code>"link"</code>, <code>"precision"</code>, <code>"variance"</code> or
+<code>"quantile"</code> (with <code>at</code> passed via <code>...</code>).
 Ignored for classification models (use <code>output</code> instead).</p></dd>
 
 
@@ -173,11 +177,11 @@ handled transparently via an internal helper.  Note that for
 <code>randomForest</code> this returns in-sample (not out-of-bag)
 predictions, consistent with the fitted-values semantics of all other
 methods.</p>
-<p>For <code>fitfn = "glmnet"</code> and <code>"xgboost"</code>, design matrices for
+<p>For <code>engine = "glmnet"</code> and <code>"xgboost"</code>, design matrices for
 <code>newdata</code> are rebuilt from the <code>terms</code> and factor levels of
 the training data, so new data may contain a subset of the training
 factor levels.</p>
-<p>For <code>fitfn = "logit"</code>, calling <code>predict(object)</code> returns a
+<p>For <code>engine = "logit"</code>, calling <code>predict(object)</code> returns a
 two-column probability <code>data.frame</code> (like all other classifiers).
 To obtain the linear predictor (log-odds), use
 <code>predict(object, type = "link")</code>.</p>
@@ -196,13 +200,13 @@ To obtain the linear predictor (log-odds), use
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co"># Regression</span></span></span>
 <span class="r-in"><span><span class="va">fitLm</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">Fertility</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">swiss</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using fitfn = 'lm'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using engine = 'lm'</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitLm</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Courtelary     Delemont Franches-Mnt      Moutier   Neuveville   Porrentruy </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     74.61530     82.50994     85.91826     76.82039     64.70241     90.50011 </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Binary classification - probabilities</span></span></span>
-<span class="r-in"><span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, fitfn <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, engine <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitLogit</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>           0         1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1 0.8273735 0.1726265</span>
@@ -223,7 +227,7 @@ To obtain the linear predictor (log-odds), use
 <span class="r-in"><span><span class="co"># Multinomial classification</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"nnet"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">fitMult</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">ice_cream</span> <span class="op">~</span> <span class="va">video</span> <span class="op">+</span> <span class="va">puzzle</span> <span class="op">+</span> <span class="va">female</span>,</span></span>
-<span class="r-in"><span>                    <span class="va">IceCream</span>, fitfn <span class="op">=</span> <span class="st">"multinom"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                    <span class="va">IceCream</span>, engine <span class="op">=</span> <span class="st">"multinom"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitMult</span>, output <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     vanilla  chocolate strawberry      class</span>
@@ -237,12 +241,12 @@ To obtain the linear predictor (log-odds), use
 <span class="r-in"><span><span class="co"># Cox model - risk scores</span></span></span>
 <span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"survival"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
 <span class="r-in"><span>  <span class="va">fitCox</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">foltime</span>, <span class="va">folstatus</span><span class="op">)</span> <span class="op">~</span> <span class="va">gender</span>, <span class="va">Whas100</span>,</span></span>
-<span class="r-in"><span>                   fitfn <span class="op">=</span> <span class="st">"coxph"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                   engine <span class="op">=</span> <span class="st">"coxph"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitCox</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span>  <span class="co"># Parametric survival - expected survival time</span></span></span>
 <span class="r-in"><span>  <span class="va">fitWei</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/survival/man/Surv.html" class="external-link">Surv</a></span><span class="op">(</span><span class="va">foltime</span>, <span class="va">folstatus</span><span class="op">)</span> <span class="op">~</span> <span class="va">gender</span> <span class="op">+</span> <span class="va">age</span>, <span class="va">Whas100</span>,</span></span>
-<span class="r-in"><span>                   fitfn <span class="op">=</span> <span class="st">"weibull"</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                   engine <span class="op">=</span> <span class="st">"weibull"</span><span class="op">)</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitWei</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 4994.958 1033.530 2558.231 1526.986 2419.490 1444.172</span>

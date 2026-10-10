@@ -11,11 +11,11 @@
 #'   fitted values on the training data are returned.
 #' @param output Character string controlling the output for classification
 #'   models.  One of \code{"prob"} (default), \code{"class"}, or
-#'   \code{"both"}.  For \code{fitfn = "rpart"} additionally
+#'   \code{"both"}.  For \code{engine = "rpart"} additionally
 #'   \code{"where"} (row index of the predicted leaf in the tree frame) or
 #'   \code{"leaf"} (node label of the predicted leaf) are available.
 #'   Ignored for regression and survival models.
-#' @param s For \code{fitfn = "glmnet"} only: the value of the penalty
+#' @param s For \code{engine = "glmnet"} only: the value of the penalty
 #'   parameter \eqn{\lambda} at which predictions are made.  Passed to
 #'   \code{\link[glmnet]{predict.cv.glmnet}}.  Default is
 #'   \code{"lambda.1se"}.
@@ -25,6 +25,10 @@
 #'   returned on the response scale both with and without \code{newdata}.
 #'   For Cox models the default is \code{"risk"}; for parametric survival
 #'   models (incl. \code{tobit}) the default is \code{"response"}.
+#'   For \code{engine = "beta"} all types of
+#'   \code{\link[betareg]{predict.betareg}} are available, e.g.
+#'   \code{"link"}, \code{"precision"}, \code{"variance"} or
+#'   \code{"quantile"} (with \code{at} passed via \code{...}).
 #'   Ignored for classification models (use \code{output} instead).
 #' @param ... Further arguments passed to the underlying predict method.
 #'
@@ -75,12 +79,12 @@
 #' predictions, consistent with the fitted-values semantics of all other
 #' methods.
 #'
-#' For \code{fitfn = "glmnet"} and \code{"xgboost"}, design matrices for
+#' For \code{engine = "glmnet"} and \code{"xgboost"}, design matrices for
 #' \code{newdata} are rebuilt from the \code{terms} and factor levels of
 #' the training data, so new data may contain a subset of the training
 #' factor levels.
 #'
-#' For \code{fitfn = "logit"}, calling \code{predict(object)} returns a
+#' For \code{engine = "logit"}, calling \code{predict(object)} returns a
 #' two-column probability \code{data.frame} (like all other classifiers).
 #' To obtain the linear predictor (log-odds), use
 #' \code{predict(object, type = "link")}.
@@ -91,26 +95,26 @@
 #' head(predict(fitLm))
 #'
 #' # Binary classification - probabilities
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #' head(predict(fitLogit))
 #' head(predict(fitLogit, output = "both"))
 #'
 #' # Multinomial classification
 #' if (requireNamespace("nnet", quietly = TRUE)) {
 #'   fitMult <- fitMod(ice_cream ~ video + puzzle + female,
-#'                     IceCream, fitfn = "multinom")
+#'                     IceCream, engine = "multinom")
 #'   head(predict(fitMult, output = "both"))
 #' }
 #'
 #' # Cox model - risk scores
 #' if (requireNamespace("survival", quietly = TRUE)) {
 #'   fitCox <- fitMod(Surv(foltime, folstatus) ~ gender, Whas100,
-#'                    fitfn = "coxph")
+#'                    engine = "coxph")
 #'   head(predict(fitCox))
 #'
 #'   # Parametric survival - expected survival time
 #'   fitWei <- fitMod(Surv(foltime, folstatus) ~ gender + age, Whas100,
-#'                    fitfn = "weibull")
+#'                    engine = "weibull")
 #'   head(predict(fitWei))
 #' }
 #'
@@ -125,7 +129,7 @@ predict.FitMod <- function(object, newdata = NULL,
                            ...) {
 
   output <- match.arg(output)
-  fitfn  <- object$fitfn
+  engine  <- object$engine
 
   # Strip FitMod class to avoid infinite recursion; the slots stored by
   # fitMod() (x_train, terms, xlev, y_levels, classification, ...) remain
@@ -141,8 +145,8 @@ predict.FitMod <- function(object, newdata = NULL,
 
   # --- rpart only: leaf/where output ---
   if (output %in% c("where", "leaf")) {
-    if (fitfn != "rpart")
-      stop("output = '", output, "' is only available for fitfn = 'rpart'.")
+    if (engine != "rpart")
+      stop("output = '", output, "' is only available for engine = 'rpart'.")
     if (is.null(newdata))
       return(if (output == "where") fit$where
              else rownames(fit$frame)[fit$where])
@@ -150,7 +154,7 @@ predict.FitMod <- function(object, newdata = NULL,
   }
 
   # --- cox: risk scores by default, type overrideable ---
-  if (fitfn == "coxph") {
+  if (engine == "coxph") {
     args <- list(fit, type = if (!is.null(type)) type else "risk")
     if (!is.null(newdata)) args$newdata <- newdata
     return(do.call(predict, c(args, list(...))))
@@ -159,7 +163,7 @@ predict.FitMod <- function(object, newdata = NULL,
   # --- parametric survival (survreg-based, incl. tobit) ---
   # NOTE: survreg objects have no $fitted.values, so a fitted() shortcut
   # would silently return NULL - always go through predict()
-  if (fitfn %in% c("weibull", "exponential", "lognormal",
+  if (engine %in% c("weibull", "exponential", "lognormal",
                    "loglogistic", "tobit")) {
     args <- list(fit, type = if (!is.null(type)) type else "response")
     if (!is.null(newdata)) args$newdata <- newdata
@@ -167,15 +171,15 @@ predict.FitMod <- function(object, newdata = NULL,
   }
 
   # --- logit special case: type = "link" returns the linear predictor ---
-  if (fitfn == "logit" && identical(type, "link")) {
+  if (engine == "logit" && identical(type, "link")) {
     args <- list(fit, type = "link")
     if (!is.null(newdata)) args$newdata <- newdata
     return(do.call(predict, c(args, list(...))))
   }
 
   # --- regression vs classification: decided per fitted object ---
-  if (!.is_classification(obj, fit, fitfn))
-    return(.predict_response(fit, obj, fitfn, newdata,
+  if (!.is_classification(obj, fit, engine))
+    return(.predict_response(fit, obj, engine, newdata,
                              s = s, type = type, ...))
 
   # --- classification ---
@@ -183,8 +187,8 @@ predict.FitMod <- function(object, newdata = NULL,
     warning("'type' is ignored for classification models in predict.FitMod; ",
             "use 'output' to control the return format.", call. = FALSE)
 
-  .pred_prob  <- function() .predict_prob(fit, obj, fitfn, newdata, s = s, ...)
-  .pred_class <- function() .predict_class(fit, obj, fitfn, newdata, s = s, ...)
+  .pred_prob  <- function() .predict_prob(fit, obj, engine, newdata, s = s, ...)
+  .pred_class <- function() .predict_class(fit, obj, engine, newdata, s = s, ...)
 
   switch(output,
          prob  = .pred_prob(),
@@ -199,22 +203,22 @@ predict.FitMod <- function(object, newdata = NULL,
 # Internal: classification or regression?
 # -------------------------------------------------------------------------
 
-# Decided from the fitted object, not from fitfn alone: several methods
+# Decided from the fitted object, not from engine alone: several methods
 # (rpart, randomForest, svm, nnet, glmnet, xgboost) support both tasks.
 #' @keywords internal
-.is_classification <- function(obj, fit, fitfn) {
+.is_classification <- function(obj, fit, engine) {
 
   # explicit flag stored by fitMod() for glmnet / xgboost
   if (!is.null(obj$classification))
     return(isTRUE(obj$classification))
 
-  switch(fitfn,
+  switch(engine,
 
          logit = , multinom = , polr = , lda = , qda = ,
          C5.0 = , naiveBayes = , logitMixed = TRUE,
 
          lm = , lmrob = , poisson = , quasipoisson = , gamma = ,
-         negbin = , zeroinfl = ,
+         beta = , negbin = , zeroinfl = ,
          lmMixed = , poissonMixed = , negbinMixed = , gammaMixed = FALSE,
 
          rpart        = identical(fit$method, "class"),
@@ -229,7 +233,7 @@ predict.FitMod <- function(object, newdata = NULL,
          glmnet  = !is.null(fit$glmnet.fit$classnames),
          xgboost = TRUE,
 
-         stop("Cannot determine task type for fitfn = '", fitfn, "'.")
+         stop("Cannot determine task type for engine = '", engine, "'.")
   )
 }
 
@@ -239,35 +243,35 @@ predict.FitMod <- function(object, newdata = NULL,
 # -------------------------------------------------------------------------
 
 #' @keywords internal
-.predict_response <- function(fit, obj, fitfn, newdata, s, type, ...) {
+.predict_response <- function(fit, obj, engine, newdata, s, type, ...) {
 
   # glmnet / xgboost: matrix interface
-  if (fitfn == "glmnet") {
+  if (engine == "glmnet") {
     nd <- .design_newdata(obj, newdata)
     p  <- predict(fit, newx = nd, s = s, type = "response")
     return(stats::setNames(as.numeric(p), rownames(nd)))
   }
-  if (fitfn == "xgboost") {
+  if (engine == "xgboost") {
     nd <- .design_newdata(obj, newdata)
     return(stats::setNames(as.numeric(predict(fit, nd)), rownames(nd)))
   }
 
   # ML regressions without a 'type = "response"' concept: their default
   # predict already returns the predictions
-  if (fitfn %in% c("rpart", "nnet")) {
+  if (engine %in% c("rpart", "nnet")) {
     args <- list(fit)
     if (!is.null(newdata)) args$newdata <- newdata
     return(as.numeric(do.call(predict, c(args, list(...)))))
   }
-  if (fitfn %in% c("randomForest", "svm")) {
+  if (engine %in% c("randomForest", "svm")) {
     # explicit newdata required; for randomForest this yields in-sample
     # (not OOB) predictions - consistent fitted-values semantics
     args <- list(fit, newdata = .resolve_newdata(fit, newdata))
     return(as.numeric(do.call(predict, c(args, list(...)))))
   }
 
-  # GLM family & friends (lm, glm, glm.nb, lmrob, zeroinfl, merMod):
-  # uniform response scale, with and without newdata
+  # GLM family & friends (lm, glm, glm.nb, lmrob, zeroinfl, betareg,
+  # merMod): uniform response scale, with and without newdata
   args <- list(fit, type = if (is.null(type)) "response" else type)
   if (!is.null(newdata)) args$newdata <- newdata
   do.call(predict, c(args, list(...)))
@@ -279,7 +283,7 @@ predict.FitMod <- function(object, newdata = NULL,
 # -------------------------------------------------------------------------
 
 #' @keywords internal
-.predict_prob <- function(fit, obj, fitfn, newdata, s, ...) {
+.predict_prob <- function(fit, obj, engine, newdata, s, ...) {
 
   args <- if (is.null(newdata)) list(fit)
           else                  list(fit, newdata = newdata)
@@ -298,7 +302,7 @@ predict.FitMod <- function(object, newdata = NULL,
     m
   }
 
-  mat <- switch(fitfn,
+  mat <- switch(engine,
 
                 logit = {
                   p <- do.call(predict, c(args, list(type = "response"),
@@ -395,8 +399,8 @@ predict.FitMod <- function(object, newdata = NULL,
                   .binary_mat(p, if (is.null(lvl)) c("0", "1") else lvl)
                 },
 
-                stop(sprintf("No probability prediction implemented for fitfn = '%s'",
-                             fitfn))
+                stop(sprintf("No probability prediction implemented for engine = '%s'",
+                             engine))
   )
 
   # Keep original level names as column names (documented contract);
@@ -414,7 +418,7 @@ predict.FitMod <- function(object, newdata = NULL,
 # -------------------------------------------------------------------------
 
 #' @keywords internal
-.predict_class <- function(fit, obj, fitfn, newdata, s, ...) {
+.predict_class <- function(fit, obj, engine, newdata, s, ...) {
 
   args <- if (is.null(newdata)) list(fit)
           else                  list(fit, newdata = newdata)
@@ -427,7 +431,7 @@ predict.FitMod <- function(object, newdata = NULL,
   .binary_class <- function(p, lv)
     factor(ifelse(as.numeric(p) > 0.5, lv[2L], lv[1L]), levels = lv)
 
-  cls <- switch(fitfn,
+  cls <- switch(engine,
 
                 logit = {
                   p <- do.call(predict, c(args, list(type = "response"),
@@ -503,8 +507,8 @@ predict.FitMod <- function(object, newdata = NULL,
                   .binary_class(p, if (is.null(lvl)) c("0", "1") else lvl)
                 },
 
-                stop(sprintf("No class prediction implemented for fitfn = '%s'",
-                             fitfn))
+                stop(sprintf("No class prediction implemented for engine = '%s'",
+                             engine))
   )
 
   if (is.factor(cls)) cls else as.factor(cls)

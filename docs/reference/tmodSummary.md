@@ -19,6 +19,9 @@ tModSummary(x, conf.level = 0.95, ...)
 # S3 method for class 'glm'
 tModSummary(x, conf.level = 0.95, useProfile = TRUE, ...)
 
+# S3 method for class 'betareg'
+tModSummary(x, conf.level = 0.95, ...)
+
 # S3 method for class 'coxph'
 tModSummary(x, conf.level = 0.95, ...)
 

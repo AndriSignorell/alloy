@@ -19,7 +19,7 @@ underlying model object."><meta property="og:image" content="https://andrisignor
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.921</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -140,7 +140,7 @@ logistic models in alloy.</p>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, fitfn <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, engine <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="va">op</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/graphics/par.html" class="external-link">par</a></span><span class="op">(</span>mfrow <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">2</span>, <span class="fl">3</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">fitLogit</span><span class="op">)</span></span></span>
@@ -152,7 +152,7 @@ logistic models in alloy.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># other model types keep their own diagnostics</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">Fertility</span> <span class="op">~</span> <span class="va">.</span>, <span class="va">swiss</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using fitfn = 'lm'</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> fitMod: using engine = 'lm'</span>
 <span class="r-plt img"><img src="plot.FitMod-3.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.FitMod-4.png" alt="" width="700" height="433"></span>
 <span class="r-plt img"><img src="plot.FitMod-5.png" alt="" width="700" height="433"></span>

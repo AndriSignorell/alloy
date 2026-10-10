@@ -1,16 +1,16 @@
 # Fit a statistical or machine-learning model with automatic method selection
 
 A unified interface for fitting a wide range of regression and
-classification models. When `fitfn` is omitted the appropriate method is
-chosen automatically from the type of the response variable. The return
-value is always an object of class `"FitMod"` layered on top of the
-original model object, so all standard methods (`predict`, `print`,
+classification models. When `engine` is omitted the appropriate method
+is chosen automatically from the type of the response variable. The
+return value is always an object of class `"FitMod"` layered on top of
+the original model object, so all standard methods (`predict`, `print`,
 `coef`, ...) continue to work.
 
 ## Usage
 
 ``` r
-fitMod(formula, data, ..., subset, na.action, fitfn = NULL)
+fitMod(formula, data, engine = NULL, subset, na.action, ...)
 ```
 
 ## Arguments
@@ -23,9 +23,16 @@ fitMod(formula, data, ..., subset, na.action, fitfn = NULL)
 
   A data frame containing the variables in `formula`.
 
-- ...:
+- engine:
 
-  Additional arguments passed to the underlying fitting function.
+  Character string naming the model to fit. One of `"lm"`, `"logit"`,
+  `"poisson"`, `"quasipoisson"`, `"gamma"`, `"beta"`, `"negbin"`,
+  `"polr"`, `"lmrob"`, `"tobit"`, `"zeroinfl"`, `"multinom"`, `"nnet"`,
+  `"rpart"`, `"C5.0"`, `"lda"`, `"qda"`, `"svm"`, `"naiveBayes"`,
+  `"randomForest"`, `"glmnet"`, `"xgboost"`, `"coxph"`, `"weibull"`,
+  `"exponential"`, `"lognormal"`, `"loglogistic"`, `"lmMixed"`,
+  `"logitMixed"`, `"poissonMixed"`, `"negbinMixed"`, `"gammaMixed"`. If
+  `NULL` (default) the engine is chosen automatically, see Details.
 
 - subset:
 
@@ -43,16 +50,9 @@ fitMod(formula, data, ..., subset, na.action, fitfn = NULL)
   respective fitting function applies (usually
   [`na.omit`](https://rdrr.io/r/stats/na.fail.html)).
 
-- fitfn:
+- ...:
 
-  Character string naming the fitting method. One of `"lm"`, `"logit"`,
-  `"poisson"`, `"quasipoisson"`, `"gamma"`, `"negbin"`, `"polr"`,
-  `"lmrob"`, `"tobit"`, `"zeroinfl"`, `"multinom"`, `"nnet"`, `"rpart"`,
-  `"C5.0"`, `"lda"`, `"qda"`, `"svm"`, `"naiveBayes"`, `"randomForest"`,
-  `"glmnet"`, `"xgboost"`, `"coxph"`, `"weibull"`, `"exponential"`,
-  `"lognormal"`, `"loglogistic"`, `"lmMixed"`, `"logitMixed"`,
-  `"poissonMixed"`, `"negbinMixed"`, `"gammaMixed"`. If `NULL` (default)
-  the method is chosen automatically.
+  Additional arguments passed to the underlying fitting function.
 
 ## Value
 
@@ -74,8 +74,24 @@ unordered factor with `"multinom"`, a non-negative integer response with
 integer storage does not necessarily mean count data – data import
 functions often return integer columns for metric variables. The chosen
 method is always reported via
-[`message()`](https://rdrr.io/r/base/message.html); supply `fitfn`
+[`message()`](https://rdrr.io/r/base/message.html); supply `engine`
 explicitly to override the heuristic.
+
+Beta regression (`engine = "beta"`, fitted with
+[`betareg`](https://rdrr.io/pkg/betareg/man/betareg.html)) models a
+response in the open interval (0, 1), typically a rate or proportion. It
+is never selected automatically, since a numeric response in (0, 1) is
+no evidence against a linear model. A two-part formula `y ~ x | z` adds
+regressors `z` for the precision parameter. If the response contains the
+boundary values 0 or 1, betareg (\>= 3.2-0) switches to the
+extended-support beta mixture (`dist = "xbetax"`), which additionally
+requires the packages statmod and numDeriv. The result carries two extra
+components: `waldTable`, the coefficient table of all model parts as a
+single matrix (rows named as in
+[`coef()`](https://rdrr.io/r/stats/coef.html), attribute `"component"`
+giving the model part), and `drop1`, the likelihood-ratio tests for the
+terms of the mean and the precision model (the latter prefixed with
+`"(phi)_"`).
 
 ## See also
 
@@ -90,7 +106,7 @@ Other modelling:
 ``` r
 # Auto-detection: numeric response -> lm
 fitMod(Sepal.Length ~ ., data = iris)
-#> fitMod: using fitfn = 'lm'
+#> fitMod: using engine = 'lm'
 #> 
 #> Call:
 #> stats::lm(formula = Sepal.Length ~ ., data = iris)
@@ -114,7 +130,7 @@ fitMod(Sepal.Length ~ ., data = iris)
 if (requireNamespace("nnet", quietly = TRUE)) {
   fitMod(Species ~ ., data = iris)
 }
-#> fitMod: using fitfn = 'multinom'
+#> fitMod: using engine = 'multinom'
 #> 
 #> Call:
 #> nnet::multinom(formula = Species ~ ., data = iris, model = TRUE, 
@@ -144,7 +160,7 @@ if (requireNamespace("nnet", quietly = TRUE)) {
 
 # Explicit method
 if (requireNamespace("rpart", quietly = TRUE)) {
-  fitMod(Species ~ ., data = iris, fitfn = "rpart")
+  fitMod(Species ~ ., data = iris, engine = "rpart")
 }
 #> 
 #> Decision Tree
@@ -169,17 +185,43 @@ if (requireNamespace("rpart", quietly = TRUE)) {
 #> Obs: 150
 #> 
 
+# Beta regression for a proportion, with a precision model after "|"
+if (requireNamespace("betareg", quietly = TRUE)) {
+  data("GasolineYield", package = "betareg")
+  fitMod(yield ~ gravity + temp | temp, data = GasolineYield,
+         engine = "beta")
+}
+#> 
+#> Call:
+#> betareg::betareg(formula = yield ~ gravity + temp | temp, data = GasolineYield)
+#> 
+#> Mean model (logit link):
+#>              estimate  95%-lci     uci    p-val     
+#> (Intercept)    -6.946   -8.253  -5.640  < 0.001  ***
+#> gravity         0.062    0.039   0.084  < 0.001  ***
+#> temp            0.009    0.007   0.011  < 0.001  ***
+#> 
+#> Precision model (log link):
+#>              estimate  95%-lci     uci  p-val     
+#> (Intercept)     3.710    1.302   6.118  0.003  ** 
+#> temp            0.001   -0.006   0.008  0.869     
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Obs (NAs): 32 (0)    Pseudo R²: 0.705   Log-lik: 49.977   AIC: -89.953
+#> 
+
 # Mixed models
 if (requireNamespace("lme4", quietly = TRUE)) {
   fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
-         fitfn = "lmMixed")
+         engine = "lmMixed")
 }
 #> 
 #> Linear mixed model
 #> 
 #> Call:
 #> fitMod(formula = Reaction ~ Days + (1 | Subject), data = lme4::sleepstudy, 
-#>     fitfn = "lmMixed")
+#>     engine = "lmMixed")
 #> 
 #> Fixed effects:
 #>              estimate  95%-lci      uci    p-val     

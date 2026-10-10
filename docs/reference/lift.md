@@ -138,7 +138,7 @@ Other roc:
 ## Examples
 
 ``` r
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 lift(fitLogit)
 #> Warning: 'type' is ignored for classification models in predict.FitMod; use 'output' to control the return format.
 #> 

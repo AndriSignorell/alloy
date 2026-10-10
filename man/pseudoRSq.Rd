@@ -8,7 +8,8 @@ pseudoRSq(fit, which = "McFadden")
 }
 \arguments{
 \item{fit}{a fitted model object of class \code{glm}, \code{multinom}
-(\pkg{nnet}), \code{polr} (\pkg{MASS}) or \code{vglm} (\pkg{VGAM})}
+(\pkg{nnet}), \code{polr} (\pkg{MASS}), \code{vglm} (\pkg{VGAM}) or
+\code{betareg} (\pkg{betareg})}
 
 \item{which}{character vector naming the measures to return, or
 \code{"all"} for everything available}
@@ -42,6 +43,8 @@ observed and fitted values}
 \item{\code{Tjur}}{coefficient of discrimination, the mean fitted
 probability of the successes minus that of the failures, binomial
 responses only}
+\item{\code{Ferrari}}{squared correlation between the linear predictor
+and the link-transformed response, beta regression only}
 \item{\code{AIC}, \code{BIC}}{information criteria of the fitted model}
 \item{\code{logLik}, \code{logLik0}}{log-likelihood of the fitted and of
 the null model}
@@ -60,8 +63,9 @@ need not be accessible. For \code{polr} and \code{multinom}, the null model
 is refitted on the full model's model frame, preserving its analysis sample,
 weights and offsets. If that frame was not stored, it is rebuilt from the
 call, which does require the original data to be available. For
-\code{vglm} the null model is refitted with \code{\link[stats]{update}},
-which requires the original data as well.
+\code{vglm} the null model is refitted with \code{\link[stats]{update}}
+in the environment of the model formula, which requires the original data
+as well.
 
 Where prior weights are present, the sample size entering Cox-Snell,
 Nagelkerke, Aldrich-Nelson and Veall-Zimmermann is their sum rather than the
@@ -85,6 +89,19 @@ fits these values consequently differ from \code{stats::logLik()},
 For \code{vglm} objects the package \pkg{VGAM} must be installed and the
 model should have been fitted with \code{model = TRUE}, so that the model
 frame can be extracted.
+
+For beta regressions (\code{betareg}) the null model has an intercept in
+the mean and a constant precision. It is refitted on the response, weights
+and offsets of the full model, so the original data need not be
+accessible. The response is continuous, and the log-likelihood of a
+density is not bounded by zero: it is usually positive for a response in
+(0, 1). McFadden, its adjusted version and Nagelkerke are ratios of
+log-likelihoods that presuppose that bound, and are therefore not defined
+for these fits; note that this includes the default \code{which}.
+Available are \code{CoxSnell}, which only depends on the likelihood ratio,
+\code{Efron}, and \code{Ferrari}, the pseudo R-squared reported by
+\pkg{betareg} itself (not available for the extended-support
+distributions), besides the log-likelihoods and information criteria.
 }
 \examples{
 fit <- glm(am ~ wt + hp, data = mtcars, family = binomial)
@@ -122,6 +139,10 @@ limited dependent variable models. \emph{Journal of Economic Surveys},
 
 Tjur, T. (2009) Coefficients of determination in logistic regression models.
 \emph{The American Statistician}, 63(4), 366-372.
+
+Ferrari, S. L. P., Cribari-Neto, F. (2004) Beta regression for modelling
+rates and proportions. \emph{Journal of Applied Statistics}, 31(7),
+799-815.
 }
 \seealso{
 Other regression.utils:

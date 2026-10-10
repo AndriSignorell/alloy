@@ -37,7 +37,7 @@ scaled to a 0--100 range.
 }
 \examples{
 fitRf <- fitMod(ice_cream ~ video + puzzle + female,
-                IceCream, fitfn = "randomForest")
+                IceCream, engine = "randomForest")
 vi <- varImp(fitRf)
 vi
 plot(vi)

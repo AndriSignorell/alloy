@@ -33,7 +33,7 @@
 #' @concept modelling
 #'
 #' @examples
-#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+#' fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 #'
 #' predictors(fitLogit)
 #' predictors(fitLogit, numeric = TRUE)     # rank drops out

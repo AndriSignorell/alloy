@@ -218,11 +218,15 @@
   # lower.tail avoids underflow to exactly 0 for large |z|
   p   <- 2 * pnorm(z, lower.tail = FALSE)
 
+  # Wald intervals at the requested level (a table stored at fit time
+  # would be tied to one level, whatever the column label says)
+  ci <- confint.default(x, level = conf.level)[pred_names, , drop = FALSE]
+
   d.coef <- data.frame(
     id        = pred_names,
     estimate  = est,
-    lci       = x$ci[pred_names, 1L],
-    uci       = x$ci[pred_names, 2L],
+    lci       = ci[, 1L],
+    uci       = ci[, 2L],
     z         = z,
     pval      = p,
     row.names = NULL,

@@ -1,7 +1,7 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.921
+Version: 0.0.0.922
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
@@ -31,7 +31,8 @@ Suggests:
     naivebayes, glmnet, xgboost, robustbase, AER, pscl,
     rpart.plot, relaimpo, NeuralNetTools, pROC, boot, VGAM,
     MuMIn, lme4, haven, foreign, 
-    R.rsp, testthat, knitr, rmarkdown
+    R.rsp, testthat, knitr, rmarkdown,
+    betareg (>= 3.2-0), statmod, numDeriv
 Remotes:  
     AndriSignorell/bedrock, AndriSignorell/pharos, 
     AndriSignorell/DescToolsX

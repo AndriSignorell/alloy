@@ -155,7 +155,7 @@ library(alloy)
 fitMod(Sepal.Length ~ ., data = iris)
 
 # explicit, and reported as odds ratios
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 print(fitLogit, output = "or")
 
 # the diagnostics a logistic model actually needs

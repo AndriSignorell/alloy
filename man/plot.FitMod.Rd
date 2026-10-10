@@ -60,7 +60,7 @@ method asks before each new page when the session is interactive, as
 caller's business (\code{par(mfrow = c(2, 3))}).
 }
 \examples{
-fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
+fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 
 op <- par(mfrow = c(2, 3))
 plot(fitLogit)
