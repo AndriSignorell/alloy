@@ -106,5 +106,9 @@ lengths(d)
 ##      50      25      25
 
 }
+\seealso{
+Other data.split:
+\code{\link[=crossVal]{crossVal()}}
+}
 \concept{data.split}
 \concept{modelling}

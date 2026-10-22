@@ -16,6 +16,7 @@
 #' Supported model families:
 #' \describe{
 #'   \item{Continuous outcome}{`lm`, `lmrob`, `gamma`, `tobit`}
+#'   \item{Rate / proportion outcome}{`beta`}
 #'   \item{Binary outcome}{`logit`}
 #'   \item{Count outcome}{`poisson`, `quasipoisson`, `negbin`, `zeroinfl`}
 #'   \item{Ordered / nominal outcome}{`polr`, `multinom`}
@@ -43,7 +44,8 @@
 #'   \item{\code{\link{varImp}}}{Variable importance for ML models
 #'     (Cleveland dot plot via \code{\link{plot.varImp}}).}
 #'   \item{\code{\link{tMod}}}{Side-by-side comparison of multiple models.}
-#'   \item{\code{\link{pseudoRSq}}}{Pseudo-R\eqn{^2} measures for GLMs.}
+#'   \item{\code{\link{pseudoRSq}}}{Pseudo-R\eqn{^2} measures for GLMs,
+#'     ordinal, multinomial and beta regressions.}
 #'   \item{\code{\link{vif}}}{Variance inflation factors (VIF / GVIF).}
 #'   \item{\code{\link{coefCI}}, \code{\link{rSq}}}{Bootstrap CIs for
 #'     coefficients and R\eqn{^2}.}

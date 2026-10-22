@@ -81,6 +81,8 @@ fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, fitfn = "logit")
 r <- roc(fitLogit)
 confint(r)
 
+usethis::use_github_action("check-standard")
+
 
 #=============================================================================
 # prepare datasets

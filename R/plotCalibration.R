@@ -143,12 +143,9 @@ plotCalibration <- function(fit,
   y  <- y[ok]
 
   # --- calibration intercept and slope ----------------------------------
-  eta <- stats::qlogis(.clampProb(p))
-
-  intercept <- unname(stats::coef(
-    stats::glm(y ~ 1, family = stats::binomial, offset = eta)))
-  slope <- unname(stats::coef(
-    stats::glm(y ~ eta, family = stats::binomial))[2L])
+  cal       <- .calibrationCoefs(p, y)
+  intercept <- cal$intercept
+  slope     <- cal$slope
 
   brier       <- brierScore(p, y)
   brierScaled <- brierScore(p, y, scaled = TRUE)

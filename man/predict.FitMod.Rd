@@ -144,6 +144,7 @@ if (requireNamespace("survival", quietly = TRUE)) {
 
 Other modelling:
 \code{\link[=fitMod]{fitMod()}},
+\code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predictors]{predictors()}},
 \code{\link[=print.FitMod]{print.FitMod()}}

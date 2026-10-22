@@ -11,7 +11,8 @@
 #' @param formula A two-sided model formula.
 #' @param data A data frame containing the variables in \code{formula}.
 #' @param engine Character string naming the model to fit.  One of
-#'   \code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
+#'   \code{"lm"}, \code{"logit"}, \code{"logitFirth"}, \code{"poisson"},
+#'   \code{"quasipoisson"},
 #'   \code{"gamma"}, \code{"beta"}, \code{"negbin"}, \code{"polr"},
 #'   \code{"lmrob"},
 #'   \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
@@ -61,6 +62,18 @@
 #' and \code{drop1}, the likelihood-ratio tests for the terms of the mean
 #' and the precision model (the latter prefixed with \code{"(phi)_"}).
 #'
+#' Firth's bias-reduced logistic regression (\code{engine = "logitFirth"})
+#' maximizes the log-likelihood penalized by the Jeffreys prior, fitted by
+#' \code{\link[stats]{glm}} with \code{brglm2::brglmFit} (package
+#' \pkg{brglm2}). The estimates stay finite under (quasi-)complete
+#' separation and are less biased for sparse covariate patterns. The
+#' result carries the additional class \code{"logitFirth"}, so that
+#' \code{\link[stats]{drop1}} and \code{\link[stats]{confint}} use
+#' penalized likelihood ratio tests and profile penalized likelihood
+#' intervals, see \code{\link{logitFirth}}; all other methods, including
+#' \code{predict()}, \code{\link{crossVal}} and \code{\link{tMod}}, work
+#' as for \code{"logit"}.
+#'
 #' @return An object of class \code{c("FitMod", <original class>)}.
 #'   For \code{xgboost} and \code{lme4} models, a list of class
 #'   \code{c("FitMod", "FitMod.xgboost")} or
@@ -89,6 +102,11 @@
 #'   data("GasolineYield", package = "betareg")
 #'   fitMod(yield ~ gravity + temp | temp, data = GasolineYield,
 #'          engine = "beta")
+#' }
+#'
+#' # Firth logistic regression, finite estimates under separation
+#' if (requireNamespace("brglm2", quietly = TRUE)) {
+#'   fitMod(admit ~ gre + gpa + rank, Admit, engine = "logitFirth")
 #' }
 #'
 #' # Mixed models
@@ -125,7 +143,7 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
   
   # --- look up registry entry, ensure package is available ---
   entry <- .engine_registry[[engine]]
-  .require_pkg(entry$pkg)
+  .require_pkg(c(entry$pkg, entry$requires))
   
   # --- glmnet / xgboost: no formula interface, convert to x/y ---
   # subset and na.action are honoured via model.frame() and removed from
@@ -204,6 +222,10 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
   
   # --- post-process on the natural class, before FitMod is prepended ---
   res <- .postprocess(res, engine)
+
+  # --- engine-specific class, e.g. for penalized likelihood methods ---
+  if (!is.null(entry$subclass))
+    class(res) <- c(entry$subclass, class(res))
   
   # --- attach FitMod class and metadata (all other models) ---
   class(res) <- c("FitMod", class(res))
@@ -248,6 +270,20 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
     defaults = list(family = "binomial")
   ),
   
+  # Firth's bias-reduced logistic regression (Jeffreys prior penalty):
+  # glm() with the fitter of brglm2. 'requires' is checked along with
+  # 'pkg'; the subclass routes drop1() and confint() to the penalized
+  # likelihood methods in logitFirth.R
+  logitFirth = list(
+    pkg      = "stats",
+    fn       = "glm",
+    requires = "brglm2",
+    subclass = "logitFirth",
+    defaults = list(family = "binomial",
+                    method = quote(brglm2::brglmFit),
+                    type   = "MPL_Jeffreys")
+  ),
+
   poisson = list(
     pkg      = "stats",
     fn       = "glm",
@@ -546,8 +582,9 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
 
 #' @keywords internal
 .require_pkg <- function(pkg) {
-  if (!requireNamespace(pkg, quietly = TRUE))
-    stop("Package '", pkg, "' must be installed for this fitting function.")
+  for (p in pkg)
+    if (!requireNamespace(p, quietly = TRUE))
+      stop("Package '", p, "' must be installed for this fitting function.")
 }
 
 

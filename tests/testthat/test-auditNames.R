@@ -3,7 +3,9 @@
 # its reason. An entry starting with "open:" is a name still to be
 # decided - it documents a debt and is removed when the name changes.
 
-.auditNamesExceptions <- character(0)   # none at present
+.auditNamesExceptions <- c(
+  "drop1.logitFirth(test = \"Chisq\")"         = "method of stats::drop1(), the values are those of the generic and its methods"
+)
 
 
 test_that("exported names and arguments follow the naming rules", {

@@ -176,6 +176,21 @@
 }
 
 
+# Calibration-in-the-large and calibration slope: logistic regressions of
+# the binary response on the linear predictor logit(p), as an offset and as
+# the only regressor. Shared by plotCalibration() and crossVal().
+#' @keywords internal
+.calibrationCoefs <- function(p, y) {
+  eta <- stats::qlogis(.clampProb(p))
+  list(
+    intercept = unname(stats::coef(
+      stats::glm(y ~ 1, family = stats::binomial, offset = eta))),
+    slope     = unname(stats::coef(
+      stats::glm(y ~ eta, family = stats::binomial))[2L])
+  )
+}
+
+
 # -------------------------------------------------------------------------
 # A default title that fits
 # -------------------------------------------------------------------------

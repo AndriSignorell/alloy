@@ -21,6 +21,7 @@ appropriate method is chosen automatically from the response variable type.
 Supported model families:
 \describe{
 \item{Continuous outcome}{\code{lm}, \code{lmrob}, \code{gamma}, \code{tobit}}
+\item{Rate / proportion outcome}{\code{beta}}
 \item{Binary outcome}{\code{logit}}
 \item{Count outcome}{\code{poisson}, \code{quasipoisson}, \code{negbin}, \code{zeroinfl}}
 \item{Ordered / nominal outcome}{\code{polr}, \code{multinom}}
@@ -52,7 +53,8 @@ survival models, and a tidy \code{data.frame} for classifiers
 \item{\code{\link{varImp}}}{Variable importance for ML models
 (Cleveland dot plot via \code{\link{plot.varImp}}).}
 \item{\code{\link{tMod}}}{Side-by-side comparison of multiple models.}
-\item{\code{\link{pseudoRSq}}}{Pseudo-R\eqn{^2} measures for GLMs.}
+\item{\code{\link{pseudoRSq}}}{Pseudo-R\eqn{^2} measures for GLMs,
+ordinal, multinomial and beta regressions.}
 \item{\code{\link{vif}}}{Variance inflation factors (VIF / GVIF).}
 \item{\code{\link{coefCI}}, \code{\link{rSq}}}{Bootstrap CIs for
 coefficients and R\eqn{^2}.}

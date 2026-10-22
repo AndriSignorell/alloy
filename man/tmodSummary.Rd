@@ -2,16 +2,19 @@
 % Please edit documentation in R/tModSummary.R
 \name{tModSummary}
 \alias{tModSummary}
+\alias{tModSummary.FitMod}
 \alias{tModSummary.lm}
 \alias{tModSummary.lmrob}
 \alias{tModSummary.glm}
 \alias{tModSummary.betareg}
 \alias{tModSummary.coxph}
 \alias{tModSummary.gam}
-\alias{tModSummary.lmer}
+\alias{tModSummary.lmerMod}
 \title{Extract model summaries for model comparison}
 \usage{
 tModSummary(x, ...)
+
+\method{tModSummary}{FitMod}(x, ...)
 
 \method{tModSummary}{lm}(x, conf.level = 0.95, ...)
 
@@ -25,7 +28,7 @@ tModSummary(x, ...)
 
 \method{tModSummary}{gam}(x, conf.level = 0.95, ...)
 
-\method{tModSummary}{lmer}(x, conf.level = 0.95, ...)
+\method{tModSummary}{lmerMod}(x, conf.level = 0.95, ...)
 }
 \arguments{
 \item{x}{A fitted model object}

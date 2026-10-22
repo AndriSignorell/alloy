@@ -124,7 +124,7 @@ pkgdown::build_favicons(overwrite = TRUE)
 usethis::edit_file("_pkgdown.yml")
 usethis::edit_file(".github/workflows/pkgdown.yaml")
 # themes: https://bootswatch.com/
-
+usethis::use_github_action("check-standard")
 
 # == 5  the whole suite =====================================================
 

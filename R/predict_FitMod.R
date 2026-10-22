@@ -171,7 +171,7 @@ predict.FitMod <- function(object, newdata = NULL,
   }
 
   # --- logit special case: type = "link" returns the linear predictor ---
-  if (engine == "logit" && identical(type, "link")) {
+  if (engine %in% c("logit", "logitFirth") && identical(type, "link")) {
     args <- list(fit, type = "link")
     if (!is.null(newdata)) args$newdata <- newdata
     return(do.call(predict, c(args, list(...))))
@@ -214,7 +214,7 @@ predict.FitMod <- function(object, newdata = NULL,
 
   switch(engine,
 
-         logit = , multinom = , polr = , lda = , qda = ,
+         logit = , logitFirth = , multinom = , polr = , lda = , qda = ,
          C5.0 = , naiveBayes = , logitMixed = TRUE,
 
          lm = , lmrob = , poisson = , quasipoisson = , gamma = ,
@@ -304,7 +304,7 @@ predict.FitMod <- function(object, newdata = NULL,
 
   mat <- switch(engine,
 
-                logit = {
+                logit = , logitFirth = {
                   p <- do.call(predict, c(args, list(type = "response"),
                                           list(...)))
                   .binary_mat(p, if (is.null(lvl)) c("0", "1") else lvl)
@@ -433,7 +433,7 @@ predict.FitMod <- function(object, newdata = NULL,
 
   cls <- switch(engine,
 
-                logit = {
+                logit = , logitFirth = {
                   p <- do.call(predict, c(args, list(type = "response"),
                                           list(...)))
                   .binary_class(p, if (is.null(lvl)) c("0", "1") else lvl)

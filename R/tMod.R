@@ -16,6 +16,9 @@
 #' Model names are automatically derived from the call. If unavailable,
 #' default names are assigned.
 #'
+#' Models fitted with \code{\link{fitMod}} are accepted and compared as
+#' the model object of the underlying fitting function.
+#'
 #' @param ... Fitted model objects
 #' @param FUN Formatting function applied to coefficients
 #' @param order Optional ordering of models
@@ -50,6 +53,11 @@
 #'   s2 <- coxph(Surv(time, status) ~ age + sex, data = lung)
 #'   tMod(s1, s2)
 #' }
+#'
+#' # --- Models fitted with fitMod() ---
+#' f1 <- fitMod(am ~ wt, data = mtcars, engine = "logit")
+#' f2 <- fitMod(am ~ wt + hp, data = mtcars, engine = "logit")
+#' tMod(f1, f2)
 
 
 
@@ -72,7 +80,10 @@ tMod <- function(..., FUN = NULL, order = NA, verbose = FALSE){
     }
   }
   
-  lmod <- list(...)
+  # FitMod objects are compared as the natural model underneath: their
+  # predict() method returns class probabilities, not what the summaries
+  # of the underlying fitter expect
+  lmod <- lapply(list(...), .stripFitMod)
   lst  <- lapply(lmod, tModSummary)
   
 

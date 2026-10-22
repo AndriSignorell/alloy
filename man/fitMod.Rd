@@ -12,7 +12,8 @@ fitMod(formula, data, engine = NULL, subset, na.action, ...)
 \item{data}{A data frame containing the variables in \code{formula}.}
 
 \item{engine}{Character string naming the model to fit.  One of
-\code{"lm"}, \code{"logit"}, \code{"poisson"}, \code{"quasipoisson"},
+\code{"lm"}, \code{"logit"}, \code{"logitFirth"}, \code{"poisson"},
+\code{"quasipoisson"},
 \code{"gamma"}, \code{"beta"}, \code{"negbin"}, \code{"polr"},
 \code{"lmrob"},
 \code{"tobit"}, \code{"zeroinfl"}, \code{"multinom"}, \code{"nnet"},
@@ -82,6 +83,18 @@ coefficient table of all model parts as a single matrix (rows named as
 in \code{coef()}, attribute \code{"component"} giving the model part),
 and \code{drop1}, the likelihood-ratio tests for the terms of the mean
 and the precision model (the latter prefixed with \code{"(phi)_"}).
+
+Firth's bias-reduced logistic regression (\code{engine = "logitFirth"})
+maximizes the log-likelihood penalized by the Jeffreys prior, fitted by
+\code{\link[stats]{glm}} with \code{brglm2::brglmFit} (package
+\pkg{brglm2}). The estimates stay finite under (quasi-)complete
+separation and are less biased for sparse covariate patterns. The
+result carries the additional class \code{"logitFirth"}, so that
+\code{\link[stats]{drop1}} and \code{\link[stats]{confint}} use
+penalized likelihood ratio tests and profile penalized likelihood
+intervals, see \code{\link{logitFirth}}; all other methods, including
+\code{predict()}, \code{\link{crossVal}} and \code{\link{tMod}}, work
+as for \code{"logit"}.
 }
 \examples{
 # Auto-detection: numeric response -> lm
@@ -104,6 +117,11 @@ if (requireNamespace("betareg", quietly = TRUE)) {
          engine = "beta")
 }
 
+# Firth logistic regression, finite estimates under separation
+if (requireNamespace("brglm2", quietly = TRUE)) {
+  fitMod(admit ~ gre + gpa + rank, Admit, engine = "logitFirth")
+}
+
 # Mixed models
 if (requireNamespace("lme4", quietly = TRUE)) {
   fitMod(Reaction ~ Days + (1 | Subject), lme4::sleepstudy,
@@ -113,6 +131,7 @@ if (requireNamespace("lme4", quietly = TRUE)) {
 }
 \seealso{
 Other modelling:
+\code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
 \code{\link[=predictors]{predictors()}},

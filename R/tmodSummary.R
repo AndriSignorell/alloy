@@ -49,6 +49,15 @@ tModSummary.default <- function(x, ...){
 
 
 #' @export
+#' @method tModSummary FitMod
+#' @rdname tModSummary
+tModSummary.FitMod <- function(x, ...){
+  # summarise the natural model object underneath the FitMod layer
+  tModSummary(.stripFitMod(x), ...)
+}
+
+
+#' @export
 #' @method tModSummary lm
 #' @rdname tModSummary
 tModSummary.lm <- function(x, conf.level = 0.95, ...){
@@ -485,9 +494,9 @@ tModSummary.gam <- function(x, conf.level = 0.95, ...){
 
 
 #' @export
-#' @method tModSummary lmer
+#' @method tModSummary lmerMod
 #' @rdname tModSummary
-tModSummary.lmer <- function(x, conf.level = 0.95, ...){
+tModSummary.lmerMod <- function(x, conf.level = 0.95, ...){
   
   sm <- summary(x)
   
@@ -525,9 +534,10 @@ tModSummary.lmer <- function(x, conf.level = 0.95, ...){
     BIC    = BIC(x),
     
     N   = nobs(x),
-    NAs = ifelse(is.null(x$na.action), 0, length(x$na.action)),
+    # S4 object: the omitted observations are recorded with the frame
+    NAs = length(attr(x@frame, "na.action")),
     
-    "n vars" = length(attr(x@frame, "terms")[[3]]),
+    "n vars" = length(attr(terms(x), "term.labels")),
     "n coef" = length(lme4::fixef(x))
   )
   
