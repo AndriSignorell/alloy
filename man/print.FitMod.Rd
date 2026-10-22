@@ -124,6 +124,7 @@ print(fitWei, output = "genuine")
 \code{\link{fitMod}}, \code{\link{predict.FitMod}}
 
 Other modelling:
+\code{\link[=confusion.FitMod]{confusion.FitMod()}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},

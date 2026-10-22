@@ -82,6 +82,7 @@ separation in logistic regression. \emph{Statistics in Medicine} 21,
 }
 \seealso{
 Other modelling:
+\code{\link[=confusion.FitMod]{confusion.FitMod()}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},

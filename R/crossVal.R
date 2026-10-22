@@ -137,7 +137,7 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
   env <- parent.frame()
 
   # --- the model: refit call, formula, engine, task ------------------------
-  refit <- .cvRefitCall(fit)
+  refit <- .fitModCall(fit, engine = .cvEngine(fit))
   fo <- tryCatch(stats::formula(fit),
                  error = function(e) eval(refit$formula, env))
   engine <- .cvEngine(fit)
@@ -331,31 +331,6 @@ print.CrossVal <- function(x, digits = 3, ...) {
 
 
 # == internal helper functions ============================================
-
-
-# The call that refits the model, always through fitMod(): the original
-# call for wrapped models (glmnet, xgboost, lme4 store the fitMod call),
-# else the arguments of the underlying fitter plus the engine. The head is
-# namespaced, so alloy need not be attached.
-.cvRefitCall <- function(fit) {
-
-  cl <- stats::getCall(fit)
-  if (is.null(cl))
-    stop("'fit' does not store its call and cannot be refitted.")
-
-  args <- as.list(cl)[-1L]
-  if (!.cvIsFitModCall(cl))
-    args$engine <- .cvEngine(fit)
-
-  as.call(c(list(quote(alloy::fitMod)), args))
-}
-
-
-.cvIsFitModCall <- function(cl) {
-  head <- cl[[1L]]
-  identical(head, as.name("fitMod")) ||
-    (is.call(head) && identical(head[[3L]], as.name("fitMod")))
-}
 
 
 # engine of a FitMod object, or the engine that refits a plain lm/glm

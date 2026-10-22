@@ -249,7 +249,101 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
 
 
 
+#' @rdname fitMod
+#' @param object a model fitted with \code{fitMod()}
+#' @param formula. changes to the formula, see
+#'   \code{\link[stats]{update.formula}}
+#' @param evaluate logical, whether to fit the updated model (default) or
+#'   return its call
+#'
+#' @details
+#' \code{update()} refits through \code{fitMod()} with the engine of
+#' \code{object}, so the result is again a \code{"FitMod"} object with all
+#' its methods; \code{\link[stats]{update.default}} would refit with the
+#' underlying function only (e.g. \code{glm()}) and lose them. The formula
+#' and the arguments in \code{...} are updated by the \code{update()} method
+#' of the underlying class, e.g. \code{update.betareg()} for a two-part
+#' formula \code{y ~ x | z}; arguments in \code{...} replace or extend
+#' those of the original call. A different
+#' \code{engine} is allowed; the defaults the registry had supplied for the
+#' old engine are then dropped, e.g. \code{method = brglm2::brglmFit} when
+#' switching from \code{"logitFirth"} to \code{"logit"}.
+#'
+#' @export
+update.FitMod <- function(object, formula., ..., evaluate = TRUE) {
+
+  # Formula and arguments are updated by the method of the underlying
+  # class (update.betareg() for a two-part formula y ~ x | z, else mostly
+  # update.default()), only the resulting call is routed through fitMod().
+  # The wrapped models (lme4, xgboost) keep their class and the stored
+  # fitMod call, update.default() then handles them directly.
+  inner <- object
+  class(inner) <- setdiff(class(object), "FitMod")
+
+  # The arguments in ... are handed on as the expressions the user wrote:
+  # forwarded as ..., update.default() would read them with match.call()
+  # as ..1, ..2. They are never evaluated here, only put into the call.
+  extras <- as.list(match.call(expand.dots = FALSE)$...)
+  upd <- as.call(c(list(quote(stats::update), quote(inner)),
+                   if (!missing(formula.)) list(quote(formula.)),
+                   extras, list(evaluate = FALSE)))
+  call <- eval(upd)
+
+  call <- .asFitModCall(call, object$engine)
+
+  # a new engine: the arguments the registry had added for the old one go,
+  # unless they were changed from their default value
+  if (!identical(call$engine, object$engine)) {
+    old <- .engine_registry[[object$engine]]$defaults
+    for (nm in names(old))
+      if (nm %in% names(call) && identical(call[[nm]], old[[nm]]))
+        call[[nm]] <- NULL
+  }
+
+  if (evaluate) eval(call, parent.frame()) else call
+}
+
+
+
 # == internal helper functions ============================================
+
+
+# The call that refits a model through fitMod(): the stored call for the
+# wrapped models (glmnet, xgboost, lme4 store the fitMod call), else the
+# arguments of the underlying fitter plus the engine - the registry
+# defaults are in the stored call already. The head is namespaced, so
+# alloy need not be attached. Used by update.FitMod() and crossVal().
+#' @keywords internal
+.fitModCall <- function(fit, engine = fit$engine) {
+
+  cl <- stats::getCall(fit)
+  if (is.null(cl))
+    stop("'fit' does not store its call and cannot be refitted.")
+
+  .asFitModCall(cl, engine)
+}
+
+
+# A call of the underlying fitter as a fitMod() call: its arguments, plus
+# the engine unless the call names one already
+#' @keywords internal
+.asFitModCall <- function(cl, engine) {
+
+  args <- as.list(cl)[-1L]
+  if (!.isFitModCall(cl) && is.null(args$engine))
+    args$engine <- engine
+
+  as.call(c(list(quote(alloy::fitMod)), args))
+}
+
+
+#' @keywords internal
+.isFitModCall <- function(cl) {
+  head <- cl[[1L]]
+  identical(head, as.name("fitMod")) ||
+    (is.call(head) && identical(head[[3L]], as.name("fitMod")))
+}
+
 
 
 # Internal registry: one entry per supported fitting function

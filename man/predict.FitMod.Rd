@@ -143,6 +143,7 @@ if (requireNamespace("survival", quietly = TRUE)) {
 \code{\link{fitMod}}, \code{\link{print.FitMod}}
 
 Other modelling:
+\code{\link[=confusion.FitMod]{confusion.FitMod()}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},

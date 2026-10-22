@@ -52,6 +52,7 @@ diagnostics that are computed per term;
 \link{model-diagnostics-overview} for an overview.
 
 Other modelling:
+\code{\link[=confusion.FitMod]{confusion.FitMod()}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},

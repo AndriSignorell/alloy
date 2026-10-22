@@ -2,9 +2,12 @@
 % Please edit documentation in R/fitMod.R
 \name{fitMod}
 \alias{fitMod}
+\alias{update.FitMod}
 \title{Fit a statistical or machine-learning model with automatic method selection}
 \usage{
 fitMod(formula, data, engine = NULL, subset, na.action, ...)
+
+\method{update}{FitMod}(object, formula., ..., evaluate = TRUE)
 }
 \arguments{
 \item{formula}{A two-sided model formula.}
@@ -38,6 +41,14 @@ default of the respective fitting function applies (usually
 \code{\link[stats]{na.omit}}).}
 
 \item{...}{Additional arguments passed to the underlying fitting function.}
+
+\item{object}{a model fitted with \code{fitMod()}}
+
+\item{formula.}{changes to the formula, see
+\code{\link[stats]{update.formula}}}
+
+\item{evaluate}{logical, whether to fit the updated model (default) or
+return its call}
 }
 \value{
 An object of class \code{c("FitMod", <original class>)}.
@@ -95,6 +106,18 @@ penalized likelihood ratio tests and profile penalized likelihood
 intervals, see \code{\link{logitFirth}}; all other methods, including
 \code{predict()}, \code{\link{crossVal}} and \code{\link{tMod}}, work
 as for \code{"logit"}.
+
+\code{update()} refits through \code{fitMod()} with the engine of
+\code{object}, so the result is again a \code{"FitMod"} object with all
+its methods; \code{\link[stats]{update.default}} would refit with the
+underlying function only (e.g. \code{glm()}) and lose them. The formula
+and the arguments in \code{...} are updated by the \code{update()} method
+of the underlying class, e.g. \code{update.betareg()} for a two-part
+formula \code{y ~ x | z}; arguments in \code{...} replace or extend
+those of the original call. A different
+\code{engine} is allowed; the defaults the registry had supplied for the
+old engine are then dropped, e.g. \code{method = brglm2::brglmFit} when
+switching from \code{"logitFirth"} to \code{"logit"}.
 }
 \examples{
 # Auto-detection: numeric response -> lm
@@ -131,6 +154,7 @@ if (requireNamespace("lme4", quietly = TRUE)) {
 }
 \seealso{
 Other modelling:
+\code{\link[=confusion.FitMod]{confusion.FitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},

@@ -170,7 +170,15 @@ test_that("test = 'none' omits the test columns", {
 test_that("update() works on the result", {
   fit <- fitMod(yield ~ gravity + temp | temp, data = GasolineYield,
                 engine = "beta")
-  expect_s3_class(update(fit, . ~ . - temp), "betareg")
+  up <- update(fit, . ~ . - temp)
+  expect_s3_class(up, c("FitMod", "betareg"))
+  expect_identical(up$engine, "beta")
+
+  # both parts of the formula are kept apart
+  ref <- betareg::betareg(yield ~ gravity | temp, data = GasolineYield)
+  expect_equal(coef(up), coef(ref))
+  expect_identical(attr(terms(up, model = "precision"), "term.labels"),
+                   "temp")
 })
 
 

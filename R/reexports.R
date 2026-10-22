@@ -9,3 +9,7 @@ survival::Surv
 #' @export
 survival::coxph
 
+
+#' @importFrom DescToolsX confusion
+#' @export
+DescToolsX::confusion

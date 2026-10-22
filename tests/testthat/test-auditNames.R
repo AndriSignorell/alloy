@@ -4,7 +4,8 @@
 # decided - it documents a debt and is removed when the name changes.
 
 .auditNamesExceptions <- c(
-  "drop1.logitFirth(test = \"Chisq\")"         = "method of stats::drop1(), the values are those of the generic and its methods"
+  "drop1.logitFirth(test = \"Chisq\")"         = "method of stats::drop1(), the values are those of the generic and its methods",
+  "update.FitMod(formula.)"                    = "method of stats::update(), the argument of update.default() it replaces"
 )
 
 
