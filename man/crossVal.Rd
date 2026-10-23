@@ -21,7 +21,10 @@ crossVal(
 \arguments{
 \item{fit}{a model fitted with \code{\link[=fitMod]{fitMod()}}, or a plain \code{\link[=lm]{lm()}} or \code{\link[=glm]{glm()}}
 (binomial, Poisson, quasi-Poisson or Gamma family), which is refitted
-through \code{\link[=fitMod]{fitMod()}} with the matching engine}
+through \code{\link[=fitMod]{fitMod()}} with the matching engine. Binary models need a
+Bernoulli response (one 0/1, logical or two-level factor value per row);
+aggregated binomial data (\code{cbind(successes, failures)} or proportions
+with trial weights) are not supported.}
 
 \item{data}{the data frame to split. \code{NULL} (default) evaluates the \code{data}
 argument of the original call in the calling environment.}
@@ -42,9 +45,9 @@ classification models and does not stratify regression models; \code{FALSE}
 never stratifies. A vector of length \code{nrow(data)}, or a list of such
 vectors, gives the strata explicitly, see \code{\link[=splitTrainTest]{splitTrainTest()}}.}
 
-\item{cutoff}{the probability threshold above which a binary prediction
-counts as positive, used for accuracy, sensitivity and specificity.
-Default 0.5.}
+\item{cutoff}{the probability threshold, in \eqn{[0, 1]}, at or above
+which a binary prediction counts as positive, used for accuracy,
+sensitivity and specificity. Default 0.5.}
 
 \item{keepModels}{logical, whether to return the models fitted on the
 training folds. Default \code{FALSE}.}
@@ -59,21 +62,33 @@ training folds. Default \code{FALSE}.}
 An object of class \code{"CrossVal"}, a list with the components
 \describe{
 \item{summary}{a data frame with one row per measure and the columns
-\code{apparent}, \code{cv}, \code{sd}, \code{min}, \code{max}, \code{pooled} and \code{optimism}.}
-\item{perFold}{a data frame with one row per fold: \code{rep}, \code{fold},
-\code{nTrain}, \code{nTest} and the measures.}
+\code{apparent}, \code{cv}, \code{sd}, \code{min}, \code{max}, \code{nFolds} (the number of folds
+with a value for the measure), \code{pooled} and \code{optimism}.}
+\item{perFold}{a data frame with one row per planned fold: \code{rep},
+\code{fold}, \code{nTrain}, \code{nTest}, \code{ok}, \code{error} and the measures (\code{NA} for
+failed folds).}
+\item{reps}{a data frame with one row per repetition: \code{rep},
+\code{nPredicted} and \code{coverage}, the share of observations with an
+out-of-fold prediction.}
 \item{pred}{the out-of-fold predictions as a data frame with \code{rep},
 \code{fold}, \code{row} (row in \code{data}), \code{obs} and \code{pred} (the probability of
 the positive class, the predicted value, or for multiclass models the
-predicted class followed by one probability column per class).}
+predicted class).}
+\item{prob}{for multiclass models a matrix of the predicted class
+probabilities, one column per class, its rows matching \code{pred}; else
+\code{NULL}.}
 \item{foldId}{an integer matrix of fold memberships, one column per
 repetition, rows matching the observations used.}
-\item{coefs}{a matrix of the coefficients per fold, if \code{\link[=coef]{coef()}} returns
-a vector of the same length for every fold, else \code{NULL}.}
-\item{models}{the models of the training folds if \code{keepModels = TRUE},
-else \code{NULL}.}
-\item{warnings, errors}{data frames of the messages collected, with the
-number of folds concerned.}
+\item{coefs}{a matrix of the coefficients per successful fold, matched
+by name and \code{NA} where a fold lacks a coefficient, if \code{\link[=coef]{coef()}} returns
+a named numeric vector for every fold (unnamed vectors of equal length
+are bound by position), else \code{NULL}.}
+\item{models}{the models of the successful training folds if
+\code{keepModels = TRUE}, else \code{NULL}.}
+\item{warnings, errors}{data frames of the distinct messages and their
+\code{count}: for \code{errors} the number of failed folds, for \code{warnings} the
+number of evaluations (folds, apparent, pooled repetitions) that raised
+the message.}
 }
 and the settings \code{task}, \code{engine}, \code{formula}, \code{n}, \code{nDropped}, \code{k},
 \code{repeats}, \code{stratified}, \code{cutoff}, \code{levels} and \code{call}.
@@ -86,55 +101,113 @@ fold left out, until every fold has served once as test set. The procedure
 can be repeated with new random splits.
 }
 \details{
-Each training fold is refitted from the call stored in \code{fit} with only the
-data replaced, so every argument of the original fit (engine, family,
-weights, tuning parameters) is carried over. A \code{subset} of the original
-call is applied to \code{data} once, before the split. Observations with missing
-values in any model variable are removed beforehand as well, so that all
-folds are of comparable size and the same observations enter the apparent
-and the cross-validated estimates. Prior weights of the fit are used in
-refitting, but the performance measures are unweighted.
+\strong{Observations.} The rows entering the cross-validation are determined
+with the semantics of \code{\link[=model.frame]{model.frame()}}: the \code{subset} of the original call is
+resolved with R's indexing rules (logical, positive, negative or row-name
+indices), and rows are dropped where any model term, including transformed
+ones such as \code{log(x)} or \code{sqrt(x)}, the response or the weights evaluate to
+\code{NA} or \code{NaN}. This is done once before the split, so that the apparent and
+the cross-validated estimates rest on the same observations and the folds
+are of comparable size. A subset that selects a row more than once is
+rejected, as the copies could otherwise end up in training and test fold.
+Variables are evaluated on the whole data only to find these rows; every
+fold model recomputes its terms (e.g. \code{poly()} or \code{scale()}) from its own
+training data. Terms that cannot be evaluated on \code{data} are an error, as
+they would be for the original fit.
 
-The performance measures depend on the task:
+The response must be computed row by row (\code{log(y)} is fine), since it is
+compared with predictions of models whose response was computed on their
+training folds only. A response that depends on other observations is
+rejected if it calls a known data-dependent function such as \code{scale()},
+\code{mean()} or \code{rank()}, or if its values recomputed on the odd rows, the
+even rows or the first half of the rows differ from those computed on
+all rows. The second check is a heuristic that may miss
+a user-defined transformation which happens to agree on that subset;
+such transformations are the user's responsibility. Computing the
+transformation in \code{data} beforehand gives all folds a common scale, but
+its estimation (e.g. of the mean and SD used by \code{scale()}) is then not
+part of the cross-validation.
+
+\strong{Refitting.} Each training fold is refitted from the call stored in
+\code{fit} with the data replaced, so the engine, family, link and tuning
+parameters are carried over. Row-wise arguments are aligned with the
+folds: prior weights, whether a column of \code{data} or a vector outside it,
+are evaluated once and split together with the data. Prior weights are
+used in refitting, but the performance measures are unweighted. An
+\code{offset} argument is not supported (specify it in the formula as
+\code{offset()}), nor is a formula variable of observation length that does not
+belong to \code{data}.
+
+\strong{Measures.} They depend on the task:
 
 \describe{
 \item{binary classification}{\code{auc} (c-statistic), \code{brier} and
 \code{brierScaled} (Brier score and its scaled version, see
 \code{\link[DescToolsX:brierScore]{DescToolsX::brierScore()}}), \code{logLoss} (mean negative log-likelihood),
-\code{calIntercept} and \code{calSlope} (calibration-in-the-large and
-calibration slope, see \code{\link[=plotCalibration]{plotCalibration()}}), and \code{accuracy},
-\code{sensitivity} and \code{specificity} at \code{cutoff}. The second level of the
-response is the positive class.}
+\code{calIntercept} (calibration-in-the-large: the intercept of a logistic
+regression of the outcome with the logit of the prediction as offset,
+i.e. with the slope fixed at 1), \code{calSlope} (the slope of the logistic
+regression of the outcome on the logit of the prediction). The two
+fits are separate. The intercept is \code{NA} if its fit does not
+converge; the slope is \code{NA} if the logits of the two classes do not
+overlap (complete or quasi-complete separation), if the logits are
+constant, or if its fit does not converge. Each case is reported in
+the warnings. The remaining measures are \code{accuracy}, \code{sensitivity}
+and \code{specificity} at \code{cutoff}. The second
+level of the response is the positive class.}
 \item{multiclass classification}{\code{accuracy}, \code{kappa}, \code{brier} (summed
 over the classes) and \code{logLoss}.}
 \item{regression}{\code{rmse}, \code{mae}, \code{rSq} (\eqn{1 - SSE/SST} on the test
 fold) and \code{calSlope} (slope of the observed on the predicted values).}
 }
 
-The measures are reported in three versions. \emph{Apparent} is the performance
-of \code{fit} on the data it was fitted to and therefore optimistic. \emph{CV} is the
-mean over all folds (and repeats), with its standard deviation and range
-across the folds. \emph{Pooled} computes each measure once on all out-of-fold
-predictions of a repetition, averaged over the repetitions; it is the more
-stable estimate for small folds and the only one available for
-leave-one-out, where a single observation has no AUC or calibration slope.
+\strong{Apparent, CV, pooled.} \emph{Apparent} is the performance of \code{fit} on the
+data it was fitted to and therefore optimistic. \emph{CV} is the unweighted mean
+of the fold results over all folds (and repeats): every fold counts
+equally, whatever its size. \code{sd}, \code{min} and \code{max} describe the spread of
+the fold results; \code{sd} is not a standard error of the CV estimate. \emph{Pooled}
+computes each measure once on all out-of-fold predictions of a repetition
+and averages over the repetitions. This is a different estimand from the
+fold mean, also for losses such as the RMSE, and the more stable choice for
+small folds. With leave-one-out, measures that need both classes or
+several observations (\code{auc}, \code{brierScaled}, the calibration measures,
+\code{rSq}, \code{calSlope}, \code{kappa}) exist only in their pooled version.
+
 \emph{Optimism} is the difference Apparent - CV: positive for measures where
-higher is better (\code{auc}, \code{rSq}), negative for losses (\code{brier}, \code{logLoss},
-\code{rmse}). For a logistic model fitted by maximum likelihood the apparent
-calibration intercept and slope are 0 and 1 by construction; a
+higher is better (\code{auc}, \code{rSq}, \code{accuracy}), negative for losses (\code{brier},
+\code{logLoss}, \code{rmse}, \code{mae}). For the calibration measures it is merely the
+difference, without a better direction. For an unpenalised logistic model
+with an intercept, fitted by maximum likelihood without weights, the
+apparent calibration intercept and slope are 0 and 1 by construction; a
 cross-validated slope clearly below 1 is the signature of overfitting.
 
-Warnings raised while fitting the folds (e.g. fitted probabilities of 0 or
-\enumerate{
-\item are collected and reported once, with the number of folds concerned. A
-fold whose model cannot be fitted or cannot predict its test data (e.g.
-because of a factor level absent from the training folds) is reported and
-left out; the function only fails if no fold succeeds.
-}
+Cross-validation assesses the given model specification. A variable
+selection or tuning done beforehand on the full data is not part of the
+refit and therefore not validated.
+
+\strong{Failures.} Warnings raised while fitting the folds or computing the
+measures (e.g. fitted probabilities of 0 or 1) are collected and reported
+once, with the number of times each was raised (counting the folds, the
+apparent and the pooled evaluations). A fold whose model cannot be fitted, cannot predict
+its test data (e.g. because of a factor level absent from the training
+folds), returns predictions of the wrong shape or invalid values, or whose
+measures cannot be computed, is kept in \code{perFold} with \code{ok = FALSE} and
+its error, and is left out of the CV estimates; the function only fails if
+no fold succeeds. The pooled estimates use only repetitions in which every
+observation was predicted, as an incomplete repetition would describe a
+different population; without such a repetition they are \code{NA}.
 
 The split is drawn from R's global random number generator; call
 \code{\link[=set.seed]{set.seed()}} before the function for reproducible results. Survival models
 are not supported.
+
+For mixed models, observations of clusters absent from the training folds
+(always so in grouped cross-validation by cluster) are predicted at
+population level, with the random effects set to zero.
+
+The models kept with \code{keepModels = TRUE} support \code{predict()}, \code{coef()} and
+inspection. Their call refers to a temporary training set, so \code{\link[=update]{update()}}
+needs the data supplied again.
 }
 \examples{
 fit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
@@ -145,7 +218,7 @@ cv
 
 # the measures of every fold, and the variability of the coefficients
 head(cv$perFold)
-apply(cv$coefs, 2, sd)
+apply(cv$coefs, 2, sd, na.rm = TRUE)
 
 # repeated cross-validation, keeping the fold models
 set.seed(1)

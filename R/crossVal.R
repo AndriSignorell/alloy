@@ -8,7 +8,10 @@
 #'
 #' @param fit a model fitted with [fitMod()], or a plain [lm()] or [glm()]
 #'   (binomial, Poisson, quasi-Poisson or Gamma family), which is refitted
-#'   through [fitMod()] with the matching engine
+#'   through [fitMod()] with the matching engine. Binary models need a
+#'   Bernoulli response (one 0/1, logical or two-level factor value per row);
+#'   aggregated binomial data (`cbind(successes, failures)` or proportions
+#'   with trial weights) are not supported.
 #' @param data the data frame to split. `NULL` (default) evaluates the `data`
 #'   argument of the original call in the calling environment.
 #' @param k the number of folds, between 2 and the number of observations
@@ -23,79 +26,151 @@
 #'   classification models and does not stratify regression models; `FALSE`
 #'   never stratifies. A vector of length `nrow(data)`, or a list of such
 #'   vectors, gives the strata explicitly, see [splitTrainTest()].
-#' @param cutoff the probability threshold above which a binary prediction
-#'   counts as positive, used for accuracy, sensitivity and specificity.
-#'   Default 0.5.
+#' @param cutoff the probability threshold, in \eqn{[0, 1]}, at or above
+#'   which a binary prediction counts as positive, used for accuracy,
+#'   sensitivity and specificity. Default 0.5.
 #' @param keepModels logical, whether to return the models fitted on the
 #'   training folds. Default `FALSE`.
 #'
 #' @details
-#' Each training fold is refitted from the call stored in `fit` with only the
-#' data replaced, so every argument of the original fit (engine, family,
-#' weights, tuning parameters) is carried over. A `subset` of the original
-#' call is applied to `data` once, before the split. Observations with missing
-#' values in any model variable are removed beforehand as well, so that all
-#' folds are of comparable size and the same observations enter the apparent
-#' and the cross-validated estimates. Prior weights of the fit are used in
-#' refitting, but the performance measures are unweighted.
+#' **Observations.** The rows entering the cross-validation are determined
+#' with the semantics of [model.frame()]: the `subset` of the original call is
+#' resolved with R's indexing rules (logical, positive, negative or row-name
+#' indices), and rows are dropped where any model term, including transformed
+#' ones such as `log(x)` or `sqrt(x)`, the response or the weights evaluate to
+#' `NA` or `NaN`. This is done once before the split, so that the apparent and
+#' the cross-validated estimates rest on the same observations and the folds
+#' are of comparable size. A subset that selects a row more than once is
+#' rejected, as the copies could otherwise end up in training and test fold.
+#' Variables are evaluated on the whole data only to find these rows; every
+#' fold model recomputes its terms (e.g. `poly()` or `scale()`) from its own
+#' training data. Terms that cannot be evaluated on `data` are an error, as
+#' they would be for the original fit.
 #'
-#' The performance measures depend on the task:
+#' The response must be computed row by row (`log(y)` is fine), since it is
+#' compared with predictions of models whose response was computed on their
+#' training folds only. A response that depends on other observations is
+#' rejected if it calls a known data-dependent function such as `scale()`,
+#' `mean()` or `rank()`, or if its values recomputed on the odd rows, the
+#' even rows or the first half of the rows differ from those computed on
+#' all rows. The second check is a heuristic that may miss
+#' a user-defined transformation which happens to agree on that subset;
+#' such transformations are the user's responsibility. Computing the
+#' transformation in `data` beforehand gives all folds a common scale, but
+#' its estimation (e.g. of the mean and SD used by `scale()`) is then not
+#' part of the cross-validation.
+#'
+#' **Refitting.** Each training fold is refitted from the call stored in
+#' `fit` with the data replaced, so the engine, family, link and tuning
+#' parameters are carried over. Row-wise arguments are aligned with the
+#' folds: prior weights, whether a column of `data` or a vector outside it,
+#' are evaluated once and split together with the data. Prior weights are
+#' used in refitting, but the performance measures are unweighted. An
+#' `offset` argument is not supported (specify it in the formula as
+#' `offset()`), nor is a formula variable of observation length that does not
+#' belong to `data`.
+#'
+#' **Measures.** They depend on the task:
 #'
 #' \describe{
 #'   \item{binary classification}{`auc` (c-statistic), `brier` and
 #'     `brierScaled` (Brier score and its scaled version, see
 #'     [DescToolsX::brierScore()]), `logLoss` (mean negative log-likelihood),
-#'     `calIntercept` and `calSlope` (calibration-in-the-large and
-#'     calibration slope, see [plotCalibration()]), and `accuracy`,
-#'     `sensitivity` and `specificity` at `cutoff`. The second level of the
-#'     response is the positive class.}
+#'     `calIntercept` (calibration-in-the-large: the intercept of a logistic
+#'     regression of the outcome with the logit of the prediction as offset,
+#'     i.e. with the slope fixed at 1), `calSlope` (the slope of the logistic
+#'     regression of the outcome on the logit of the prediction). The two
+#'     fits are separate. The intercept is `NA` if its fit does not
+#'     converge; the slope is `NA` if the logits of the two classes do not
+#'     overlap (complete or quasi-complete separation), if the logits are
+#'     constant, or if its fit does not converge. Each case is reported in
+#'     the warnings. The remaining measures are `accuracy`, `sensitivity`
+#'     and `specificity` at `cutoff`. The second
+#'     level of the response is the positive class.}
 #'   \item{multiclass classification}{`accuracy`, `kappa`, `brier` (summed
 #'     over the classes) and `logLoss`.}
 #'   \item{regression}{`rmse`, `mae`, `rSq` (\eqn{1 - SSE/SST} on the test
 #'     fold) and `calSlope` (slope of the observed on the predicted values).}
 #' }
 #'
-#' The measures are reported in three versions. *Apparent* is the performance
-#' of `fit` on the data it was fitted to and therefore optimistic. *CV* is the
-#' mean over all folds (and repeats), with its standard deviation and range
-#' across the folds. *Pooled* computes each measure once on all out-of-fold
-#' predictions of a repetition, averaged over the repetitions; it is the more
-#' stable estimate for small folds and the only one available for
-#' leave-one-out, where a single observation has no AUC or calibration slope.
+#' **Apparent, CV, pooled.** *Apparent* is the performance of `fit` on the
+#' data it was fitted to and therefore optimistic. *CV* is the unweighted mean
+#' of the fold results over all folds (and repeats): every fold counts
+#' equally, whatever its size. `sd`, `min` and `max` describe the spread of
+#' the fold results; `sd` is not a standard error of the CV estimate. *Pooled*
+#' computes each measure once on all out-of-fold predictions of a repetition
+#' and averages over the repetitions. This is a different estimand from the
+#' fold mean, also for losses such as the RMSE, and the more stable choice for
+#' small folds. With leave-one-out, measures that need both classes or
+#' several observations (`auc`, `brierScaled`, the calibration measures,
+#' `rSq`, `calSlope`, `kappa`) exist only in their pooled version.
+#'
 #' *Optimism* is the difference Apparent - CV: positive for measures where
-#' higher is better (`auc`, `rSq`), negative for losses (`brier`, `logLoss`,
-#' `rmse`). For a logistic model fitted by maximum likelihood the apparent
-#' calibration intercept and slope are 0 and 1 by construction; a
+#' higher is better (`auc`, `rSq`, `accuracy`), negative for losses (`brier`,
+#' `logLoss`, `rmse`, `mae`). For the calibration measures it is merely the
+#' difference, without a better direction. For an unpenalised logistic model
+#' with an intercept, fitted by maximum likelihood without weights, the
+#' apparent calibration intercept and slope are 0 and 1 by construction; a
 #' cross-validated slope clearly below 1 is the signature of overfitting.
 #'
-#' Warnings raised while fitting the folds (e.g. fitted probabilities of 0 or
-#' 1) are collected and reported once, with the number of folds concerned. A
-#' fold whose model cannot be fitted or cannot predict its test data (e.g.
-#' because of a factor level absent from the training folds) is reported and
-#' left out; the function only fails if no fold succeeds.
+#' Cross-validation assesses the given model specification. A variable
+#' selection or tuning done beforehand on the full data is not part of the
+#' refit and therefore not validated.
+#'
+#' **Failures.** Warnings raised while fitting the folds or computing the
+#' measures (e.g. fitted probabilities of 0 or 1) are collected and reported
+#' once, with the number of times each was raised (counting the folds, the
+#' apparent and the pooled evaluations). A fold whose model cannot be fitted, cannot predict
+#' its test data (e.g. because of a factor level absent from the training
+#' folds), returns predictions of the wrong shape or invalid values, or whose
+#' measures cannot be computed, is kept in `perFold` with `ok = FALSE` and
+#' its error, and is left out of the CV estimates; the function only fails if
+#' no fold succeeds. The pooled estimates use only repetitions in which every
+#' observation was predicted, as an incomplete repetition would describe a
+#' different population; without such a repetition they are `NA`.
 #'
 #' The split is drawn from R's global random number generator; call
 #' [set.seed()] before the function for reproducible results. Survival models
 #' are not supported.
 #'
+#' For mixed models, observations of clusters absent from the training folds
+#' (always so in grouped cross-validation by cluster) are predicted at
+#' population level, with the random effects set to zero.
+#'
+#' The models kept with `keepModels = TRUE` support `predict()`, `coef()` and
+#' inspection. Their call refers to a temporary training set, so [update()]
+#' needs the data supplied again.
+#'
 #' @return An object of class `"CrossVal"`, a list with the components
 #' \describe{
 #'   \item{summary}{a data frame with one row per measure and the columns
-#'     `apparent`, `cv`, `sd`, `min`, `max`, `pooled` and `optimism`.}
-#'   \item{perFold}{a data frame with one row per fold: `rep`, `fold`,
-#'     `nTrain`, `nTest` and the measures.}
+#'     `apparent`, `cv`, `sd`, `min`, `max`, `nFolds` (the number of folds
+#'     with a value for the measure), `pooled` and `optimism`.}
+#'   \item{perFold}{a data frame with one row per planned fold: `rep`,
+#'     `fold`, `nTrain`, `nTest`, `ok`, `error` and the measures (`NA` for
+#'     failed folds).}
+#'   \item{reps}{a data frame with one row per repetition: `rep`,
+#'     `nPredicted` and `coverage`, the share of observations with an
+#'     out-of-fold prediction.}
 #'   \item{pred}{the out-of-fold predictions as a data frame with `rep`,
 #'     `fold`, `row` (row in `data`), `obs` and `pred` (the probability of
 #'     the positive class, the predicted value, or for multiclass models the
-#'     predicted class followed by one probability column per class).}
+#'     predicted class).}
+#'   \item{prob}{for multiclass models a matrix of the predicted class
+#'     probabilities, one column per class, its rows matching `pred`; else
+#'     `NULL`.}
 #'   \item{foldId}{an integer matrix of fold memberships, one column per
 #'     repetition, rows matching the observations used.}
-#'   \item{coefs}{a matrix of the coefficients per fold, if [coef()] returns
-#'     a vector of the same length for every fold, else `NULL`.}
-#'   \item{models}{the models of the training folds if `keepModels = TRUE`,
-#'     else `NULL`.}
-#'   \item{warnings, errors}{data frames of the messages collected, with the
-#'     number of folds concerned.}
+#'   \item{coefs}{a matrix of the coefficients per successful fold, matched
+#'     by name and `NA` where a fold lacks a coefficient, if [coef()] returns
+#'     a named numeric vector for every fold (unnamed vectors of equal length
+#'     are bound by position), else `NULL`.}
+#'   \item{models}{the models of the successful training folds if
+#'     `keepModels = TRUE`, else `NULL`.}
+#'   \item{warnings, errors}{data frames of the distinct messages and their
+#'     `count`: for `errors` the number of failed folds, for `warnings` the
+#'     number of evaluations (folds, apparent, pooled repetitions) that raised
+#'     the message.}
 #' }
 #' and the settings `task`, `engine`, `formula`, `n`, `nDropped`, `k`,
 #' `repeats`, `stratified`, `cutoff`, `levels` and `call`.
@@ -109,7 +184,7 @@
 #'
 #' # the measures of every fold, and the variability of the coefficients
 #' head(cv$perFold)
-#' apply(cv$coefs, 2, sd)
+#' apply(cv$coefs, 2, sd, na.rm = TRUE)
 #'
 #' # repeated cross-validation, keeping the fold models
 #' set.seed(1)
@@ -135,15 +210,22 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
 
   cl <- match.call()
   env <- parent.frame()
+  .cvCheckArgs(repeats, cutoff, keepModels)
 
-  # --- the model: refit call, formula, engine, task ------------------------
-  refit <- .fitModCall(fit, engine = .cvEngine(fit))
-  fo <- tryCatch(stats::formula(fit),
-                 error = function(e) eval(refit$formula, env))
+  # --- the model: engine, task, refit call, formula ------------------------
   engine <- .cvEngine(fit)
   task <- .cvTask(fit, engine)
+  refit <- .fitModCall(fit, engine = engine)
+  fo <- tryCatch(stats::formula(fit),
+                 error = function(e) eval(refit$formula, env))
+  foEnv <- environment(fo)
+  if (is.null(foEnv)) foEnv <- env
 
-  # --- the data: as in the original call, subset applied, complete cases ---
+  if (!is.null(refit$offset))
+    stop("an 'offset' argument is not supported; ",
+         "specify the offset in the formula with offset().")
+
+  # --- the data: rows as model.frame() would use them ----------------------
   if (is.null(data)) {
     if (is.null(refit$data))
       stop("'data' is not stored in the call of 'fit'; supply it explicitly.")
@@ -153,31 +235,35 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     stop("'data' must be a data frame.")
 
   nOrig <- nrow(data)
-  keep <- .cvKeepRows(refit, fo, data, env)
+  rows <- .cvKeepRows(refit, fo, data, foEnv)
+  keep <- rows$keep
+  w <- if (!is.null(rows$weights)) rows$weights[keep]
   refit$subset <- NULL
+  refit$weights <- NULL
+
   data <- data[keep, , drop = FALSE]
   n <- nrow(data)
-
-  foEnv <- environment(fo)
-  obs <- eval(fo[[2L]], data, if (is.null(foEnv)) env else foEnv)
+  obs <- .cvResponse(fo, data, foEnv)
 
   # a plain lm/glm is refitted once through fitMod(), so that predictions
   # come on the same scale as those of the fold models
   evalEnv <- new.env(parent = env)
-  if (!inherits(fit, "FitMod")) {
-    full <- refit
-    full$data <- as.name(".cvTrain")
-    assign(".cvTrain", data, envir = evalEnv)
-    fit <- suppressMessages(eval(full, evalEnv))
-  }
+  if (!inherits(fit, "FitMod"))
+    fit <- suppressMessages(.cvRefit(refit, data, w, evalEnv))
 
   # --- apparent performance of fit on the same observations ----------------
-  pa <- .cvQuietly(predict(fit, newdata = data))
+  pa <- .cvQuietly(.cvPredict(fit, data))
   if (inherits(pa$value, "cvError"))
     stop("'fit' cannot predict 'data': ", pa$value)
 
-  lev <- if (task == "regression") NULL else colnames(as.matrix(pa$value))
+  lev <- NULL
   if (task != "regression") {
+    lev <- colnames(as.matrix(pa$value))
+    if (is.null(lev))
+      stop("the predictions of 'fit' carry no class names.")
+    if (length(lev) == 2L && is.numeric(obs) && any(obs != round(obs)))
+      stop("a binary response must have one class per observation; ",
+           "proportions with trial weights are not supported.")
     obs <- factor(as.character(obs), levels = lev)
     if (anyNA(obs))
       stop("the response has values not among the predicted classes ",
@@ -185,95 +271,133 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     task <- if (length(lev) == 2L) "binary" else "multiclass"
   }
 
-  apparent <- .cvMetrics(obs, .cvPredValue(pa$value, task, lev), task, cutoff)
+  am <- .cvQuietly(.cvMetrics(obs, .cvPredValue(pa$value, task, lev, n),
+                              task, cutoff))
+  if (inherits(am$value, "cvError"))
+    stop("the measures of 'fit' cannot be computed: ", am$value)
+  apparent <- am$value
+  metricNames <- names(apparent)
+  naMetrics <- stats::setNames(rep(NA_real_, length(metricNames)),
+                               metricNames)
 
   # --- fold memberships ----------------------------------------------------
   foldId <- .cvFoldId(n, k, repeats, folds, strata, keep, nOrig, obs, task)
   repeats <- ncol(foldId)
-  k <- length(unique(foldId[, 1L]))
+  k <- max(foldId)
 
   # --- refit and evaluate fold by fold -------------------------------------
-  refit$data <- as.name(".cvTrain")
+  grid <- expand.grid(fold = seq_len(k), rep = seq_len(repeats))
+  runs <- lapply(seq_len(nrow(grid)), function(i) {
+    test <- foldId[, grid$rep[i]] == grid$fold[i]
+    .cvRunFold(refit, evalEnv, data, w, test, obs, task, lev, cutoff,
+               keepModels)
+  })
 
-  runs <- vector("list", repeats * k)
-  i <- 0L
-
-  for (r in seq_len(repeats)) {
-    ids <- sort(unique(foldId[, r]))
-    for (f in ids) {
-      i <- i + 1L
-      test <- foldId[, r] == f
-      runs[[i]] <- .cvRunFold(refit, evalEnv, data, test, obs, task, lev,
-                              cutoff, keepModels)
-      runs[[i]]$rep <- r
-      runs[[i]]$fold <- f
-      if (!is.null(runs[[i]]$pred)) {
-        runs[[i]]$pred$rep <- r
-        runs[[i]]$pred$fold <- f
-        runs[[i]]$pred$row <- keep[runs[[i]]$pred$row]
-      }
-    }
-  }
-  runs <- runs[seq_len(i)]
-
-  failed <- vapply(runs, function(z) !is.null(z$error), logical(1L))
+  ok <- vapply(runs, function(z) is.null(z$error), logical(1L))
   errors <- .cvTally(lapply(runs, `[[`, "error"))
-  warns <- .cvTally(c(list(pa$warnings), lapply(runs, `[[`, "warnings")))
 
-  if (all(failed))
+  if (!any(ok))
     stop("no fold could be fitted and evaluated: ", errors$message[1L])
-  if (any(failed))
+  if (!all(ok))
     warning(gettextf("%d of %d folds failed and were left out:\n%s",
-                     sum(failed), length(runs), .cvFormatTally(errors)),
+                     sum(!ok), length(runs), .cvFormatTally(errors)),
             call. = FALSE, domain = NA)
+  # --- per fold ------------------------------------------------------------
+  m <- t(vapply(runs, function(z)
+    if (is.null(z$error)) z$metrics else naMetrics,
+    numeric(length(metricNames))))
+  m <- matrix(m, ncol = length(metricNames),
+              dimnames = list(NULL, metricNames))
+
+  perFold <- data.frame(
+    rep    = grid$rep,
+    fold   = grid$fold,
+    nTrain = vapply(runs, `[[`, integer(1L), "nTrain"),
+    nTest  = vapply(runs, `[[`, integer(1L), "nTest"),
+    ok     = ok,
+    error  = vapply(runs, function(z)
+      if (is.null(z$error)) NA_character_ else z$error, character(1L)),
+    m, check.names = FALSE)
+
+  # --- out-of-fold predictions ---------------------------------------------
+  okRuns <- runs[ok]
+  okRep <- grid$rep[ok]
+  okFold <- grid$fold[ok]
+  testRows <- lapply(okRuns, `[[`, "test")
+  values <- lapply(okRuns, `[[`, "value")
+  idx <- unlist(testRows)
+  nTest <- lengths(testRows)
+
+  prob <- if (task == "multiclass")
+    `dimnames<-`(do.call(rbind, values), list(NULL, lev))
+
+  pred <- data.frame(
+    rep  = rep(okRep, nTest),
+    fold = rep(okFold, nTest),
+    row  = keep[idx],
+    obs  = obs[idx],
+    pred = if (task == "multiclass") .cvClass(prob, lev) else unlist(values))
+
+  # --- pooled: complete repetitions only -----------------------------------
+  nPred <- tabulate(pred$rep, repeats)
+  reps <- data.frame(rep = seq_len(repeats), nPredicted = nPred,
+                     coverage = nPred / n)
+  complete <- which(nPred == n)
+
+  pooledRep <- lapply(complete, function(r) {
+    i <- pred$rep == r
+    v <- if (task == "multiclass") prob[i, , drop = FALSE] else pred$pred[i]
+    .cvQuietly(.cvMetrics(pred$obs[i], v, task, cutoff))
+  })
+  pooled <- if (length(pooledRep))
+    colMeans(do.call(rbind, lapply(pooledRep, function(z)
+      if (inherits(z$value, "cvError")) naMetrics else z$value)))
+  else
+    naMetrics
+
+  warns <- .cvTally(c(list(pa$warnings, am$warnings),
+                      lapply(runs, `[[`, "warnings"),
+                      lapply(pooledRep, `[[`, "warnings")))
   if (nrow(warns) > 0L)
-    warning(gettextf("warnings in fitting the folds:\n%s",
+    warning(gettextf("warnings during the cross-validation:\n%s",
                      .cvFormatTally(warns)),
             call. = FALSE, domain = NA)
 
-  ok <- runs[!failed]
+  if (length(complete) < repeats)
+    warning(if (length(complete) == 0L)
+      "no repetition predicted every observation; pooled measures are NA."
+    else
+      gettextf("pooled measures rest on the %d of %d repetitions that predicted every observation.",
+               length(complete), repeats),
+    call. = FALSE)
 
-  # --- assemble ------------------------------------------------------------
-  perFold <- do.call(rbind, lapply(ok, function(z)
-    data.frame(rep = z$rep, fold = z$fold, nTrain = n - z$nTest,
-               nTest = z$nTest, t(z$metrics), check.names = FALSE)))
-  rownames(perFold) <- NULL
-
-  pred <- do.call(rbind, lapply(ok, `[[`, "pred"))
-  rownames(pred) <- NULL
-
-  metricNames <- names(apparent)
-  m <- as.matrix(perFold[metricNames])
-
-  pooled <- colMeans(do.call(rbind, lapply(split(pred, pred$rep), function(z)
-    .cvMetrics(z$obs, .cvPooledValue(z, task, lev), task, cutoff))))
-
-  cvMean <- colMeans(m, na.rm = TRUE)
+  # --- summary -------------------------------------------------------------
+  cvMean <- .cvColApply(m, mean)
   summary <- data.frame(
     apparent = apparent,
     cv       = cvMean,
-    sd       = apply(m, 2L, stats::sd, na.rm = TRUE),
-    min      = .cvRange(m, min),
-    max      = .cvRange(m, max),
+    sd       = .cvColApply(m, stats::sd),
+    min      = .cvColApply(m, min),
+    max      = .cvColApply(m, max),
+    nFolds   = colSums(!is.na(m)),
     pooled   = pooled,
     optimism = apparent - cvMean,
     row.names = metricNames
   )
-  summary[is.na(summary)] <- NA
 
+  runNames <- .cvRunNames(okRep, okFold, repeats)
   models <- if (keepModels)
-    stats::setNames(lapply(ok, `[[`, "model"),
-                    .cvRunNames(perFold$rep, perFold$fold, repeats))
-
-  coefs <- .cvCoefMatrix(lapply(ok, `[[`, "coef"),
-                         .cvRunNames(perFold$rep, perFold$fold, repeats))
+    stats::setNames(lapply(okRuns, `[[`, "model"), runNames)
+  coefs <- .cvCoefMatrix(lapply(okRuns, `[[`, "coef"), runNames)
 
   dimnames(foldId) <- list(keep, paste0("rep", seq_len(repeats)))
 
   structure(list(
     summary    = summary,
     perFold    = perFold,
+    reps       = reps,
     pred       = pred,
+    prob       = prob,
     foldId     = foldId,
     coefs      = coefs,
     models     = models,
@@ -317,12 +441,18 @@ print.CrossVal <- function(x, digits = 3, ...) {
   cat("\n\n")
 
   s <- x$summary
+  s$nFolds <- NULL
   names(s) <- c("Apparent", "CV", "SD", "Min", "Max", "Pooled", "Optimism")
   print(format(round(as.matrix(s), digits), nsmall = digits), quote = FALSE,
         right = TRUE)
 
-  if (nrow(x$errors) > 0L)
-    cat(gettextf("\n%d fold(s) failed, see $errors\n", sum(x$errors$folds)))
+  nFail <- sum(!x$perFold$ok)
+  if (nFail > 0L)
+    cat(gettextf("\n%d of %d folds failed, see $perFold and $errors\n",
+                 nFail, nrow(x$perFold)))
+  if (any(x$reps$coverage < 1))
+    cat(gettextf("%d of %d repetitions incomplete, see $reps\n",
+                 sum(x$reps$coverage < 1), nrow(x$reps)))
   cat("\n")
 
   invisible(x)
@@ -331,6 +461,24 @@ print.CrossVal <- function(x, digits = 3, ...) {
 
 
 # == internal helper functions ============================================
+
+
+.cvIsCount <- function(x, min = 1) {
+  is.numeric(x) && length(x) == 1L && is.finite(x) && x >= min &&
+    x == round(x)
+}
+
+
+.cvCheckArgs <- function(repeats, cutoff, keepModels) {
+  if (!.cvIsCount(repeats))
+    stop("'repeats' must be a positive integer.")
+  if (!(is.numeric(cutoff) && length(cutoff) == 1L && is.finite(cutoff) &&
+        cutoff >= 0 && cutoff <= 1))
+    stop("'cutoff' must be a single number in [0, 1].")
+  if (!(is.logical(keepModels) && length(keepModels) == 1L &&
+        !is.na(keepModels)))
+    stop("'keepModels' must be TRUE or FALSE.")
+}
 
 
 # engine of a FitMod object, or the engine that refits a plain lm/glm
@@ -372,35 +520,140 @@ print.CrossVal <- function(x, digits = 3, ...) {
 }
 
 
-# Rows of data entering the cross-validation: the subset of the original
-# call, then complete cases of the model variables
-.cvKeepRows <- function(refit, fo, data, env) {
+# Rows of data entering the cross-validation, with model.frame() semantics:
+# the subset resolved by R indexing, then rows where no model term, the
+# response or the weights is NA/NaN. Returns the row indices and the prior
+# weights evaluated on the full data.
+.cvKeepRows <- function(refit, fo, data, foEnv) {
 
-  keep <- rep(TRUE, nrow(data))
+  n <- nrow(data)
 
-  if (!is.null(refit$subset)) {
-    s <- eval(refit$subset, data, env)
-    if (is.logical(s))
-      keep <- keep & !is.na(s) & s
-    else
-      keep <- seq_len(nrow(data)) %in% s
+  # formula variables of observation length must come from data, else they
+  # could not be split with it
+  for (v in setdiff(all.vars(fo), c(names(data), "."))) {
+    obj <- get0(v, envir = foEnv, inherits = TRUE)
+    if (!is.null(obj) && !is.function(obj) && n > 1L && NROW(obj) == n)
+      stop(gettextf("the formula of 'fit' uses %s from outside 'data'; add it as a column of 'data'.",
+                    sQuote(v)), domain = NA)
   }
 
-  vars <- all.vars(fo)
-  vars <- if ("." %in% vars) names(data) else intersect(vars, names(data))
-  if (!is.null(refit$weights))
-    vars <- union(vars, intersect(all.vars(refit$weights), names(data)))
+  idx <- seq_len(n)
+  if (!is.null(refit$subset)) {
+    s <- eval(refit$subset, data, foEnv)
+    names(idx) <- rownames(data)
+    idx <- unname(idx[s])
+    idx <- idx[!is.na(idx)]
+    if (anyDuplicated(idx))
+      stop("the 'subset' of 'fit' selects observations more than once, ",
+           "which cross-validation cannot split.")
+  }
 
-  keep <- keep & stats::complete.cases(data[vars])
+  w <- NULL
+  if (!is.null(refit$weights)) {
+    w <- eval(refit$weights, data, foEnv)
+    if (!is.numeric(w) || length(w) != n)
+      stop(gettextf("the weights of 'fit' must be a numeric vector of length %d.",
+                    n), domain = NA)
+  }
 
-  if (!any(keep))
+  # an error here would also have stopped the original fit on these data
+  mf <- tryCatch(
+    suppressWarnings(stats::model.frame(.cvNoBars(fo), data = data,
+                                        na.action = stats::na.pass)),
+    error = function(e)
+      stop("the model terms cannot be evaluated on 'data': ",
+           conditionMessage(e), call. = FALSE))
+  cc <- stats::complete.cases(mf)
+  if (!is.null(w)) cc <- cc & !is.na(w)
+
+  keep <- idx[cc[idx]]
+  if (length(keep) == 0L)
     stop("no complete observations left in 'data'.")
 
-  which(keep)
+  list(keep = keep, weights = w)
 }
 
 
-# Fold memberships as an n x repeats integer matrix
+# random-effect bars (a | g) turned into (a + g), so that model.frame()
+# sees all variables of a mixed model formula
+.cvNoBars <- function(fo) {
+  sub <- function(e) {
+    if (!is.call(e)) return(e)
+    if (identical(e[[1L]], as.name("|")) || identical(e[[1L]], as.name("||")))
+      e[[1L]] <- as.name("+")
+    as.call(lapply(as.list(e), sub))
+  }
+  fo[[length(fo)]] <- sub(fo[[length(fo)]])
+  fo
+}
+
+
+# functions whose value for one row depends on the other rows
+.cvDataDependent <- c(
+  "scale", "mean", "median", "sd", "var", "mad", "IQR", "sum", "prod",
+  "min", "max", "range", "rank", "quantile", "ecdf", "cumsum", "cumprod",
+  "cummax", "cummin", "diff", "rev", "sort", "order", "length", "nrow",
+  "NROW", "ave", "prop.table", "proportions", "table", "tabulate", "poly",
+  "lag", "lead")
+
+
+# names of all functions called in an expression
+.cvCallNames <- function(e) {
+  if (!is.call(e)) return(character())
+  head <- e[[1L]]
+  nm <- if (is.name(head)) as.character(head)
+        else if (is.call(head) && as.character(head[[1L]]) %in% c("::", ":::"))
+          as.character(head[[3L]])
+  unique(c(nm, unlist(lapply(as.list(e)[-1L], .cvCallNames)),
+           if (is.call(head)) .cvCallNames(head)))
+}
+
+
+# the response, checked to be a single column computed row by row
+.cvResponse <- function(fo, data, foEnv) {
+
+  obs <- eval(fo[[2L]], data, foEnv)
+
+  if (NCOL(obs) != 1L)
+    stop("crossVal() needs a response with one value per observation; ",
+         "matrix responses such as cbind(successes, failures) are not ",
+         "supported.")
+
+  # the fold models evaluate the response on their training rows, so it
+  # must not depend on the other rows: known data-dependent functions are
+  # rejected, and as a heuristic for the rest the response is recomputed on
+  # the odd rows, the even rows and the first half, and compared
+  lhs <- fo[[2L]]
+  bad <- intersect(.cvCallNames(lhs), .cvDataDependent)
+  n <- nrow(data)
+  if (length(bad) == 0L && n >= 2L) {
+    for (i in list(seq(1L, n, by = 2L), seq(2L, n, by = 2L),
+                   seq_len(n %/% 2L))) {
+      part <- eval(lhs, data[i, , drop = FALSE], foEnv)
+      same <- if (is.numeric(obs))
+        isTRUE(all.equal(as.numeric(obs)[i], as.numeric(part)))
+      else
+        identical(as.character(unlist(obs))[i], as.character(unlist(part)))
+      if (!same) {
+        bad <- "?"
+        break
+      }
+    }
+  }
+  if (length(bad))
+    stop(gettextf("the response %s depends on other observations%s; compute it in 'data' beforehand (its estimation is then not cross-validated).",
+                  sQuote(deparse1(lhs)),
+                  if (identical(bad, "?")) "" else
+                    paste0(" through ", paste0(bad, "()", collapse = ", "))),
+         domain = NA)
+
+  if (is.matrix(obs) || is.data.frame(obs)) obs <- obs[, 1L]
+  # predict.FitMod() names the classes of a logical response "0" and "1"
+  if (is.logical(obs)) as.integer(obs) else obs
+}
+
+
+# Fold memberships as an n x repeats integer matrix with ids 1..k
 .cvFoldId <- function(n, k, repeats, folds, strata, keep, nOrig, obs, task) {
 
   if (!is.null(folds)) {
@@ -409,30 +662,31 @@ print.CrossVal <- function(x, digits = 3, ...) {
                     nOrig, length(folds)))
     if (repeats > 1L)
       warning("'repeats' is ignored when 'folds' is given.", call. = FALSE)
+    if (anyNA(folds[keep]))
+      stop("'folds' must not have missing values.")
     id <- as.integer(factor(folds[keep]))
-    if (anyNA(id) || length(unique(id)) < 2L)
-      stop("'folds' must define at least two folds without missing values.")
+    if (max(id) < 2L)
+      stop("'folds' must define at least two folds.")
     return(structure(matrix(id), stratified = FALSE))
   }
 
-  if (!is.numeric(k) || length(k) != 1L || k < 2 || k > n || k != round(k))
+  if (!.cvIsCount(k, 2) || k > n)
     stop(gettextf("'k' must be an integer between 2 and %d.", n))
-  if (!is.numeric(repeats) || length(repeats) != 1L || repeats < 1 ||
-      repeats != round(repeats))
-    stop("'repeats' must be a positive integer.")
 
-  s <- if (isTRUE(strata)) {
+  # stratification is void for leave-one-out
+  s <- if (k == n) {
+    NULL
+  } else if (isTRUE(strata)) {
     if (task == "regression") NULL else obs
   } else if (isFALSE(strata)) {
     NULL
   } else {
-    nStrata <- if (is.data.frame(strata)) nrow(strata)
-               else if (is.list(strata)) length(strata[[1L]])
-               else length(strata)
-    if (nStrata != nOrig)
-      stop(gettextf("'strata' must be of length %d, not %d.",
-                    nOrig, nStrata))
-    if (is.list(strata)) lapply(strata, `[`, keep) else strata[keep]
+    sl <- if (is.list(strata)) as.list(strata) else list(strata)
+    len <- vapply(sl, NROW, integer(1L))
+    if (any(len != nOrig))
+      stop(gettextf("every stratification vector must be of length %d.",
+                    nOrig))
+    if (is.list(strata)) lapply(sl, `[`, keep) else strata[keep]
   }
 
   p <- stats::setNames(rep(1, k), seq_len(k))
@@ -441,34 +695,48 @@ print.CrossVal <- function(x, digits = 3, ...) {
     as.integer(splitTrainTest(seq_len(n), p = p, strata = s,
                               output = "group")),
     integer(n))
-
+  # splitTrainTest() stops if a fold would remain empty
   structure(matrix(id, nrow = n), stratified = !is.null(s))
 }
 
 
-# Refit on the training folds, predict the test fold, compute the measures
-.cvRunFold <- function(refit, evalEnv, data, test, obs, task, lev, cutoff,
+# Evaluate the refit call on the training data; the weights are embedded as
+# values, so they need not be found by the model's own lookup
+.cvRefit <- function(refit, train, w, evalEnv) {
+  refit$data <- as.name(".cvTrain")
+  if (!is.null(w)) refit$weights <- w
+  assign(".cvTrain", train, envir = evalEnv)
+  on.exit(rm(".cvTrain", envir = evalEnv))
+  eval(refit, evalEnv)
+}
+
+
+# Refit on the training folds, predict the test fold, compute the measures;
+# any error on the way marks the fold as failed
+.cvRunFold <- function(refit, evalEnv, data, w, test, obs, task, lev, cutoff,
                        keepModel) {
 
-  assign(".cvTrain", data[!test, , drop = FALSE], envir = evalEnv)
-  on.exit(rm(".cvTrain", envir = evalEnv))
+  train <- !test
 
   res <- .cvQuietly({
-    model <- eval(refit, evalEnv)
-    p <- predict(model, newdata = data[test, , drop = FALSE])
-    list(model = model, value = .cvPredValue(p, task, lev))
+    model <- .cvRefit(refit, data[train, , drop = FALSE], w[train], evalEnv)
+    value <- .cvPredValue(.cvPredict(model, data[test, , drop = FALSE]),
+                          task, lev, sum(test))
+    list(model = model, value = value,
+         metrics = .cvMetrics(obs[test], value, task, cutoff))
   })
 
-  out <- list(nTest = sum(test), warnings = res$warnings, error = NULL)
+  out <- list(nTrain = sum(train), nTest = sum(test),
+              warnings = res$warnings, error = NULL)
 
   if (inherits(res$value, "cvError")) {
     out$error <- unclass(res$value)
     return(out)
   }
 
-  value <- res$value$value
-  out$metrics <- .cvQuietly(.cvMetrics(obs[test], value, task, cutoff))$value
-  out$pred <- .cvPredFrame(which(test), obs[test], value, task, lev)
+  out$test <- which(test)
+  out$value <- res$value$value
+  out$metrics <- res$value$metrics
   out$coef <- tryCatch(stats::coef(res$value$model), error = function(e) NULL)
   if (keepModel) out$model <- res$value$model
 
@@ -476,29 +744,52 @@ print.CrossVal <- function(x, digits = 3, ...) {
 }
 
 
-# Predictions in the form the measures need: P(positive) for binary,
-# the probability matrix for multiclass, the numeric prediction otherwise
-.cvPredValue <- function(p, task, lev) {
-  if (task == "regression")
-    return(as.numeric(unlist(p)))
-  p <- as.matrix(p)[, lev, drop = FALSE]
-  if (task == "binary") unname(p[, 2L]) else unname(p)
+# Predictions of a fold model; clusters of a mixed model that are absent
+# from the training folds are predicted at population level
+.cvPredict <- function(model, newdata) {
+  if (inherits(model, "FitMod.lme4"))
+    stats::predict(model, newdata = newdata, allow.new.levels = TRUE)
+  else
+    stats::predict(model, newdata = newdata)
 }
 
 
-.cvPredFrame <- function(row, obs, value, task, lev) {
-  if (task != "multiclass")
-    return(data.frame(rep = NA_integer_, fold = NA_integer_, row = row,
-                      obs = obs, pred = value))
-  cls <- factor(lev[max.col(value, ties.method = "first")], levels = lev)
-  data.frame(rep = NA_integer_, fold = NA_integer_, row = row, obs = obs,
-             pred = cls, stats::setNames(as.data.frame(value), lev),
-             check.names = FALSE)
+# Predictions in the form the measures need -- P(positive) for binary, the
+# probability matrix for multiclass, the numeric prediction otherwise --
+# checked for shape and valid values
+.cvPredValue <- function(p, task, lev, n) {
+
+  if (task == "regression") {
+    if (NCOL(p) != 1L)
+      stop(gettextf("the prediction has %d columns instead of 1.", NCOL(p)))
+    p <- as.numeric(if (is.list(p)) p[[1L]] else p)
+    if (length(p) != n)
+      stop(gettextf("%d predictions for %d observations.", length(p), n))
+    if (!all(is.finite(p)))
+      stop("the predictions contain NA, NaN or infinite values.")
+    return(p)
+  }
+
+  p <- as.matrix(p)
+  if (nrow(p) != n)
+    stop(gettextf("%d predictions for %d observations.", nrow(p), n))
+  miss <- setdiff(lev, colnames(p))
+  if (length(miss))
+    stop("the prediction has no probability for class ",
+         paste(sQuote(miss), collapse = ", "), ".")
+  p <- unname(p[, lev, drop = FALSE])
+  storage.mode(p) <- "double"
+  if (!all(is.finite(p)) || any(p < 0 | p > 1))
+    stop("the predicted probabilities are not all within [0, 1].")
+  if (any(abs(rowSums(p) - 1) > 1e-6))
+    stop("the predicted class probabilities do not sum to 1.")
+
+  if (task == "binary") p[, 2L] else p
 }
 
 
-.cvPooledValue <- function(pred, task, lev) {
-  if (task == "multiclass") as.matrix(pred[lev]) else pred$pred
+.cvClass <- function(p, lev) {
+  factor(lev[max.col(p, ties.method = "first")], levels = lev)
 }
 
 
@@ -519,9 +810,7 @@ print.CrossVal <- function(x, digits = 3, ...) {
   # AUC, scaled Brier score and calibration need both classes; a fold
   # holding a single class (always so in leave-one-out) has none of them
   both <- length(unique(y)) == 2L
-  cal <- if (both)
-    .cvSafe(unlist(.calibrationCoefs(p, y)), c(NA_real_, NA_real_))
-  else c(NA_real_, NA_real_)
+  cal <- if (both) .cvCalibration(pc, y) else c(NA_real_, NA_real_)
 
   c(auc          = if (both) .cvSafe(cStat(p, y)) else NA_real_,
     brier        = brierScore(p, y),
@@ -536,15 +825,64 @@ print.CrossVal <- function(x, digits = 3, ...) {
 }
 
 
+# calibration-in-the-large (intercept with the logit of p as offset, slope
+# fixed at 1) and calibration slope (logistic regression on the logit of p).
+# The two fits are independent. The slope is NA if the logits of the two
+# classes do not overlap (complete or quasi-complete separation: the ML
+# estimate does not exist) or are constant (not identifiable); either fit is
+# NA if it fails or does not converge. Each case raises a warning, and the
+# warnings of glm.fit() are passed on, so that crossVal() reports them.
+.cvCalibration <- function(p, y) {
+
+  lp <- stats::qlogis(p)
+  one <- matrix(1, length(y))
+
+  calFit <- function(x, offset, coefIdx, what) {
+    fit <- tryCatch(
+      stats::glm.fit(x, y, offset = offset, family = stats::binomial()),
+      error = function(e) {
+        warning(gettextf("the %s fit failed: %s", what, conditionMessage(e)),
+                call. = FALSE)
+        NULL
+      })
+    if (is.null(fit))
+      return(NA_real_)
+    if (!fit$converged || fit$boundary) {
+      warning(gettextf("the %s fit did not converge; set to NA.", what),
+              call. = FALSE)
+      return(NA_real_)
+    }
+    unname(fit$coefficients[coefIdx])
+  }
+
+  a <- lp[y == 0L]
+  b <- lp[y == 1L]
+
+  slope <- if (diff(range(lp)) == 0) {
+    warning("constant predictions: the calibration slope is not ",
+            "identifiable; set to NA.", call. = FALSE)
+    NA_real_
+  } else if (max(a) <= min(b) || max(b) <= min(a)) {
+    warning("the predictions separate the classes: the calibration slope ",
+            "does not exist; set to NA.", call. = FALSE)
+    NA_real_
+  } else {
+    calFit(cbind(one, lp), NULL, 2L, "calibration slope")
+  }
+
+  c(calFit(one, lp, 1L, "calibration intercept"), slope)
+}
+
+
 .cvMetricsMulti <- function(obs, p) {
 
   lev <- levels(obs)
   ind <- outer(as.integer(obs), seq_along(lev), `==`)
-  cls <- factor(lev[max.col(p, ties.method = "first")], levels = lev)
+  cls <- .cvClass(p, lev)
   cm <- .cvSafe(suppressMessages(confusion(cls, obs)), NULL)
 
   c(accuracy = mean(cls == obs),
-    kappa    = if (is.null(cm)) NA_real_ else cm$kappa,
+    kappa    = if (is.null(cm)) NA_real_ else unname(cm$kappa)[1L],
     brier    = mean(rowSums((p - ind)^2)),
     logLoss  = -mean(log(pmax(p[ind], 1e-15))))
 }
@@ -558,7 +896,9 @@ print.CrossVal <- function(x, digits = 3, ...) {
   c(rmse     = sqrt(mean(res^2)),
     mae      = mean(abs(res)),
     rSq      = if (sst > 0) 1 - sum(res^2) / sst else NA_real_,
-    calSlope = .cvSafe(unname(stats::coef(stats::lm(obs ~ pred))[2L])))
+    calSlope = if (length(obs) > 1L)
+      .cvSafe(unname(stats::coef(stats::lm(obs ~ pred))[2L]))
+    else NA_real_)
 }
 
 
@@ -585,24 +925,29 @@ print.CrossVal <- function(x, digits = 3, ...) {
 }
 
 
-# Distinct messages and the number of folds (list elements) raising them
+# Distinct messages and the number of evaluations (list elements) raising them
 .cvTally <- function(msgs) {
   msgs <- unlist(lapply(msgs, unique))
   if (length(msgs) == 0L)
-    return(data.frame(message = character(), folds = integer()))
+    return(data.frame(message = character(), count = integer()))
   tab <- table(factor(msgs, levels = unique(msgs)))
-  data.frame(message = names(tab), folds = as.integer(tab),
+  data.frame(message = names(tab), count = as.integer(tab),
              stringsAsFactors = FALSE)
 }
 
 
 .cvFormatTally <- function(tally) {
-  paste0("  [", tally$folds, "x] ", tally$message, collapse = "\n")
+  paste0("  [", tally$count, "x] ", tally$message, collapse = "\n")
 }
 
 
-.cvRange <- function(m, fun) {
-  apply(m, 2L, function(z) if (all(is.na(z))) NA_real_ else fun(z, na.rm = TRUE))
+# column-wise statistic over the non-missing values, NA if there are none
+# (or, for sd, fewer than two)
+.cvColApply <- function(m, fun) {
+  apply(m, 2L, function(z) {
+    z <- z[!is.na(z)]
+    if (length(z) == 0L) NA_real_ else fun(z)
+  })
 }
 
 
@@ -611,10 +956,28 @@ print.CrossVal <- function(x, digits = 3, ...) {
 }
 
 
-.cvCoefMatrix <- function(coefs, names) {
-  ok <- !vapply(coefs, is.null, logical(1L)) &
-    vapply(coefs, function(z) is.numeric(z) && is.null(dim(z)), logical(1L))
-  if (!all(ok) || length(unique(lengths(coefs))) != 1L)
+# coefficients of the folds as a matrix, matched by name; NULL unless every
+# fold returns a plain numeric vector, and if names are missing for some
+# folds only (vectors without any names are bound by position if of equal
+# length)
+.cvCoefMatrix <- function(coefs, runNames) {
+
+  ok <- vapply(coefs, function(z)
+    is.numeric(z) && is.null(dim(z)) && length(z) > 0L, logical(1L))
+  if (length(coefs) == 0L || !all(ok))
     return(NULL)
-  do.call(rbind, stats::setNames(coefs, names))
+
+  named <- vapply(coefs, function(z) !is.null(names(z)), logical(1L))
+
+  if (!any(named)) {
+    if (length(unique(lengths(coefs))) != 1L)
+      return(NULL)
+    return(do.call(rbind, stats::setNames(coefs, runNames)))
+  }
+  if (!all(named))
+    return(NULL)
+
+  all <- unique(unlist(lapply(coefs, names)))
+  matrix(unlist(lapply(coefs, function(z) unname(z[all]))),
+         ncol = length(all), byrow = TRUE, dimnames = list(runNames, all))
 }
