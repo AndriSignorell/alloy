@@ -41,7 +41,11 @@ For \code{engine = "beta"} all types of
 \code{\link[betareg]{predict.betareg}} are available, e.g.
 \code{"link"}, \code{"precision"}, \code{"variance"} or
 \code{"quantile"} (with \code{at} passed via \code{...}).
-Ignored for classification models (use \code{output} instead).}
+For logistic models (\code{"logit"}, \code{"logitFirth"}) the types
+of \code{\link[stats]{predict.glm}} (\code{"link"}, \code{"response"},
+\code{"terms"}) are passed on, see Details.
+Ignored for all other classification models (use \code{output}
+instead).}
 
 \item{...}{Further arguments passed to the underlying predict method.}
 }
@@ -104,10 +108,15 @@ For \code{engine = "glmnet"} and \code{"xgboost"}, design matrices for
 the training data, so new data may contain a subset of the training
 factor levels.
 
-For \code{engine = "logit"}, calling \code{predict(object)} returns a
-two-column probability \code{data.frame} (like all other classifiers).
-To obtain the linear predictor (log-odds), use
-\code{predict(object, type = "link")}.
+For \code{engine = "logit"} and \code{"logitFirth"}, calling
+\code{predict(object)} returns a two-column probability
+\code{data.frame} (like all other classifiers). With an explicit
+\code{type} the result is that of \code{\link[stats]{predict.glm}}:
+\code{type = "link"} gives the linear predictor (log-odds),
+\code{type = "response"} the probability of the second class as a
+vector. Functions written for \code{glm} objects, which call
+\code{predict(x, type = "response")}, therefore work with these models
+as well, e.g. \code{DescToolsX::brierScore()}.
 }
 \examples{
 # Regression
@@ -143,12 +152,13 @@ if (requireNamespace("survival", quietly = TRUE)) {
 \code{\link{fitMod}}, \code{\link{print.FitMod}}
 
 Other modelling:
-\code{\link[=confusion.FitMod]{confusion.FitMod()}},
+\code{\link{classification-metrics}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predictors]{predictors()}},
-\code{\link[=print.FitMod]{print.FitMod()}}
+\code{\link[=print.FitMod]{print.FitMod()}},
+\code{\link{regression-metrics}}
 }
 \concept{modelling}
 \concept{prediction}

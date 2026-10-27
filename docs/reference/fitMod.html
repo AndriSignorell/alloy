@@ -23,7 +23,7 @@ top of the original model object, so all standard methods
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -63,7 +63,10 @@ top of the original model object, so all standard methods
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitMod</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, engine <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">subset</span>, <span class="va">na.action</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fitMod</span><span class="op">(</span><span class="va">formula</span>, <span class="va">data</span>, engine <span class="op">=</span> <span class="cn">NULL</span>, <span class="va">subset</span>, <span class="va">na.action</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="co"># S3 method for class 'FitMod'</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/stats/update.html" class="external-link">update</a></span><span class="op">(</span><span class="va">object</span>, <span class="va">formula.</span>, <span class="va">...</span>, evaluate <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -80,7 +83,8 @@ top of the original model object, so all standard methods
 
 <dt id="arg-engine">engine<a class="anchor" aria-label="anchor" href="#arg-engine"></a></dt>
 <dd><p>Character string naming the model to fit.  One of
-<code>"lm"</code>, <code>"logit"</code>, <code>"poisson"</code>, <code>"quasipoisson"</code>,
+<code>"lm"</code>, <code>"logit"</code>, <code>"logitFirth"</code>, <code>"poisson"</code>,
+<code>"quasipoisson"</code>,
 <code>"gamma"</code>, <code>"beta"</code>, <code>"negbin"</code>, <code>"polr"</code>,
 <code>"lmrob"</code>,
 <code>"tobit"</code>, <code>"zeroinfl"</code>, <code>"multinom"</code>, <code>"nnet"</code>,
@@ -111,6 +115,20 @@ default of the respective fitting function applies (usually
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
 <dd><p>Additional arguments passed to the underlying fitting function.</p></dd>
+
+
+<dt id="arg-object">object<a class="anchor" aria-label="anchor" href="#arg-object"></a></dt>
+<dd><p>a model fitted with <code>fitMod()</code></p></dd>
+
+
+<dt id="arg-formula-">formula.<a class="anchor" aria-label="anchor" href="#arg-formula-"></a></dt>
+<dd><p>changes to the formula, see
+<code><a href="https://rdrr.io/r/stats/update.formula.html" class="external-link">update.formula</a></code></p></dd>
+
+
+<dt id="arg-evaluate">evaluate<a class="anchor" aria-label="anchor" href="#arg-evaluate"></a></dt>
+<dd><p>logical, whether to fit the updated model (default) or
+return its call</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -150,14 +168,42 @@ coefficient table of all model parts as a single matrix (rows named as
 in <code><a href="https://rdrr.io/r/stats/coef.html" class="external-link">coef()</a></code>, attribute <code>"component"</code> giving the model part),
 and <code>drop1</code>, the likelihood-ratio tests for the terms of the mean
 and the precision model (the latter prefixed with <code>"(phi)_"</code>).</p>
+<p>Firth's bias-reduced logistic regression (<code>engine = "logitFirth"</code>)
+maximizes the log-likelihood penalized by the Jeffreys prior, fitted by
+<code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></code> with <code><a href="https://rdrr.io/pkg/brglm2/man/brglmFit.html" class="external-link">brglm2::brglmFit</a></code> (package
+<span class="pkg">brglm2</span>). The estimates stay finite under (quasi-)complete
+separation and are less biased for sparse covariate patterns. The
+result carries the additional class <code>"logitFirth"</code>, so that
+<code><a href="https://rdrr.io/r/stats/add1.html" class="external-link">drop1</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></code> use
+penalized likelihood ratio tests and profile penalized likelihood
+intervals, see <code><a href="logitFirth.html">logitFirth</a></code>. A fit that does not converge
+from the default start values of <span class="pkg">brglm2</span> (the maximum likelihood
+estimates, which diverge under complete separation) is repeated from 0.
+All other methods, including
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="crossVal.html">crossVal</a></code> and <code><a href="tMod.html">tMod</a></code>, work
+as for <code>"logit"</code>.</p>
+<p><code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> refits through <code>fitMod()</code> with the engine of
+<code>object</code>, so the result is again a <code>"FitMod"</code> object with all
+its methods; <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update.default</a></code> would refit with the
+underlying function only (e.g. <code><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm()</a></code>) and lose them. The formula
+and the arguments in <code>...</code> are updated by the <code><a href="https://rdrr.io/r/stats/update.html" class="external-link">update()</a></code> method
+of the underlying class, e.g. <code>update.betareg()</code> for a two-part
+formula <code>y ~ x | z</code>; arguments in <code>...</code> replace or extend
+those of the original call. A different
+<code>engine</code> is allowed; the defaults the registry had supplied for the
+old engine are then dropped, e.g. <code>method = brglm2::brglmFit</code> when
+switching from <code>"logitFirth"</code> to <code>"logit"</code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p>Other modelling:
+<code><a href="classification-metrics.html">classification-metrics</a></code>,
+<code><a href="logitFirth.html">logitFirth</a></code>,
 <code><a href="plot.FitMod.html">plot.FitMod()</a></code>,
 <code><a href="predict.FitMod.html">predict.FitMod()</a></code>,
 <code><a href="predictors.html">predictors()</a></code>,
-<code><a href="print.FitMod.html">print.FitMod()</a></code></p></div>
+<code><a href="print.FitMod.html">print.FitMod()</a></code>,
+<code><a href="regression-metrics.html">regression-metrics</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -267,6 +313,30 @@ and the precision model (the latter prefixed with <code>"(phi)_"</code>).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Obs (NAs): 32 (0)	Pseudo R²: 0.705   Log-lik: 49.977   AIC: -89.953</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Firth logistic regression, finite estimates under separation</span></span></span>
+<span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"brglm2"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span> <span class="op">{</span></span></span>
+<span class="r-in"><span>  <span class="fu">fitMod</span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, engine <span class="op">=</span> <span class="st">"logitFirth"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> stats::glm(formula = admit ~ gre + gpa + rank, family = "binomial", </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     data = Admit, method = brglm2::brglmFit, type = "MPL_Jeffreys")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Coefficients:</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                 estimate  95%-lci     uci    p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)       -3.908   -6.131  -1.685  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gre                0.002    0.000   0.004    0.042  *  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gpa                0.788    0.140   1.435    0.017  *  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank  (ref: 1)         .        .       .  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank 2            -0.666   -1.285  -0.046    0.035  *  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank 3            -1.318   -1.993  -0.643  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank 4            -1.511   -2.324  -0.698  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> Obs (NAs): 400 (0)	Pseudo R² (McFadden): 0.083   AIC: 470.547</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Mixed models</span></span></span>

@@ -29,8 +29,8 @@ bestCut(x, method = c("youden", "closest.topleft"))
 
 A named numeric vector with elements `threshold`, `specificity`, and
 `sensitivity` at the optimal cut-point. When ties exist,
-[`coords`](https://rdrr.io/pkg/pROC/man/coords.html) may return multiple
-columns; the result is then a matrix (one column per tied optimum).
+[`coords`](https://rdrr.io/pkg/pROC/man/coords.html) may return several
+optima; the result is then a matrix with one row per tied optimum.
 
 ## See also
 
@@ -39,7 +39,8 @@ columns; the result is then a matrix (one column per tied optimum).
 
 Other roc:
 [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md),
-[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md)
+[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md),
+[`rocTest()`](https://andrisignorell.github.io/alloy/reference/rocTest.md)
 
 ## Examples
 
@@ -60,11 +61,9 @@ r <- roc(aSAH$outcome, aSAH$s100b)
 #> Setting direction: controls < cases
 
 bestCut(r)
-#> Warning: 'transpose=TRUE' is deprecated. Only 'transpose=FALSE' will be allowed in a future version.
 #>   threshold specificity sensitivity 
 #>   0.2050000   0.8055556   0.6341463 
 bestCut(r, method = "closest.topleft")
-#> Warning: 'transpose=TRUE' is deprecated. Only 'transpose=FALSE' will be allowed in a future version.
 #>   threshold specificity sensitivity 
 #>   0.2050000   0.8055556   0.6341463 
 ```

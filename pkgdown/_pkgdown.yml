@@ -41,6 +41,8 @@ reference:
   - predictors
   - response
   - refLevel
+  - crossVal
+  - logitFirth
 - title: Diagnostics for Binary Responses
   desc: |
     The plots a logistic model needs, where the residual-versus-fitted plot of a linear model says nothing.
@@ -62,6 +64,9 @@ reference:
   - confint.roc
   - bestCut
   - lift
+  - classification-metrics
+  - regression-metrics
+  - rocTest
 - title: Model Fit & Coefficients
   desc: |
     Goodness-of-fit measures, coefficient intervals, collinearity, and variable importance.

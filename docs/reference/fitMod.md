@@ -11,6 +11,9 @@ the original model object, so all standard methods (`predict`, `print`,
 
 ``` r
 fitMod(formula, data, engine = NULL, subset, na.action, ...)
+
+# S3 method for class 'FitMod'
+update(object, formula., ..., evaluate = TRUE)
 ```
 
 ## Arguments
@@ -26,13 +29,14 @@ fitMod(formula, data, engine = NULL, subset, na.action, ...)
 - engine:
 
   Character string naming the model to fit. One of `"lm"`, `"logit"`,
-  `"poisson"`, `"quasipoisson"`, `"gamma"`, `"beta"`, `"negbin"`,
-  `"polr"`, `"lmrob"`, `"tobit"`, `"zeroinfl"`, `"multinom"`, `"nnet"`,
-  `"rpart"`, `"C5.0"`, `"lda"`, `"qda"`, `"svm"`, `"naiveBayes"`,
-  `"randomForest"`, `"glmnet"`, `"xgboost"`, `"coxph"`, `"weibull"`,
-  `"exponential"`, `"lognormal"`, `"loglogistic"`, `"lmMixed"`,
-  `"logitMixed"`, `"poissonMixed"`, `"negbinMixed"`, `"gammaMixed"`. If
-  `NULL` (default) the engine is chosen automatically, see Details.
+  `"logitFirth"`, `"poisson"`, `"quasipoisson"`, `"gamma"`, `"beta"`,
+  `"negbin"`, `"polr"`, `"lmrob"`, `"tobit"`, `"zeroinfl"`,
+  `"multinom"`, `"nnet"`, `"rpart"`, `"C5.0"`, `"lda"`, `"qda"`,
+  `"svm"`, `"naiveBayes"`, `"randomForest"`, `"glmnet"`, `"xgboost"`,
+  `"coxph"`, `"weibull"`, `"exponential"`, `"lognormal"`,
+  `"loglogistic"`, `"lmMixed"`, `"logitMixed"`, `"poissonMixed"`,
+  `"negbinMixed"`, `"gammaMixed"`. If `NULL` (default) the engine is
+  chosen automatically, see Details.
 
 - subset:
 
@@ -53,6 +57,19 @@ fitMod(formula, data, engine = NULL, subset, na.action, ...)
 - ...:
 
   Additional arguments passed to the underlying fitting function.
+
+- object:
+
+  a model fitted with `fitMod()`
+
+- formula.:
+
+  changes to the formula, see
+  [`update.formula`](https://rdrr.io/r/stats/update.formula.html)
+
+- evaluate:
+
+  logical, whether to fit the updated model (default) or return its call
 
 ## Value
 
@@ -93,13 +110,50 @@ giving the model part), and `drop1`, the likelihood-ratio tests for the
 terms of the mean and the precision model (the latter prefixed with
 `"(phi)_"`).
 
+Firth's bias-reduced logistic regression (`engine = "logitFirth"`)
+maximizes the log-likelihood penalized by the Jeffreys prior, fitted by
+[`glm`](https://rdrr.io/r/stats/glm.html) with
+[`brglm2::brglmFit`](https://rdrr.io/pkg/brglm2/man/brglmFit.html)
+(package brglm2). The estimates stay finite under (quasi-)complete
+separation and are less biased for sparse covariate patterns. The result
+carries the additional class `"logitFirth"`, so that
+[`drop1`](https://rdrr.io/r/stats/add1.html) and
+[`confint`](https://rdrr.io/r/stats/confint.html) use penalized
+likelihood ratio tests and profile penalized likelihood intervals, see
+[`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md).
+A fit that does not converge from the default start values of brglm2
+(the maximum likelihood estimates, which diverge under complete
+separation) is repeated from 0. All other methods, including
+[`predict()`](https://rdrr.io/r/stats/predict.html),
+[`crossVal`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+and [`tMod`](https://andrisignorell.github.io/alloy/reference/tMod.md),
+work as for `"logit"`.
+
+[`update()`](https://rdrr.io/r/stats/update.html) refits through
+`fitMod()` with the engine of `object`, so the result is again a
+`"FitMod"` object with all its methods;
+[`update.default`](https://rdrr.io/r/stats/update.html) would refit with
+the underlying function only (e.g.
+[`glm()`](https://rdrr.io/r/stats/glm.html)) and lose them. The formula
+and the arguments in `...` are updated by the
+[`update()`](https://rdrr.io/r/stats/update.html) method of the
+underlying class, e.g. `update.betareg()` for a two-part formula
+`y ~ x | z`; arguments in `...` replace or extend those of the original
+call. A different `engine` is allowed; the defaults the registry had
+supplied for the old engine are then dropped, e.g.
+`method = brglm2::brglmFit` when switching from `"logitFirth"` to
+`"logit"`.
+
 ## See also
 
 Other modelling:
+[`classification-metrics`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md),
+[`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md),
 [`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
 [`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
 [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
-[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md),
+[`regression-metrics`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
 
 ## Examples
 
@@ -209,6 +263,30 @@ if (requireNamespace("betareg", quietly = TRUE)) {
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
 #> Obs (NAs): 32 (0)    Pseudo R²: 0.705   Log-lik: 49.977   AIC: -89.953
+#> 
+
+# Firth logistic regression, finite estimates under separation
+if (requireNamespace("brglm2", quietly = TRUE)) {
+  fitMod(admit ~ gre + gpa + rank, Admit, engine = "logitFirth")
+}
+#> 
+#> Call:
+#> stats::glm(formula = admit ~ gre + gpa + rank, family = "binomial", 
+#>     data = Admit, method = brglm2::brglmFit, type = "MPL_Jeffreys")
+#> 
+#> Coefficients:
+#>                 estimate  95%-lci     uci    p-val     
+#> (Intercept)       -3.908   -6.131  -1.685  < 0.001  ***
+#> gre                0.002    0.000   0.004    0.042  *  
+#> gpa                0.788    0.140   1.435    0.017  *  
+#> rank  (ref: 1)         .        .       .  < 0.001  ***
+#> rank 2            -0.666   -1.285  -0.046    0.035  *  
+#> rank 3            -1.318   -1.993  -0.643  < 0.001  ***
+#> rank 4            -1.511   -2.324  -0.698  < 0.001  ***
+#> ---
+#> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Obs (NAs): 400 (0)   Pseudo R² (McFadden): 0.083   AIC: 470.547
 #> 
 
 # Mixed models

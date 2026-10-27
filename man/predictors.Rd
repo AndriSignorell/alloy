@@ -52,11 +52,12 @@ diagnostics that are computed per term;
 \link{model-diagnostics-overview} for an overview.
 
 Other modelling:
-\code{\link[=confusion.FitMod]{confusion.FitMod()}},
+\code{\link{classification-metrics}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
-\code{\link[=print.FitMod]{print.FitMod()}}
+\code{\link[=print.FitMod]{print.FitMod()}},
+\code{\link{regression-metrics}}
 }
 \concept{modelling}

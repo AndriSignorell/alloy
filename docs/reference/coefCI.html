@@ -15,7 +15,7 @@ from a linear model using a fast parallel implementation."><meta property="og:im
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,9 +111,9 @@ For each sample, the linear model is refitted and coefficients are stored.</p>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">mpg</span> <span class="op">~</span> <span class="va">wt</span> <span class="op">+</span> <span class="va">hp</span>, data <span class="op">=</span> <span class="va">mtcars</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">coefCI</span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     est         lci         uci</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.22727012 32.96484326 41.52749546</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.87783074 -5.36771193 -2.46816651</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03177295 -0.04879222 -0.02009276</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) 37.22727012 33.01767290 41.59027976</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> wt          -3.87783074 -5.44251668 -2.47657224</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> hp          -0.03177295 -0.04999322 -0.01941865</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

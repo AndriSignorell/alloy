@@ -154,8 +154,7 @@ plotPartialResid <- function(fit,
                            col = th$twin[2L], lty = "dashed"))
 
     if (!isFALSE(smooth) && !identical(smooth, NA)) {
-      lo <- stats::loess(partial ~ xv, weights = w, degree = 1L,
-                         family = "gaussian")
+      lo <- .loessSmooth(xv, partial, w)
       callIf(graphics::lines, smooth,
              defaults = list(x = lo, col = th$twin[1L]))
     }

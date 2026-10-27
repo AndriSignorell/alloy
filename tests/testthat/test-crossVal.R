@@ -21,7 +21,8 @@ test_that("the result has the documented structure", {
   expect_named(cv$summary, c("apparent", "cv", "sd", "min", "max", "nFolds",
                              "pooled", "optimism"))
   expect_named(cv$perFold, c("rep", "fold", "nTrain", "nTest", "ok", "error",
-                             measures))
+                             "cutoff", measures))
+  expect_true(all(cv$perFold$cutoff == 0.5))
   expect_identical(nrow(cv$perFold), 5L)
   expect_true(all(cv$perFold$ok))
   expect_identical(sum(cv$perFold$nTest), 400L)
@@ -29,8 +30,9 @@ test_that("the result has the documented structure", {
 
   # every observation predicted exactly once, out of fold
   expect_identical(sort(cv$pred$row), 1:400)
-  expect_named(cv$pred, c("rep", "fold", "row", "obs", "pred"))
+  expect_named(cv$pred, c("rep", "fold", "row", "obs", "pred", "cutoff"))
   expect_null(cv$prob)
+  expect_identical(cv$cutoffApparent, 0.5)
   expect_identical(cv$reps$coverage, 1)
   expect_null(cv$models)
   expect_identical(dim(cv$coefs), c(5L, 6L))
@@ -64,6 +66,52 @@ test_that("the measures agree with a hand-made cross-validation", {
   expect_equal(cv$summary["brier", "pooled"],
                mean((cv$pred$pred - (as.integer(cv$pred$obs) - 1L))^2))
 
+})
+
+
+test_that("a data-driven cut-point is found on every training fold", {
+
+  skip_if_not_installed("pROC")
+
+  set.seed(7)
+  cv <- crossVal(fitLogit, k = 4, cutoff = "youden", keepModels = TRUE)
+
+  # apparent: the cut-point of bestCut(roc(fit)) on all data
+  expect_equal(cv$cutoffApparent,
+               unname(bestCut(roc(fitLogit, quiet = TRUE))["threshold"]))
+  p <- predict(fitLogit)[, 2L]
+  expect_equal(cv$summary["accuracy", "apparent"],
+               mean((p >= cv$cutoffApparent) == (Admit$admit == 1)))
+
+  id <- cv$foldId[, 1L]
+  for (f in 1:4) {
+    m <- cv$models[[f]]
+    tr <- id != f
+    pTr <- predict(m, newdata = Admit[tr, ])[, 2L]
+    cut <- unname(bestCut(roc(pTr, ref = Admit$admit[tr], levels = c(0, 1),
+                              direction = "<", quiet = TRUE))["threshold"])
+    pTe <- predict(m, newdata = Admit[!tr, ])[, 2L]
+    yTe <- Admit$admit[!tr]
+
+    expect_equal(cv$perFold$cutoff[f], cut)
+    expect_equal(cv$perFold$accuracy[f], mean((pTe >= cut) == (yTe == 1)))
+    expect_equal(cv$perFold$sensitivity[f], mean(pTe[yTe == 1] >= cut))
+  }
+
+  # the cut-points differ between folds, and the pooled accuracy classifies
+  # each prediction with the cut-point of its own fold
+  expect_gt(length(unique(cv$perFold$cutoff)), 1L)
+  y <- as.integer(cv$pred$obs) - 1L
+  expect_equal(cv$summary["accuracy", "pooled"],
+               mean((cv$pred$pred >= cv$pred$cutoff) == (y == 1L)))
+
+  expect_identical(cv$cutoff, "youden")
+  expect_output(print(cv), "youden per training fold")
+
+  set.seed(7)
+  expect_identical(crossVal(fitLogit, k = 4,
+                            cutoff = "closest.topleft")$cutoff,
+                   "closest.topleft")
 })
 
 
@@ -338,7 +386,8 @@ test_that("multiclass probabilities are kept apart from the metadata", {
 
 test_that("calibration: separate fits, NA slope on separation", {
 
-  cal <- alloy:::.cvCalibration
+  cal <- function(p, y)
+    unlist(alloy:::.calibrationCoefs(p, y), use.names = FALSE)
 
   # overlapping classes: as two separate glm() fits
   set.seed(1)
@@ -438,7 +487,8 @@ test_that("survival models and bad arguments are rejected", {
   expect_error(crossVal(fitLogit, repeats = Inf), "'repeats' must be")
   expect_error(crossVal(fitLogit, repeats = 1:2), "'repeats' must be")
 
-  for (co in list(-0.1, 1.1, NA, Inf, c(0.3, 0.5), "0.5"))
+  for (co in list(-0.1, 1.1, NA, Inf, c(0.3, 0.5), "0.5", "Youden",
+                 c("youden", "closest.topleft")))
     expect_error(crossVal(fitLogit, cutoff = co), "'cutoff' must be")
 
   for (km in list(NA, c(TRUE, FALSE), "yes"))

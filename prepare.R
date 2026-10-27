@@ -49,7 +49,7 @@ Rcpp::compileAttributes(getwd())
 Rcpp::compileAttributes("C:/temp/alloy")
 
 devtools::check()
-devtools::install(dependencies = F)
+devtools::install(dependencies = F, upgrade = FALSE)
 
 devtools::document()
 devtools::load_all()

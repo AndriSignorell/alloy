@@ -53,6 +53,40 @@ test_that("estimates stay finite under separation", {
 })
 
 
+test_that("a fit diverging from the default start is repeated from 0", {
+
+  # brglmFit starts at the ML estimates, which diverge here: x = 1 only
+  # among the cases (complete separation)
+  set.seed(7)
+  n <- 3000
+  d <- data.frame(a = rbinom(n, 1, 0.3), b = rbinom(n, 1, 0.2),
+                  x = rbinom(n, 1, 0.005), age = rnorm(n))
+  d$y <- rbinom(n, 1, plogis(-0.3 + 1.5 * d$a - d$b + 0.4 * d$age))
+  d$y[d$x == 1] <- 1
+
+  plain <- suppressWarnings(
+    glm(y ~ a + b + x + age, binomial, d, method = brglm2::brglmFit,
+        type = "MPL_Jeffreys"))
+  skip_if(isTRUE(plain$converged), "brglm2 converges here by now")
+
+  fit <- fitMod(y ~ a + b + x + age, d, engine = "logitFirth")
+  expect_true(fit$converged)
+  expect_lt(coef(fit)["x"], 10)
+
+  # the same maximum as the internal fitter, from 0
+  dd <- alloy:::.firthData(fit)
+  ff <- alloy:::.firthFit(dd, start = rep(0, ncol(dd$X)))
+  expect_equal(ff$coef, coef(fit), tolerance = 1e-6)
+
+  # no start values left in the call: update() with another formula works
+  expect_null(fit$call$start)
+  expect_true(update(fit, . ~ . - age)$converged)
+
+  expect_true(all(is.finite(confint(fit))))
+
+})
+
+
 test_that("drop1() gives penalized likelihood ratio tests", {
 
   tab <- drop1(fitF)
@@ -134,4 +168,15 @@ test_that("prediction, cross-validation, comparison and printing work", {
   expect_output(print(fitF), "rank")
   expect_output(print(fitF, output = "or", useProfile = TRUE), "OR")
 
+})
+
+
+test_that("estimates, intervals and PLR test reproduce logistf", {
+  # SAS and R, Example 8.15: 2x2 table with an empty cell
+  d <- data.frame(pred = c(rep(1, 20), rep(0, 220)),
+                  outcome = c(rep(1, 40), rep(0, 200)))
+  f <- fitMod(outcome ~ pred, d, engine = "logitFirth")
+  expect_equal(unname(coef(f)), c(-2.280389, 5.993961), tolerance = 1e-6)
+  expect_equal(unname(confint(f)["pred", ]), c(3.947048, 10.852893), tolerance = 1e-6)
+  expect_equal(drop1(f)["pred", "PLR"], 78.95473, tolerance = 1e-6)
 })

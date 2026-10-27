@@ -163,15 +163,16 @@
 # Fitted probabilities of exactly 0 or 1 (complete separation, or simply a
 # very sharp model) have an infinite logit. Clamping keeps the calibration
 # regression finite; it is a deliberate change of the data and therefore
-# reported, never silent.
+# reported, never silent. The message carries no count, so that the same
+# warning from many folds of crossVal() is collected into one line; the
+# upper bound is written as 1 - eps, which %g would round to 1.
 #' @keywords internal
 .clampProb <- function(p, eps = 1e-10) {
   hit <- p < eps | p > 1 - eps
   if (any(hit))
     warning(gettextf(
-      "%d fitted probabilit%s clamped to [%g, %g] to keep the logit finite",
-      sum(hit), if (sum(hit) == 1L) "y was" else "ies were", eps, 1 - eps),
-      domain = NA)
+      "fitted probabilities of 0 or 1 were clamped to [%g, 1 - %g] to keep the logit finite",
+      eps, eps), call. = FALSE, domain = NA)
   pmin(pmax(p, eps), 1 - eps)
 }
 
@@ -179,15 +180,81 @@
 # Calibration-in-the-large and calibration slope: logistic regressions of
 # the binary response on the linear predictor logit(p), as an offset and as
 # the only regressor. Shared by plotCalibration() and crossVal().
+#
+# The two fits are independent. The slope is NA if the logits of the two
+# classes do not overlap (complete or quasi-complete separation: the ML
+# estimate does not exist) or are constant (not identifiable); either fit
+# is NA if it fails or does not converge. Each case raises a warning, and
+# the warnings of glm.fit() are passed on, not muffled.
 #' @keywords internal
 .calibrationCoefs <- function(p, y) {
+
   eta <- stats::qlogis(.clampProb(p))
-  list(
-    intercept = unname(stats::coef(
-      stats::glm(y ~ 1, family = stats::binomial, offset = eta))),
-    slope     = unname(stats::coef(
-      stats::glm(y ~ eta, family = stats::binomial))[2L])
-  )
+  one <- matrix(1, length(y))
+
+  calFit <- function(x, offset, coefIdx, what) {
+    fit <- tryCatch(
+      stats::glm.fit(x, y, offset = offset, family = stats::binomial()),
+      error = function(e) {
+        warning(gettextf("the %s fit failed: %s", what, conditionMessage(e)),
+                call. = FALSE)
+        NULL
+      })
+    if (is.null(fit))
+      return(NA_real_)
+    if (!fit$converged || fit$boundary) {
+      warning(gettextf("the %s fit did not converge; set to NA.", what),
+              call. = FALSE)
+      return(NA_real_)
+    }
+    unname(fit$coefficients[coefIdx])
+  }
+
+  a <- eta[y == 0]
+  b <- eta[y == 1]
+
+  slope <- if (diff(range(eta)) == 0) {
+    warning("constant predictions: the calibration slope is not ",
+            "identifiable; set to NA.", call. = FALSE)
+    NA_real_
+  } else if (length(a) == 0L || length(b) == 0L) {
+    warning("a single class: the calibration slope is not identifiable; ",
+            "set to NA.", call. = FALSE)
+    NA_real_
+  } else if (max(a) <= min(b) || max(b) <= min(a)) {
+    warning("the predictions separate the classes: the calibration slope ",
+            "does not exist; set to NA.", call. = FALSE)
+    NA_real_
+  } else {
+    calFit(cbind(one, eta), NULL, 2L, "calibration slope")
+  }
+
+  list(intercept = calFit(one, eta, 1L, "calibration intercept"),
+       slope     = slope)
+}
+
+
+# -------------------------------------------------------------------------
+# Loess smoother for the diagnostic plots
+# -------------------------------------------------------------------------
+
+# Local linear loess of y on x (weights w), as drawn by plotCalibration()
+# and plotPartialResid().
+# The default surface = "interpolate" evaluates the fit only at the vertices
+# of a k-d tree and interpolates between them; with many observations the
+# curve then shows kinks at the cell boundaries, which read like breakpoints
+# of the data. Up to maxDirect observations the fit is computed directly at
+# every point (a few seconds for 10,000), beyond that the cells are made
+# finer.
+#' @keywords internal
+.loessSmooth <- function(x, y, w = NULL, maxDirect = 20000L) {
+  ctrl <- if (length(x) <= maxDirect) stats::loess.control(surface = "direct")
+          else stats::loess.control(cell = 0.02)
+  # do.call() hands over the values: written as an argument, 'weights'
+  # would be looked up by model.frame() and could find stats::weights
+  do.call(stats::loess,
+          list(formula = y ~ x, data = data.frame(x = x, y = y), weights = w,
+               degree = 1L, family = "gaussian", control = ctrl))
 }
 
 
@@ -205,9 +272,12 @@
 #' @keywords internal
 .modelTitle <- function(fit, prefix, width = 54L) {
 
-  fo  <- stats::formula(fit)
+  # a formula as well (crossVal() keeps no model); one with "." cannot be
+  # expanded without its data and is shown as written
+  fo  <- if (inherits(fit, "formula")) fit else stats::formula(fit)
   lhs <- deparse1(fo[[2L]])
-  rhs <- attr(stats::terms(fit), "term.labels")
+  rhs <- tryCatch(attr(stats::terms(fit), "term.labels"),
+                  error = function(e) deparse1(fo[[3L]]))
 
   if (!length(rhs))
     return(paste0(prefix, ": ", lhs, " ~ 1"))

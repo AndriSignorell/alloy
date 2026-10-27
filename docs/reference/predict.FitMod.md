@@ -57,8 +57,11 @@ predict(
   `"response"`. For `engine = "beta"` all types of
   [`predict.betareg`](https://rdrr.io/pkg/betareg/man/predict.betareg.html)
   are available, e.g. `"link"`, `"precision"`, `"variance"` or
-  `"quantile"` (with `at` passed via `...`). Ignored for classification
-  models (use `output` instead).
+  `"quantile"` (with `at` passed via `...`). For logistic models
+  (`"logit"`, `"logitFirth"`) the types of
+  [`predict.glm`](https://rdrr.io/r/stats/predict.glm.html) (`"link"`,
+  `"response"`, `"terms"`) are passed on, see Details. Ignored for all
+  other classification models (use `output` instead).
 
 - ...:
 
@@ -127,9 +130,16 @@ For `engine = "glmnet"` and `"xgboost"`, design matrices for `newdata`
 are rebuilt from the `terms` and factor levels of the training data, so
 new data may contain a subset of the training factor levels.
 
-For `engine = "logit"`, calling `predict(object)` returns a two-column
-probability `data.frame` (like all other classifiers). To obtain the
-linear predictor (log-odds), use `predict(object, type = "link")`.
+For `engine = "logit"` and `"logitFirth"`, calling `predict(object)`
+returns a two-column probability `data.frame` (like all other
+classifiers). With an explicit `type` the result is that of
+[`predict.glm`](https://rdrr.io/r/stats/predict.glm.html):
+`type = "link"` gives the linear predictor (log-odds),
+`type = "response"` the probability of the second class as a vector.
+Functions written for `glm` objects, which call
+`predict(x, type = "response")`, therefore work with these models as
+well, e.g.
+[`DescToolsX::brierScore()`](https://andrisignorell.github.io/DescToolsX/reference/brierScore.html).
 
 ## See also
 
@@ -137,10 +147,13 @@ linear predictor (log-odds), use `predict(object, type = "link")`.
 [`print.FitMod`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
 
 Other modelling:
+[`classification-metrics`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md),
 [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md),
 [`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
 [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
-[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md),
+[`regression-metrics`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
 
 ## Examples
 

@@ -3,12 +3,15 @@
 \name{tMod}
 \alias{tMod}
 \alias{print.TMod}
+\alias{format.TMod}
 \alias{plot.TMod}
 \title{Compare multiple statistical models}
 \usage{
 tMod(..., FUN = NULL, order = NA, verbose = FALSE)
 
 \method{print}{TMod}(x, digits = 3, naForm = "-", verbose = NULL, ...)
+
+\method{format}{TMod}(x, digits = 3, naForm = "-", verbose = NULL, ...)
 
 \method{plot}{TMod}(x, terms = NULL, intercept = FALSE, ...)
 }
@@ -41,6 +44,11 @@ An object of class \code{"TMod"} with components:
 \item \code{mall}: array of estimates and confidence intervals
 \item \code{terms}: mapping of model terms
 }
+
+\code{format()}: a list with the formatted coefficient table
+\code{coef} and the model statistics \code{stats}, both data.frames of
+strings with identical column names. Used by \code{print()} and by
+\code{pons::toWrd()}.
 }
 \description{
 Creates a unified comparison object for multiple fitted models by

@@ -103,7 +103,10 @@ separation and are less biased for sparse covariate patterns. The
 result carries the additional class \code{"logitFirth"}, so that
 \code{\link[stats]{drop1}} and \code{\link[stats]{confint}} use
 penalized likelihood ratio tests and profile penalized likelihood
-intervals, see \code{\link{logitFirth}}; all other methods, including
+intervals, see \code{\link{logitFirth}}. A fit that does not converge
+from the default start values of \pkg{brglm2} (the maximum likelihood
+estimates, which diverge under complete separation) is repeated from 0.
+All other methods, including
 \code{predict()}, \code{\link{crossVal}} and \code{\link{tMod}}, work
 as for \code{"logit"}.
 
@@ -154,12 +157,13 @@ if (requireNamespace("lme4", quietly = TRUE)) {
 }
 \seealso{
 Other modelling:
-\code{\link[=confusion.FitMod]{confusion.FitMod()}},
+\code{\link{classification-metrics}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
 \code{\link[=predictors]{predictors()}},
-\code{\link[=print.FitMod]{print.FitMod()}}
+\code{\link[=print.FitMod]{print.FitMod()}},
+\code{\link{regression-metrics}}
 }
 \concept{classification}
 \concept{modelling}

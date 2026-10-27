@@ -280,3 +280,25 @@ test_that("[BUG] .drop1.polr does not silently discard offsets", {
     regexp = "offset"
   )
 })
+
+
+test_that("logistic models pass an explicit type to predict.glm()", {
+
+  fit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
+  g   <- glm(admit ~ gre + gpa + rank, binomial, Admit)
+  nd  <- head(Admit)
+
+  # without type: the probability data.frame of all classifiers
+  expect_s3_class(predict(fit), "data.frame")
+
+  # with type: exactly as predict.glm()
+  expect_equal(predict(fit, type = "response"), predict(g, type = "response"))
+  expect_equal(predict(fit, nd, type = "response"),
+               predict(g, nd, type = "response"))
+  expect_equal(predict(fit, type = "link"), predict(g, type = "link"))
+  expect_no_warning(predict(fit, type = "response"))
+
+  # so code written for glm objects works unchanged
+  expect_equal(DescToolsX::brierScore(fit), DescToolsX::brierScore(g))
+
+})

@@ -37,7 +37,7 @@ A ROC curve is not in this list on purpose. It measures discrimination
 and is invariant to any monotone transformation of the predicted
 probabilities, so it cannot detect miscalibration and barely responds
 to a misspecified functional form. It answers a real question, just not
-this one - see \code{\link[=roc]{roc()}} and \code{\link[DescToolsX:cStat]{cStat()}}.
+this one - see \code{\link[=roc]{roc()}} and \code{\link[=cStat]{cStat()}}.
 
 The formal counterparts to these plots live in \pkg{lumen}:
 \code{hosmerLemeshowTest()} for the grouped goodness-of-fit test that panel 2

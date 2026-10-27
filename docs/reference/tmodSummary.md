@@ -10,6 +10,9 @@ standardized format.
 ``` r
 tModSummary(x, ...)
 
+# S3 method for class 'FitMod'
+tModSummary(x, ...)
+
 # S3 method for class 'lm'
 tModSummary(x, conf.level = 0.95, ...)
 
@@ -28,7 +31,7 @@ tModSummary(x, conf.level = 0.95, ...)
 # S3 method for class 'gam'
 tModSummary(x, conf.level = 0.95, ...)
 
-# S3 method for class 'lmer'
+# S3 method for class 'lmerMod'
 tModSummary(x, conf.level = 0.95, ...)
 ```
 

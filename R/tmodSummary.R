@@ -112,10 +112,10 @@ tModSummary.lm <- function(x, conf.level = 0.95, ...){
     AIC      = AIC(x),
     BIC      = BIC(x),
     
-    MAE  = DescToolsX::mae(y, fit),
-    MAPE = DescToolsX::mape(y, fit),
-    MSE  = DescToolsX::mse(y, fit),
-    RMSE = DescToolsX::rmse(y, fit)
+    MAE  = DescToolsX::mae(fit, y),
+    MAPE = DescToolsX::mape(fit, y),
+    MSE  = DescToolsX::mse(fit, y),
+    RMSE = DescToolsX::rmse(fit, y)
   )
   
   list(
@@ -186,10 +186,10 @@ tModSummary.lmrob <- function(x, conf.level = 0.95, ...){
     "n vars" = length(attr(x$terms, "term.labels")),
     "n coef" = nrow(cf),
     
-    MAE  = DescToolsX::mae(y, fit),
-    MAPE = DescToolsX::mape(y, fit),
-    MSE  = DescToolsX::mse(y, fit),
-    RMSE = DescToolsX::rmse(y, fit)
+    MAE  = DescToolsX::mae(fit, y),
+    MAPE = DescToolsX::mape(fit, y),
+    MSE  = DescToolsX::mse(fit, y),
+    RMSE = DescToolsX::rmse(fit, y)
   )
   
   list(
@@ -299,10 +299,10 @@ tModSummary.glm <- function(x, conf.level = 0.95, useProfile = TRUE, ...){
       
       numdf = attr(logLik(x), "df"),
       
-      MAE  = DescToolsX::mae(y, pred),
-      MAPE = DescToolsX::mape(y, pred),
-      MSE  = DescToolsX::mse(y, pred),
-      RMSE = DescToolsX::rmse(y, pred)
+      MAE  = DescToolsX::mae(pred, y),
+      MAPE = DescToolsX::mape(pred, y),
+      MSE  = DescToolsX::mse(pred, y),
+      RMSE = DescToolsX::rmse(pred, y)
     )
   }
   
@@ -354,10 +354,10 @@ tModSummary.betareg <- function(x, conf.level = 0.95, ...){
     
     numdf = attr(logLik(x), "df"),
     
-    MAE  = DescToolsX::mae(y, pred),
-    MAPE = DescToolsX::mape(y, pred),
-    MSE  = DescToolsX::mse(y, pred),
-    RMSE = DescToolsX::rmse(y, pred)
+    MAE  = DescToolsX::mae(pred, y),
+    MAPE = DescToolsX::mape(pred, y),
+    MSE  = DescToolsX::mse(pred, y),
+    RMSE = DescToolsX::rmse(pred, y)
   )
   
   list(
@@ -480,10 +480,10 @@ tModSummary.gam <- function(x, conf.level = 0.95, ...){
     "n vars" = length(attr(x$terms, "term.labels")),
     "n coef" = length(coef(x)),
     
-    MAE  = DescToolsX::mae(y, fit),
-    MAPE = DescToolsX::mape(y, fit),
-    MSE  = DescToolsX::mse(y, fit),
-    RMSE = DescToolsX::rmse(y, fit)
+    MAE  = DescToolsX::mae(fit, y),
+    MAPE = DescToolsX::mape(fit, y),
+    MSE  = DescToolsX::mse(fit, y),
+    RMSE = DescToolsX::rmse(fit, y)
   )
   
   list(

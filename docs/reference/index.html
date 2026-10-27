@@ -13,7 +13,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -52,7 +52,7 @@
 
       <dl><dt>
 
-          <code><a href="fitMod.html">fitMod()</a></code>
+          <code><a href="fitMod.html">fitMod()</a></code> <code><a href="fitMod.html">update(<i>&lt;FitMod&gt;</i>)</a></code>
 
         </dt>
         <dd>Fit a statistical or machine-learning model with automatic method selection</dd>
@@ -98,6 +98,20 @@
 
         </dt>
         <dd>Reference level of factor predictors in a model</dd>
+
+        <dt>
+
+          <code><a href="crossVal.html">crossVal()</a></code> <code><a href="crossVal.html">print(<i>&lt;CrossVal&gt;</i>)</a></code>
+
+        </dt>
+        <dd>k-Fold Cross-Validation of a Fitted Model</dd>
+
+        <dt>
+
+          <code><a href="logitFirth.html">drop1(<i>&lt;logitFirth&gt;</i>)</a></code> <code><a href="logitFirth.html">confint(<i>&lt;logitFirth&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Penalized Likelihood Inference for Firth Logistic Regression</dd>
       </dl></div><div class="section level2">
       <h2 id="diagnostics-for-binary-responses">Diagnostics for Binary Responses<a class="anchor" aria-label="anchor" href="#diagnostics-for-binary-responses"></a></h2>
 
@@ -185,7 +199,7 @@
           <code><a href="roc.html">roc()</a></code>
 
         </dt>
-        <dd>ROC curve for a fitted model or predictor vector</dd>
+        <dd>ROC curve for a fitted model, a cross-validation or a predictor vector</dd>
 
         <dt>
 
@@ -207,6 +221,27 @@
 
         </dt>
         <dd>Lift and gain table for a fitted model or predictor vector</dd>
+
+        <dt>
+
+          <code><a href="classification-metrics.html">confusion(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="classification-metrics.html">cStat(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="classification-metrics.html">brierScore(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="classification-metrics.html">averagePrecision(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="classification-metrics.html">logLoss(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;glm&gt;</i>)</a></code> <code><a href="classification-metrics.html">cStat(<i>&lt;glm&gt;</i>)</a></code> <code><a href="classification-metrics.html">brierScore(<i>&lt;glm&gt;</i>)</a></code> <code><a href="classification-metrics.html">averagePrecision(<i>&lt;glm&gt;</i>)</a></code> <code><a href="classification-metrics.html">logLoss(<i>&lt;glm&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;multinom&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;rpart&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;randomForest&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;svm&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;lda&gt;</i>)</a></code> <code><a href="classification-metrics.html">confusion(<i>&lt;qda&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Classification Metrics of Fitted Models</dd>
+
+        <dt>
+
+          <code><a href="regression-metrics.html">mae(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="regression-metrics.html">mse(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="regression-metrics.html">rmse(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="regression-metrics.html">mape(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="regression-metrics.html">smape(<i>&lt;FitMod&gt;</i>)</a></code> <code><a href="regression-metrics.html">mae(<i>&lt;lm&gt;</i>)</a></code> <code><a href="regression-metrics.html">mse(<i>&lt;lm&gt;</i>)</a></code> <code><a href="regression-metrics.html">rmse(<i>&lt;lm&gt;</i>)</a></code> <code><a href="regression-metrics.html">mape(<i>&lt;lm&gt;</i>)</a></code> <code><a href="regression-metrics.html">smape(<i>&lt;lm&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Prediction Errors of Fitted Regression Models</dd>
+
+        <dt>
+
+          <code><a href="rocTest.html">rocTest()</a></code>
+
+        </dt>
+        <dd>Test for the Difference of Two ROC Curves</dd>
       </dl></div><div class="section level2">
       <h2 id="model-fit-coefficients">Model Fit &amp; Coefficients<a class="anchor" aria-label="anchor" href="#model-fit-coefficients"></a></h2>
 
@@ -335,7 +370,7 @@
 
       <dl><dt>
 
-          <code><a href="tMod.html">tMod()</a></code> <code><a href="tMod.html">print(<i>&lt;TMod&gt;</i>)</a></code> <code><a href="tMod.html">plot(<i>&lt;TMod&gt;</i>)</a></code>
+          <code><a href="tMod.html">tMod()</a></code> <code><a href="tMod.html">print(<i>&lt;TMod&gt;</i>)</a></code> <code><a href="tMod.html">format(<i>&lt;TMod&gt;</i>)</a></code> <code><a href="tMod.html">plot(<i>&lt;TMod&gt;</i>)</a></code>
 
         </dt>
         <dd>Compare multiple statistical models</dd>

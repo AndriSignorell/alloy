@@ -5,7 +5,16 @@
 \alias{reexports}
 \alias{Surv}
 \alias{coxph}
+\alias{averagePrecision}
+\alias{brierScore}
+\alias{cStat}
 \alias{confusion}
+\alias{logLoss}
+\alias{mae}
+\alias{mape}
+\alias{mse}
+\alias{rmse}
+\alias{smape}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -13,7 +22,7 @@ These objects are imported from other packages. Follow the links
 below to see their documentation.
 
 \describe{
-  \item{DescToolsX}{\code{\link[DescToolsX:confusion]{confusion()}}}
+  \item{DescToolsX}{\code{\link[DescToolsX:averagePrecision]{averagePrecision()}}, \code{\link[DescToolsX:brierScore]{brierScore()}}, \code{\link[DescToolsX:confusion]{confusion()}}, \code{\link[DescToolsX:cStat]{cStat()}}, \code{\link[DescToolsX:logLoss]{logLoss()}}, \code{\link[DescToolsX:mae]{mae()}}, \code{\link[DescToolsX:mape]{mape()}}, \code{\link[DescToolsX:mse]{mse()}}, \code{\link[DescToolsX:rmse]{rmse()}}, \code{\link[DescToolsX:smape]{smape()}}}
 
   \item{survival}{\code{\link[survival:coxph]{coxph()}}, \code{\link[survival:Surv]{Surv()}}}
 }}

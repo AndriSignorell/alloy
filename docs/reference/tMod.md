@@ -12,6 +12,9 @@ tMod(..., FUN = NULL, order = NA, verbose = FALSE)
 print(x, digits = 3, naForm = "-", verbose = NULL, ...)
 
 # S3 method for class 'TMod'
+format(x, digits = 3, naForm = "-", verbose = NULL, ...)
+
+# S3 method for class 'TMod'
 plot(x, terms = NULL, intercept = FALSE, ...)
 ```
 
@@ -67,6 +70,12 @@ An object of class `"TMod"` with components:
 
 - `terms`: mapping of model terms
 
+[`format()`](https://rdrr.io/r/base/format.html): a list with the
+formatted coefficient table `coef` and the model statistics `stats`,
+both data.frames of strings with identical column names. Used by
+[`print()`](https://rdrr.io/r/base/print.html) and by
+[`pons::toWrd()`](https://andrisignorell.github.io/pons/reference/toWrd.html).
+
 ## Details
 
 The function standardizes model output across different model classes
@@ -78,6 +87,11 @@ in tabular and graphical form.
 
 Model names are automatically derived from the call. If unavailable,
 default names are assigned.
+
+Models fitted with
+[`fitMod`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+are accepted and compared as the model object of the underlying fitting
+function.
 
 ## See also
 
@@ -155,4 +169,36 @@ if(requireNamespace("survival", quietly = TRUE)){
 #> 6    NAs         0              0      
 #> 7 n vars         1              2      
 #> 8 n coef         1              2      
+
+# --- Models fitted with fitMod() ---
+f1 <- fitMod(am ~ wt, data = mtcars, engine = "logit")
+f2 <- fitMod(am ~ wt + hp, data = mtcars, engine = "logit")
+tMod(f1, f2)
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#>           coef           f1               f2    
+#> 1  (Intercept)        12.040 **        18.866 * 
+#> 2           wt        -4.024 **        -8.083 **
+#> 3           hp          -               0.036 * 
+#> 4          ---                                  
+#> 5          AIC        23.176           16.059   
+#> 6            N         32               32      
+#> 7          NAs          0                0      
+#> 8       n vars          1                2      
+#> 9       n coef          2                3      
+#> 10    McFadden         0.556            0.767   
 ```

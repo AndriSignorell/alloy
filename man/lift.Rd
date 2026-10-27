@@ -51,7 +51,7 @@ can be acted upon - direct marketing, fraud triage, churn prevention.
 }
 \details{
 As in \code{\link{roc}}, the second column of
-\code{predict(x, type = "prob")} is used as the predictor when \code{x} is
+\code{predict(x, output = "prob")} is used as the predictor when \code{x} is
 a \code{"FitMod"} object - the positive class is therefore the second
 factor level of the response.  For models with non-standard probability
 output, supply the predictor vector explicitly via \code{x} and
@@ -98,7 +98,8 @@ lift(fitLogit, nBins = 5)
 
 Other roc:
 \code{\link[=bestCut]{bestCut()}},
-\code{\link[=roc]{roc()}}
+\code{\link[=roc]{roc()}},
+\code{\link[=rocTest]{rocTest()}}
 }
 \concept{classification}
 \concept{model-evaluation}

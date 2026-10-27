@@ -70,7 +70,10 @@
 #' result carries the additional class \code{"logitFirth"}, so that
 #' \code{\link[stats]{drop1}} and \code{\link[stats]{confint}} use
 #' penalized likelihood ratio tests and profile penalized likelihood
-#' intervals, see \code{\link{logitFirth}}; all other methods, including
+#' intervals, see \code{\link{logitFirth}}. A fit that does not converge
+#' from the default start values of \pkg{brglm2} (the maximum likelihood
+#' estimates, which diverge under complete separation) is repeated from 0.
+#' All other methods, including
 #' \code{predict()}, \code{\link{crossVal}} and \code{\link{tMod}}, work
 #' as for \code{"logit"}.
 #'
@@ -188,7 +191,33 @@ fitMod <- function(formula, data, engine = NULL, subset, na.action, ...) {
   cl[[1L]] <- call("::", as.name(entry$pkg), as.name(entry$fn))
   
   # --- fit model ---
-  res <- eval(cl, parent.frame())
+  # for a Firth fit the warnings of the first attempt are held back: they
+  # belong to a fit that may be discarded below
+  held <- list()
+  res <- withCallingHandlers(
+    eval(cl, parent.frame()),
+    warning = function(w) {
+      if (engine != "logitFirth") return()
+      held[[length(held) + 1L]] <<- w
+      invokeRestart("muffleWarning")
+    })
+
+  # brglmFit starts from the maximum likelihood estimates, which diverge
+  # under complete separation - the very case Firth's method is used for -
+  # and then fails to converge. Starting at 0 (as logistf does) converges
+  # to the finite estimate. The start values are not kept in the stored
+  # call: their length is tied to the design, and update() with a changed
+  # formula or crossVal() refit through fitMod(), which retries in turn.
+  if (engine == "logitFirth" && !isTRUE(res$converged)) {
+    cl$start <- rep(0, length(stats::coef(res)))
+    res <- eval(cl, parent.frame())
+    res$call$start <- NULL
+    if (!isTRUE(res$converged))
+      warning("fitMod: the Firth fit did not converge, not even from ",
+              "start values 0.", call. = FALSE)
+  } else {
+    for (w in held) warning(w)
+  }
   
   # --- xgboost: wrap in list since xgboost objects don't support $<- ---
   if (engine == "xgboost") {

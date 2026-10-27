@@ -21,7 +21,7 @@ consistent column names across all model types."><meta property="og:image" conte
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -111,7 +111,11 @@ For <code>engine = "beta"</code> all types of
 <code><a href="https://rdrr.io/pkg/betareg/man/predict.betareg.html" class="external-link">predict.betareg</a></code> are available, e.g.
 <code>"link"</code>, <code>"precision"</code>, <code>"variance"</code> or
 <code>"quantile"</code> (with <code>at</code> passed via <code>...</code>).
-Ignored for classification models (use <code>output</code> instead).</p></dd>
+For logistic models (<code>"logit"</code>, <code>"logitFirth"</code>) the types
+of <code><a href="https://rdrr.io/r/stats/predict.glm.html" class="external-link">predict.glm</a></code> (<code>"link"</code>, <code>"response"</code>,
+<code>"terms"</code>) are passed on, see Details.
+Ignored for all other classification models (use <code>output</code>
+instead).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -181,19 +185,27 @@ methods.</p>
 <code>newdata</code> are rebuilt from the <code>terms</code> and factor levels of
 the training data, so new data may contain a subset of the training
 factor levels.</p>
-<p>For <code>engine = "logit"</code>, calling <code>predict(object)</code> returns a
-two-column probability <code>data.frame</code> (like all other classifiers).
-To obtain the linear predictor (log-odds), use
-<code>predict(object, type = "link")</code>.</p>
+<p>For <code>engine = "logit"</code> and <code>"logitFirth"</code>, calling
+<code>predict(object)</code> returns a two-column probability
+<code>data.frame</code> (like all other classifiers). With an explicit
+<code>type</code> the result is that of <code><a href="https://rdrr.io/r/stats/predict.glm.html" class="external-link">predict.glm</a></code>:
+<code>type = "link"</code> gives the linear predictor (log-odds),
+<code>type = "response"</code> the probability of the second class as a
+vector. Functions written for <code>glm</code> objects, which call
+<code>predict(x, type = "response")</code>, therefore work with these models
+as well, e.g. <code><a href="https://andrisignorell.github.io/DescToolsX/reference/brierScore.html" class="external-link">DescToolsX::brierScore()</a></code>.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="fitMod.html">fitMod</a></code>, <code><a href="print.FitMod.html">print.FitMod</a></code></p>
 <p>Other modelling:
+<code><a href="classification-metrics.html">classification-metrics</a></code>,
 <code><a href="fitMod.html">fitMod()</a></code>,
+<code><a href="logitFirth.html">logitFirth</a></code>,
 <code><a href="plot.FitMod.html">plot.FitMod()</a></code>,
 <code><a href="predictors.html">predictors()</a></code>,
-<code><a href="print.FitMod.html">print.FitMod()</a></code></p></div>
+<code><a href="print.FitMod.html">print.FitMod()</a></code>,
+<code><a href="regression-metrics.html">regression-metrics</a></code></p></div>
     </div>
 
     <div class="section level2">

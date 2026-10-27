@@ -38,13 +38,16 @@ plotCalibration(
 - fit:
 
   a fitted logistic model of class `"FitMod"` (fitted with
-  `engine = "logit"`) or a binomial
-  [`glm`](https://rdrr.io/r/stats/glm.html).
+  `engine = "logit"`), a binomial
+  [`glm`](https://rdrr.io/r/stats/glm.html), or the result of
+  [`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+  for a binary model.
 
 - newdata:
 
   optional data frame for evaluating calibration out of sample. `NULL`
-  (default) uses the training data.
+  (default) uses the training data. Not used with a cross-validation,
+  whose predictions are already out of sample.
 
 - main:
 
@@ -114,8 +117,9 @@ plotCalibration(
 ## Value
 
 invisibly, a list with the components `intercept`, `slope`, `brier`
-(scaled and unscaled), `bins` (the binned observed proportions) and
-`inSample`.
+(scaled and unscaled), `bins` (the binned observed proportions),
+`inSample` and `sample`, one of `"training"`, `"validation"` and
+`"cross-validation"`.
 
 ## Details
 
@@ -141,6 +145,16 @@ departures from linearity in the logit, not overfitting. The numbers
 earn their meaning on new data (`newdata`) or a resampled estimate;
 `plotCalibration` reports them either way, and says which case it is in
 the annotation.
+
+A cross-validation from
+[`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+can be passed instead of a model. The curve then shows the out-of-fold
+predictions, each made by a model that had not seen the observation.
+With repeated cross-validation every observation is shown once, at the
+mean of its out-of-fold predictions; intercept and slope of this curve
+can therefore differ slightly from the pooled values in the summary of
+[`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md),
+which are computed per repetition and then averaged.
 
 The smoother is a loess of the binary response on the fitted
 probability. Its band is pointwise and rests on constant variance, which
@@ -173,5 +187,10 @@ plotCalibration(fitLogit)
 idx <- sample(nrow(Admit), nrow(Admit) * 0.7)
 fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], engine = "logit")
 plotCalibration(fitTrain, newdata = Admit[-idx, ])
+
+
+# cross-validated: out-of-fold predictions of the whole sample
+set.seed(1)
+plotCalibration(crossVal(fitLogit, k = 10, repeats = 5))
 
 ```

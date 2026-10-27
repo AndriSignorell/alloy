@@ -19,8 +19,8 @@ top-left corner \eqn{(0, 1)} of the ROC space.}
 \value{
 A named numeric vector with elements \code{threshold},
 \code{specificity}, and \code{sensitivity} at the optimal cut-point.
-When ties exist, \code{\link[pROC]{coords}} may return multiple columns;
-the result is then a matrix (one column per tied optimum).
+When ties exist, \code{\link[pROC]{coords}} may return several
+optima; the result is then a matrix with one row per tied optimum.
 }
 \description{
 A thin convenience wrapper around \code{\link[pROC]{coords}} that returns
@@ -41,7 +41,8 @@ bestCut(r, method = "closest.topleft")
 
 Other roc:
 \code{\link[=lift]{lift()}},
-\code{\link[=roc]{roc()}}
+\code{\link[=roc]{roc()}},
+\code{\link[=rocTest]{rocTest()}}
 }
 \concept{classification}
 \concept{model-evaluation}

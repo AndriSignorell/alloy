@@ -185,39 +185,55 @@ tMod <- function(..., FUN = NULL, order = NA, verbose = FALSE){
 #' @param digits Number of digits for printing
 #' @param naForm String used for missing values
 #' @export
-print.TMod <- function(x, digits=3, naForm = "-", verbose = NULL, ...){
-  
-  verbose <- if(!is.null(verbose)) verbose else x$verbose
-  
-  if(!verbose){
-    x[[2]] <- x[[2]][match(
-      c("adj.r.squared","AIC","N","NAs","n vars","n coef","MAE","RMSE","McFadden",
-        "Ferrari"),
-      x[[2]]$stat, nomatch = 0), ]
-  }
-  
-  colnames(x[[1]])[-1] <- paste0(colnames(x[[1]])[-1], strrep(" ", 4))
-  x[[1]][, -1] <- fm(x[[1]][, -1], digits=digits, naForm = naForm)
-  
-  x2 <- x[[2]]
-  x[[2]][, -1] <- fm(x[[2]][, -1], digits=digits, naForm = naForm)
-  
-  idx <- x[[2]]$stat %in% c("numdf","dendf","N","NAs","n vars","n coef")
-  x[[2]][idx, -1] <- fm(x2[idx, -1], digits=0, naForm=naForm)
-  
-  mm <- x[[2]]
-  colnames(mm) <- colnames(x[[1]])
-  
+print.TMod <- function(x, digits = 3, naForm = "-", verbose = NULL, ...){
+
+  f <- format(x, digits = digits, naForm = naForm, verbose = verbose)
+
   m <- rbind(
-    x[[1]],
-    setNamesX(c("---", rep("", ncol(x[[1]]) -1)), colnames(x[[1]])),
-    mm
+    f$coef,
+    setNamesX(c("---", rep("", ncol(f$coef) - 1L)), colnames(f$coef)),
+    f$stats
   )
-  
-  m[, -1] <- lapply(m[, -1, drop=FALSE], strAlign, sep=".")
+
+  colnames(m)[-1] <- paste0(colnames(m)[-1], strrep(" ", 4))
+  m[, -1] <- lapply(m[, -1, drop = FALSE], strAlign, sep = ".")
   row.names(m) <- NULL
-  
+
   print(m, ...)
+  invisible(x)
+}
+
+
+#' @rdname tMod
+#' @return \code{format()}: a list with the formatted coefficient table
+#'   \code{coef} and the model statistics \code{stats}, both data.frames of
+#'   strings with identical column names. Used by \code{print()} and by
+#'   \code{pons::toWrd()}.
+#' @export
+format.TMod <- function(x, digits = 3, naForm = "-", verbose = NULL, ...){
+
+  verbose <- if(!is.null(verbose)) verbose else x$verbose
+
+  cf <- x[[1]]
+  st <- x[[2]]
+
+  if(!verbose)
+    st <- st[match(c("adj.r.squared", "AIC", "N", "NAs", "n vars", "n coef",
+                     "MAE", "RMSE", "McFadden", "Ferrari"),
+                   st$stat, nomatch = 0), , drop = FALSE]
+
+  cf[, -1] <- fm(cf[, -1, drop = FALSE], digits = digits, naForm = naForm)
+
+  # counts without decimals
+  st0 <- st
+  idx <- st$stat %in% c("numdf", "dendf", "N", "NAs", "n vars", "n coef")
+  st[, -1]    <- fm(st0[, -1, drop = FALSE], digits = digits, naForm = naForm)
+  st[idx, -1] <- fm(st0[idx, -1, drop = FALSE], digits = 0, naForm = naForm)
+
+  colnames(st) <- colnames(cf)
+  row.names(cf) <- row.names(st) <- NULL
+
+  list(coef = cf, stats = st)
 }
 
 

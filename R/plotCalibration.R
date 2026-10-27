@@ -28,15 +28,25 @@
 #' estimate; \code{plotCalibration} reports them either way, and says
 #' which case it is in the annotation.
 #'
+#' A cross-validation from [crossVal()] can be passed instead of a model.
+#' The curve then shows the out-of-fold predictions, each made by a model
+#' that had not seen the observation. With repeated cross-validation every
+#' observation is shown once, at the mean of its out-of-fold predictions;
+#' intercept and slope of this curve can therefore differ slightly from the
+#' pooled values in the summary of [crossVal()], which are computed per
+#' repetition and then averaged.
+#'
 #' The smoother is a loess of the binary response on the fitted
 #' probability. Its band is pointwise and rests on constant variance,
 #' which a binary response does not have; read it as an indication of
 #' where the data are thin, not as a simultaneous confidence region.
 #'
 #' @param fit a fitted logistic model of class \code{"FitMod"} (fitted with
-#'   \code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.
+#'   \code{engine = "logit"}), a binomial \code{\link[stats]{glm}}, or the
+#'   result of [crossVal()] for a binary model.
 #' @param newdata optional data frame for evaluating calibration out of
-#'   sample. \code{NULL} (default) uses the training data.
+#'   sample. \code{NULL} (default) uses the training data. Not used with a
+#'   cross-validation, whose predictions are already out of sample.
 #' @param main main title. \code{NULL} (default) derives one from the
 #'   model formula; \code{""}, \code{NA} or \code{FALSE} suppress it.
 #' @param xlab,ylab axis labels.
@@ -69,7 +79,9 @@
 #'
 #' @return invisibly, a list with the components \code{intercept},
 #'   \code{slope}, \code{brier} (scaled and unscaled), \code{bins} (the
-#'   binned observed proportions) and \code{inSample}.
+#'   binned observed proportions), \code{inSample} and \code{sample}, one
+#'   of \code{"training"}, \code{"validation"} and
+#'   \code{"cross-validation"}.
 #'
 #' @references
 #' Steyerberg, E. W. et al. (2010) Assessing the performance of prediction
@@ -97,6 +109,10 @@
 #' fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], engine = "logit")
 #' plotCalibration(fitTrain, newdata = Admit[-idx, ])
 #'
+#' # cross-validated: out-of-fold predictions of the whole sample
+#' set.seed(1)
+#' plotCalibration(crossVal(fitLogit, k = 10, repeats = 5))
+#'
 #' @export
 plotCalibration <- function(fit,
                             newdata = NULL,
@@ -121,22 +137,41 @@ plotCalibration <- function(fit,
 
   conf.level <- checkConfLevel(conf.level)
 
-  parts <- .logitParts(fit)
-
-  if (any(parts$m != 1))
-    stop("calibration is defined for binary observations; ",
-         "this model has grouped (m > 1) responses")
-
   # --- predictions and response ----------------------------------------
-  if (is.null(newdata)) {
-    p <- parts$p
-    y <- parts$y
-    inSample <- TRUE
+  if (inherits(fit, "CrossVal")) {
+
+    if (!is.null(newdata))
+      stop("'newdata' cannot be combined with a cross-validation; its ",
+           "predictions are already out of sample.")
+
+    oof      <- .cvOutOfFold(fit)
+    p        <- oof$p
+    y        <- oof$y
+    sample   <- "cross-validation"
+    titleFit <- fit$formula
+
   } else {
-    p <- stats::predict(parts$fit, newdata = newdata, type = "response")
-    y <- .responseFromData(parts$fit, newdata)
-    inSample <- FALSE
+
+    parts <- .logitParts(fit)
+
+    if (any(parts$m != 1))
+      stop("calibration is defined for binary observations; ",
+           "this model has grouped (m > 1) responses")
+
+    titleFit <- parts$fit
+
+    if (is.null(newdata)) {
+      p <- parts$p
+      y <- parts$y
+      sample <- "training"
+    } else {
+      p <- stats::predict(parts$fit, newdata = newdata, type = "response")
+      y <- .responseFromData(parts$fit, newdata)
+      sample <- "validation"
+    }
   }
+
+  inSample <- sample == "training"
 
   ok <- !is.na(p) & !is.na(y)
   p  <- p[ok]
@@ -172,7 +207,7 @@ plotCalibration <- function(fit,
   pchPt <- if (identical(pch, .useTheme)) th$points$pch else pch
   cexPt <- if (identical(cex, .useTheme)) th$points$cex else cex
 
-  main <- .resolveTitle(main, default = .modelTitle(parts$fit, "calibration"))
+  main <- .resolveTitle(main, default = .modelTitle(titleFit, "calibration"))
 
   rng <- range(p, na.rm = TRUE)
   if (is.null(xlim)) xlim <- rng
@@ -196,7 +231,7 @@ plotCalibration <- function(fit,
     graphics::abline(0, 1, col = th$twin[2L], lty = "dashed")
 
     if (!isFALSE(smooth) && !identical(smooth, NA)) {
-      lo <- stats::loess(y ~ p, degree = 1L, family = "gaussian")
+      lo <- .loessSmooth(p, y)
       callIf(
         graphics::lines, smooth,
         defaults = list(x = lo, col = th$twin[1L],
@@ -239,7 +274,10 @@ plotCalibration <- function(fit,
             "intercept: ", fm(.roundForDisplay(intercept, 2), digits = 2), "\n",
             "slope: ",     fm(.roundForDisplay(slope, 2),     digits = 2), "\n",
             "Brier: ",     fm(brier,     digits = 3),
-            if (inSample) "\n(in-sample fit)" else "\n(validation sample)"),
+            switch(sample,
+                   training           = "\n(in-sample fit)",
+                   validation         = "\n(validation sample)",
+                   "cross-validation" = paste0("\n(", .cvDesignLabel(fit), ")"))),
           cex = 0.8, bg = addOpacity("white", 0.8), border = NA)
       )
     }
@@ -252,8 +290,19 @@ plotCalibration <- function(fit,
     brier       = brier,
     brierScaled = brierScaled,
     bins        = bins,
-    inSample    = inSample
+    inSample    = inSample,
+    sample      = sample
   ))
+}
+
+
+# Short description of a cross-validation design for the annotation
+#' @keywords internal
+.cvDesignLabel <- function(x) {
+  if (x$repeats > 1L)
+    gettextf("%d-fold CV, mean of %d repeats", x$k, x$repeats)
+  else
+    gettextf("%d-fold cross-validation", x$k)
 }
 
 

@@ -29,10 +29,12 @@ plotCalibration(
 }
 \arguments{
 \item{fit}{a fitted logistic model of class \code{"FitMod"} (fitted with
-\code{engine = "logit"}) or a binomial \code{\link[stats]{glm}}.}
+\code{engine = "logit"}), a binomial \code{\link[stats]{glm}}, or the
+result of \code{\link[=crossVal]{crossVal()}} for a binary model.}
 
 \item{newdata}{optional data frame for evaluating calibration out of
-sample. \code{NULL} (default) uses the training data.}
+sample. \code{NULL} (default) uses the training data. Not used with a
+cross-validation, whose predictions are already out of sample.}
 
 \item{main}{main title. \code{NULL} (default) derives one from the
 model formula; \code{""}, \code{NA} or \code{FALSE} suppress it.}
@@ -78,7 +80,9 @@ internal framework.}
 \value{
 invisibly, a list with the components \code{intercept},
 \code{slope}, \code{brier} (scaled and unscaled), \code{bins} (the
-binned observed proportions) and \code{inSample}.
+binned observed proportions), \code{inSample} and \code{sample}, one
+of \code{"training"}, \code{"validation"} and
+\code{"cross-validation"}.
 }
 \description{
 Plots observed event rates against predicted probabilities, with a
@@ -109,6 +113,14 @@ numbers earn their meaning on new data (\code{newdata}) or a resampled
 estimate; \code{plotCalibration} reports them either way, and says
 which case it is in the annotation.
 
+A cross-validation from \code{\link[=crossVal]{crossVal()}} can be passed instead of a model.
+The curve then shows the out-of-fold predictions, each made by a model
+that had not seen the observation. With repeated cross-validation every
+observation is shown once, at the mean of its out-of-fold predictions;
+intercept and slope of this curve can therefore differ slightly from the
+pooled values in the summary of \code{\link[=crossVal]{crossVal()}}, which are computed per
+repetition and then averaged.
+
 The smoother is a loess of the binary response on the fitted
 probability. Its band is pointwise and rests on constant variance,
 which a binary response does not have; read it as an indication of
@@ -123,6 +135,10 @@ plotCalibration(fitLogit)
 idx <- sample(nrow(Admit), nrow(Admit) * 0.7)
 fitTrain <- fitMod(admit ~ gre + gpa + rank, Admit[idx, ], engine = "logit")
 plotCalibration(fitTrain, newdata = Admit[-idx, ])
+
+# cross-validated: out-of-fold predictions of the whole sample
+set.seed(1)
+plotCalibration(crossVal(fitLogit, k = 10, repeats = 5))
 
 }
 \references{

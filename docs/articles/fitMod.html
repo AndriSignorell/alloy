@@ -31,7 +31,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -824,7 +824,7 @@ reference</a></p>
 <span><span class="co">#&gt; (Intercept)      0.495    0.419  0.585  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; age              1.009    0.998  1.020    0.095  .  </span></span>
 <span><span class="co">#&gt; urban  (ref: N)      .        .      .  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; urban Y          1.922    1.532  2.410  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; urban Y          1.922    1.532  2.411  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -838,12 +838,12 @@ reference</a></p>
 <span><span class="co">#&gt; Log-lik: -1250.196   AIC: 2508.392</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fitLogitMixed</span>, output <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt;           N         Y class</span></span>
-<span><span class="co">#&gt; 1 0.6193328 0.3806672     N</span></span>
-<span><span class="co">#&gt; 2 0.6688867 0.3311133     N</span></span>
-<span><span class="co">#&gt; 3 0.6547595 0.3452405     N</span></span>
-<span><span class="co">#&gt; 4 0.6403537 0.3596463     N</span></span>
-<span><span class="co">#&gt; 5 0.6846662 0.3153338     N</span></span>
-<span><span class="co">#&gt; 6 0.6807593 0.3192407     N</span></span></code></pre></div>
+<span><span class="co">#&gt; 1 0.6193305 0.3806695     N</span></span>
+<span><span class="co">#&gt; 2 0.6688892 0.3311108     N</span></span>
+<span><span class="co">#&gt; 3 0.6547607 0.3452393     N</span></span>
+<span><span class="co">#&gt; 4 0.6403534 0.3596466     N</span></span>
+<span><span class="co">#&gt; 5 0.6846702 0.3153298     N</span></span>
+<span><span class="co">#&gt; 6 0.6807629 0.3192371     N</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mixed-poisson-regression-poissonmixed">Mixed Poisson regression (<code>poissonMixed</code>)<a class="anchor" aria-label="anchor" href="#mixed-poisson-regression-poissonmixed"></a>
@@ -861,11 +861,11 @@ reference</a></p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed effects:</span></span>
 <span><span class="co">#&gt;                   estimate  95%-lci     uci    p-val     </span></span>
-<span><span class="co">#&gt; (Intercept)          1.277    0.903   1.651  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; (Intercept)          1.276    0.899   1.653  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; period  (ref: 1)         .        .       .  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 2            -1.125   -1.663  -0.586  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 3            -1.319   -1.900  -0.738  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 4            -1.945   -2.723  -1.167  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 2            -1.125   -1.671  -0.579  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 3            -1.319   -1.908  -0.730  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 4            -1.945   -2.734  -1.156  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -876,7 +876,7 @@ reference</a></p>
 <span><span class="co">#&gt; ICC: 0.504</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Obs: 56   Groups: herd: 15</span></span>
-<span><span class="co">#&gt; Log-lik: -96.692   AIC: 203.384</span></span>
+<span><span class="co">#&gt; Log-lik: -96.692   AIC: 203.383</span></span>
 <span><span class="va">fitPoisMixed</span> <span class="op">|&gt;</span> <span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span>output <span class="op">=</span> <span class="st">"irr"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mixed Poisson regression</span></span>
@@ -887,11 +887,11 @@ reference</a></p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Fixed effects (Incidence Rate Ratios):</span></span>
 <span><span class="co">#&gt;                     IRR  95%-lci    uci    p-val     </span></span>
-<span><span class="co">#&gt; (Intercept)       3.585    2.467  5.211  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; (Intercept)       3.583    2.457  5.225  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; period  (ref: 1)      .        .      .  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 2          0.325    0.189  0.556  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 3          0.267    0.150  0.478  &lt; 0.001  ***</span></span>
-<span><span class="co">#&gt; period 4          0.143    0.066  0.311  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 2          0.325    0.188  0.561  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 3          0.267    0.148  0.482  &lt; 0.001  ***</span></span>
+<span><span class="co">#&gt; period 4          0.143    0.065  0.315  &lt; 0.001  ***</span></span>
 <span><span class="co">#&gt; ---</span></span>
 <span><span class="co">#&gt; Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -902,7 +902,7 @@ reference</a></p>
 <span><span class="co">#&gt; ICC: 0.504</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Obs: 56   Groups: herd: 15</span></span>
-<span><span class="co">#&gt; Log-lik: -96.692   AIC: 203.384</span></span></code></pre></div>
+<span><span class="co">#&gt; Log-lik: -96.692   AIC: 203.383</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="mixed-negative-binomial-regression-negbinmixed">Mixed negative binomial regression (<code>negbinMixed</code>)<a class="anchor" aria-label="anchor" href="#mixed-negative-binomial-regression-negbinmixed"></a>
@@ -912,8 +912,6 @@ reference</a></p>
 <span>                         data <span class="op">=</span> <span class="fu">lme4</span><span class="fu">::</span><span class="va"><a href="https://rdrr.io/pkg/lme4/man/cbpp.html" class="external-link">cbpp</a></span>, engine <span class="op">=</span> <span class="st">"negbinMixed"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; boundary (singular) fit: see help('isSingular')</span></span>
 <span><span class="va">fitNegbinMixed</span></span>
-<span><span class="co">#&gt; Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model failed to converge with max|grad| = 0.00688859 (tol = 0.002, component 1)</span></span>
-<span><span class="co">#&gt;   See ?lme4::convergence and ?lme4::troubleshooting.</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Mixed negative binomial regression</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -933,7 +931,7 @@ reference</a></p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Random effects:</span></span>
 <span><span class="co">#&gt;  Groups Variance  Std.Dev</span></span>
-<span><span class="co">#&gt;  herd   3.090e-10 0.000  </span></span>
+<span><span class="co">#&gt;  herd   8.584e-11 0.000  </span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; Obs: 56   Groups: herd: 15</span></span>
 <span><span class="co">#&gt; Log-lik: -90.731   AIC: 193.462</span></span></code></pre></div>

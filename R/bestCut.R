@@ -15,8 +15,8 @@
 #'
 #' @return A named numeric vector with elements \code{threshold},
 #'   \code{specificity}, and \code{sensitivity} at the optimal cut-point.
-#'   When ties exist, \code{\link[pROC]{coords}} may return multiple columns;
-#'   the result is then a matrix (one column per tied optimum).
+#'   When ties exist, \code{\link[pROC]{coords}} may return several
+#'   optima; the result is then a matrix with one row per tied optimum.
 #'
 #' @examples
 #' library(pROC)
@@ -39,8 +39,14 @@
 #' @export
 bestCut <- function(x, method = c("youden", "closest.topleft")) {
   method <- match.arg(method)
-  pROC::coords(roc = x, x = "best", best.method = method,
-               transpose = TRUE)
+
+  # transpose = FALSE: the transposed layout is deprecated in pROC. The
+  # result is a data frame with one row per optimum
+  res <- as.matrix(pROC::coords(roc = x, x = "best", best.method = method,
+                                transpose = FALSE))
+  rownames(res) <- NULL
+
+  if (nrow(res) == 1L) res[1L, ] else res
 }
 
 

@@ -303,6 +303,54 @@ test_that("the annotation accepts a named anchor position", {
 })
 
 
+test_that("plotCalibration shows the out-of-fold predictions of a crossVal()", {
+
+  d <- .diagData()
+  fit <- .diagFit(d)
+
+  set.seed(1)
+  cv <- crossVal(fit, data = d, k = 5)
+  cal <- .nullDevice(plotCalibration(cv))
+
+  expect_identical(cal$sample, "cross-validation")
+  expect_false(cal$inSample)
+  expect_equal(sum(cal$bins$n), cv$n)
+
+  # one repetition: exactly the pooled values of the summary
+  expect_equal(cal$intercept, cv$summary["calIntercept", "pooled"])
+  expect_equal(cal$slope, cv$summary["calSlope", "pooled"])
+  expect_equal(cal$brier, cv$summary["brier", "pooled"])
+
+  # repeats: one point per observation, at its mean out-of-fold prediction
+  set.seed(1)
+  cv3 <- crossVal(fit, data = d, k = 5, repeats = 3)
+  cal3 <- .nullDevice(plotCalibration(cv3))
+  pm <- tapply(cv3$pred$pred, cv3$pred$row, mean)
+  y <- cv3$pred$obs[match(sort(unique(cv3$pred$row)), cv3$pred$row)]
+  expect_equal(sum(cal3$bins$n), cv3$n)
+  expect_equal(cal3$brier, mean((pm - (as.integer(y) - 1L))^2))
+
+  expect_error(.nullDevice(plotCalibration(cv, newdata = .diagData())),
+               "'newdata' cannot be combined")
+
+  set.seed(1)
+  cvR <- crossVal(fitMod(x1 ~ x2, .diagData(), engine = "lm"), k = 5)
+  expect_error(.nullDevice(plotCalibration(cvR)), "binary classification")
+})
+
+
+test_that("the calibration fits report separation instead of a slope", {
+
+  # .calibrationCoefs() is shared with crossVal(), see test-crossVal.R
+  p <- c(0.1, 0.2, 0.3, 0.7, 0.8, 0.9)
+  y <- c(0, 0, 0, 1, 1, 1)
+  expect_warning(cal <- alloy:::.calibrationCoefs(p, y),
+                 "separate the classes")
+  expect_true(is.na(cal$slope))
+  expect_true(is.finite(cal$intercept))
+})
+
+
 # --- plotInfluence -------------------------------------------------------
 
 test_that("influence statistics match the stats originals", {

@@ -1,7 +1,7 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.925
+Version: 0.0.0.926
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
@@ -33,11 +33,11 @@ Suggests:
     MuMIn, lme4, haven, foreign, 
     R.rsp, testthat, knitr, rmarkdown,
     betareg (>= 3.2-0), statmod, numDeriv, brglm2
-Remotes:  
+Remotes: 
     AndriSignorell/pharos, AndriSignorell/DescToolsX
 VignetteBuilder: R.rsp, knitr
 URL: https://andrisignorell.github.io/alloy/,
             https://github.com/AndriSignorell/alloy/
 BugReports: https://github.com/AndriSignorell/alloy/issues
-Config/roxygen2/version: 8.1.0
+Config/roxygen2/version: 8.1.1
 LazyData: true

@@ -29,7 +29,11 @@
 #'   \code{\link[betareg]{predict.betareg}} are available, e.g.
 #'   \code{"link"}, \code{"precision"}, \code{"variance"} or
 #'   \code{"quantile"} (with \code{at} passed via \code{...}).
-#'   Ignored for classification models (use \code{output} instead).
+#'   For logistic models (\code{"logit"}, \code{"logitFirth"}) the types
+#'   of \code{\link[stats]{predict.glm}} (\code{"link"}, \code{"response"},
+#'   \code{"terms"}) are passed on, see Details.
+#'   Ignored for all other classification models (use \code{output}
+#'   instead).
 #' @param ... Further arguments passed to the underlying predict method.
 #'
 #' @return
@@ -84,10 +88,15 @@
 #' the training data, so new data may contain a subset of the training
 #' factor levels.
 #'
-#' For \code{engine = "logit"}, calling \code{predict(object)} returns a
-#' two-column probability \code{data.frame} (like all other classifiers).
-#' To obtain the linear predictor (log-odds), use
-#' \code{predict(object, type = "link")}.
+#' For \code{engine = "logit"} and \code{"logitFirth"}, calling
+#' \code{predict(object)} returns a two-column probability
+#' \code{data.frame} (like all other classifiers). With an explicit
+#' \code{type} the result is that of \code{\link[stats]{predict.glm}}:
+#' \code{type = "link"} gives the linear predictor (log-odds),
+#' \code{type = "response"} the probability of the second class as a
+#' vector. Functions written for \code{glm} objects, which call
+#' \code{predict(x, type = "response")}, therefore work with these models
+#' as well, e.g. \code{DescToolsX::brierScore()}.
 #'
 #' @examples
 #' # Regression
@@ -170,9 +179,15 @@ predict.FitMod <- function(object, newdata = NULL,
     return(do.call(predict, c(args, list(...))))
   }
 
-  # --- logit special case: type = "link" returns the linear predictor ---
-  if (engine %in% c("logit", "logitFirth") && identical(type, "link")) {
-    args <- list(fit, type = "link")
+  # --- logistic models: an explicit type is that of predict.glm() ---
+  # A vector as from predict.glm(), so that code written for glm objects
+  # (DescToolsX::cStat(), confusion(), brierScore(), ...) works unchanged;
+  # without type the probability data.frame of all classifiers. Other
+  # values (e.g. type = "prob" from code for other classifiers) are
+  # ignored with a warning below, as for all classification models
+  if (engine %in% c("logit", "logitFirth") &&
+      isTRUE(type %in% c("link", "response", "terms"))) {
+    args <- list(fit, type = type)
     if (!is.null(newdata)) args$newdata <- newdata
     return(do.call(predict, c(args, list(...))))
   }

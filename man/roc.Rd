@@ -2,37 +2,53 @@
 % Please edit documentation in R/roc.R
 \name{roc}
 \alias{roc}
-\title{ROC curve for a fitted model or predictor vector}
+\title{ROC curve for a fitted model, a cross-validation or a predictor vector}
 \usage{
 roc(x, ref = NULL, ...)
 }
 \arguments{
 \item{x}{Either a fitted binary classification model of class
 \code{"FitMod"} (in which case predicted probabilities and the response
-are extracted automatically), or a numeric vector of predicted
-probabilities / scores when \code{ref} is supplied.}
+are extracted automatically), an object of class \code{"CrossVal"} from
+\code{\link[=crossVal]{crossVal()}} (out-of-fold predictions), or a numeric vector of
+predicted probabilities / scores when \code{ref} is supplied.}
 
 \item{ref}{Optional factor or binary vector of true class labels.  If
-\code{NULL} (default), \code{x} must be a \code{"FitMod"} object and
-the response is extracted via \code{\link{response}}.}
+\code{NULL} (default), \code{x} must be a \code{"FitMod"} or
+\code{"CrossVal"} object and the response is taken from it.}
 
-\item{...}{Further arguments passed to \code{\link[pROC]{roc}}.}
+\item{...}{Further arguments passed to \code{\link[pROC]{roc}}; they
+override the defaults set here, e.g. \code{direction}.}
 }
 \value{
 An object of class \code{"roc"} as returned by
 \code{\link[pROC]{roc}}.
 }
 \description{
-Convenience wrapper around \code{\link[pROC]{roc}} that accepts either a
-fitted \code{"FitMod"} binary classification model or a numeric predictor
-vector directly.
+Convenience wrapper around \code{\link[pROC]{roc}} that accepts a
+fitted \code{"FitMod"} binary classification model, the result of
+\code{\link[=crossVal]{crossVal()}} for such a model, or a numeric predictor vector directly.
 }
 \details{
-When \code{x} is a \code{"FitMod"} object, the second column of
-\code{predict(x, type = "prob")} is used as the predictor (i.e. the
-probability of the second factor level).  For models with non-standard
-probability output, supply the predictor vector explicitly via \code{x}
-and \code{ref}.
+For a \code{"FitMod"} object the predicted probability of the second
+class (the second column of \code{predict(x)}) is the predictor. The
+class order is known then, so \code{levels} is set to the classes and
+\code{direction} to \code{"<"} (higher predictions for the second
+class): \pkg{pROC} would otherwise choose the direction from the data
+and turn a model worse than chance into one better than chance.
+
+For a \code{"CrossVal"} object the curve is drawn from the out-of-fold
+predictions, each made by a model that had not seen the observation,
+with the same \code{levels} and \code{direction}. With repeated
+cross-validation each observation enters once, with the mean of its
+out-of-fold predictions; the AUC of this curve can therefore differ
+slightly from the pooled \code{auc} in the summary of \code{\link[=crossVal]{crossVal()}},
+which is computed per repetition and then averaged.
+
+For a predictor vector with \code{ref}, \pkg{pROC} determines levels
+and direction itself unless they are given in \code{...}. For models
+with non-standard probability output, supply the predictor vector
+explicitly via \code{x} and \code{ref}.
 }
 \examples{
 fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
@@ -43,14 +59,20 @@ plot(r)
 p <- predict(fitLogit)[, 2]
 r2 <- roc(p, ref = Admit$admit)
 
+# cross-validated ROC curve
+set.seed(1)
+rCV <- roc(crossVal(fitLogit, k = 10))
+rCV$auc
+
 }
 \seealso{
-\code{\link[pROC]{roc}}, \code{\link{bestCut}},
+\code{\link[pROC]{roc}}, \code{\link[=rocTest]{rocTest()}}, \code{\link{bestCut}},
 \code{\link{response}}
 
 Other roc:
 \code{\link[=bestCut]{bestCut()}},
-\code{\link[=lift]{lift()}}
+\code{\link[=lift]{lift()}},
+\code{\link[=rocTest]{rocTest()}}
 }
 \concept{classification}
 \concept{model-evaluation}

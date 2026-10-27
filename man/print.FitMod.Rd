@@ -124,11 +124,12 @@ print(fitWei, output = "genuine")
 \code{\link{fitMod}}, \code{\link{predict.FitMod}}
 
 Other modelling:
-\code{\link[=confusion.FitMod]{confusion.FitMod()}},
+\code{\link{classification-metrics}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
-\code{\link[=predictors]{predictors()}}
+\code{\link[=predictors]{predictors()}},
+\code{\link{regression-metrics}}
 }
 \concept{modelling}

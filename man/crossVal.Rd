@@ -45,9 +45,11 @@ classification models and does not stratify regression models; \code{FALSE}
 never stratifies. A vector of length \code{nrow(data)}, or a list of such
 vectors, gives the strata explicitly, see \code{\link[=splitTrainTest]{splitTrainTest()}}.}
 
-\item{cutoff}{the probability threshold, in \eqn{[0, 1]}, at or above
-which a binary prediction counts as positive, used for accuracy,
-sensitivity and specificity. Default 0.5.}
+\item{cutoff}{the probability threshold at or above which a binary
+prediction counts as positive, used for accuracy, sensitivity and
+specificity: a number in \eqn{[0, 1]} (default 0.5), or
+\code{"youden"} or \code{"closest.topleft"} for the optimal cut-point of
+\code{\link[=bestCut]{bestCut()}}, determined anew on every training fold (see Details).}
 
 \item{keepModels}{logical, whether to return the models fitted on the
 training folds. Default \code{FALSE}.}
@@ -65,15 +67,16 @@ An object of class \code{"CrossVal"}, a list with the components
 \code{apparent}, \code{cv}, \code{sd}, \code{min}, \code{max}, \code{nFolds} (the number of folds
 with a value for the measure), \code{pooled} and \code{optimism}.}
 \item{perFold}{a data frame with one row per planned fold: \code{rep},
-\code{fold}, \code{nTrain}, \code{nTest}, \code{ok}, \code{error} and the measures (\code{NA} for
-failed folds).}
+\code{fold}, \code{nTrain}, \code{nTest}, \code{ok}, \code{error}, for binary models \code{cutoff},
+and the measures (\code{NA} for failed folds).}
 \item{reps}{a data frame with one row per repetition: \code{rep},
 \code{nPredicted} and \code{coverage}, the share of observations with an
 out-of-fold prediction.}
 \item{pred}{the out-of-fold predictions as a data frame with \code{rep},
 \code{fold}, \code{row} (row in \code{data}), \code{obs} and \code{pred} (the probability of
 the positive class, the predicted value, or for multiclass models the
-predicted class).}
+predicted class), for binary models followed by the \code{cutoff} it was
+classified with.}
 \item{prob}{for multiclass models a matrix of the predicted class
 probabilities, one column per class, its rows matching \code{pred}; else
 \code{NULL}.}
@@ -91,7 +94,9 @@ number of evaluations (folds, apparent, pooled repetitions) that raised
 the message.}
 }
 and the settings \code{task}, \code{engine}, \code{formula}, \code{n}, \code{nDropped}, \code{k},
-\code{repeats}, \code{stratified}, \code{cutoff}, \code{levels} and \code{call}.
+\code{repeats}, \code{stratified}, \code{cutoff} (the number or method given),
+\code{cutoffApparent} (the cut-point of the apparent measures), \code{levels} and
+\code{call}.
 }
 \description{
 Estimates the out-of-sample performance of a fitted model by k-fold
@@ -161,6 +166,19 @@ over the classes) and \code{logLoss}.}
 fold) and \code{calSlope} (slope of the observed on the predicted values).}
 }
 
+\strong{Data-driven cutoff.} With \code{cutoff = "youden"} (or
+\code{"closest.topleft"}) the cut-point is part of the model and is
+cross-validated with it: every fold model determines its cut-point with
+\code{\link[=bestCut]{bestCut()}} on its own training data and classifies the test fold with it,
+so the cut-point never sees the observations it classifies. The apparent
+measures use the cut-point of \code{fit} on all data, as
+\code{bestCut(roc(fit))} returns it. A cut-point chosen on all data and then
+passed as a number would make the cross-validated accuracy, sensitivity
+and specificity optimistic. The cut-points are reported in \code{perFold} and
+\code{pred}; the pooled measures classify every prediction with the cut-point
+of its own fold. Ties of the criterion are resolved by the first
+cut-point that \pkg{pROC} reports.
+
 \strong{Apparent, CV, pooled.} \emph{Apparent} is the performance of \code{fit} on the
 data it was fitted to and therefore optimistic. \emph{CV} is the unweighted mean
 of the fold results over all folds (and repeats): every fold counts
@@ -197,8 +215,16 @@ no fold succeeds. The pooled estimates use only repetitions in which every
 observation was predicted, as an incomplete repetition would describe a
 different population; without such a repetition they are \code{NA}.
 
+For binary models, \code{\link[=plotCalibration]{plotCalibration()}} and \code{\link[=roc]{roc()}} accept the result
+and show the out-of-fold predictions, see \code{\link[=rocTest]{rocTest()}} for comparing the
+cross-validated ROC curves of two models.
+
 The split is drawn from R's global random number generator; call
-\code{\link[=set.seed]{set.seed()}} before the function for reproducible results. Survival models
+\code{\link[=set.seed]{set.seed()}} before the function for reproducible results. Fit a model
+whose fitting draws random numbers itself (e.g. a random forest) before
+setting the seed: written as a call inside \code{crossVal()}, it is evaluated
+before the split and shifts the random stream, so that the folds no
+longer match those of another model cross-validated with the same seed. Survival models
 are not supported.
 
 For mixed models, observations of clusters absent from the training folds
@@ -219,6 +245,12 @@ cv
 # the measures of every fold, and the variability of the coefficients
 head(cv$perFold)
 apply(cv$coefs, 2, sd, na.rm = TRUE)
+
+# the Youden cut-point, determined on every training fold
+set.seed(1)
+cvY <- crossVal(fit, cutoff = "youden")
+cvY$cutoffApparent
+summary(cvY$perFold$cutoff)
 
 # repeated cross-validation, keeping the fold models
 set.seed(1)

@@ -77,12 +77,13 @@ plot(fitMod(Fertility ~ ., swiss))
 logistic models in alloy.
 
 Other modelling:
-\code{\link[=confusion.FitMod]{confusion.FitMod()}},
+\code{\link{classification-metrics}},
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
 \code{\link[=predictors]{predictors()}},
-\code{\link[=print.FitMod]{print.FitMod()}}
+\code{\link[=print.FitMod]{print.FitMod()}},
+\code{\link{regression-metrics}}
 }
 \concept{binary-outcome}
 \concept{modelling}

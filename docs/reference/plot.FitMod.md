@@ -95,10 +95,13 @@ on one page is the caller's business (`par(mfrow = c(2, 3))`).
 for an overview of the diagnostics for logistic models in alloy.
 
 Other modelling:
+[`classification-metrics`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md),
 [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md),
 [`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
 [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
-[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
+[`print.FitMod()`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md),
+[`regression-metrics`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
 
 ## Examples
 

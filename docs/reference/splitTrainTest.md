@@ -86,6 +86,11 @@ complete description of the split. It can be stored alongside the data,
 tabulated, or passed to [`split()`](https://rdrr.io/r/base/split.html)
 to obtain the data subsets later.
 
+## See also
+
+Other data.split:
+[`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+
 ## Examples
 
 ``` r

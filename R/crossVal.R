@@ -26,9 +26,11 @@
 #'   classification models and does not stratify regression models; `FALSE`
 #'   never stratifies. A vector of length `nrow(data)`, or a list of such
 #'   vectors, gives the strata explicitly, see [splitTrainTest()].
-#' @param cutoff the probability threshold, in \eqn{[0, 1]}, at or above
-#'   which a binary prediction counts as positive, used for accuracy,
-#'   sensitivity and specificity. Default 0.5.
+#' @param cutoff the probability threshold at or above which a binary
+#'   prediction counts as positive, used for accuracy, sensitivity and
+#'   specificity: a number in \eqn{[0, 1]} (default 0.5), or
+#'   `"youden"` or `"closest.topleft"` for the optimal cut-point of
+#'   [bestCut()], determined anew on every training fold (see Details).
 #' @param keepModels logical, whether to return the models fitted on the
 #'   training folds. Default `FALSE`.
 #'
@@ -93,6 +95,19 @@
 #'     fold) and `calSlope` (slope of the observed on the predicted values).}
 #' }
 #'
+#' **Data-driven cutoff.** With `cutoff = "youden"` (or
+#' `"closest.topleft"`) the cut-point is part of the model and is
+#' cross-validated with it: every fold model determines its cut-point with
+#' [bestCut()] on its own training data and classifies the test fold with it,
+#' so the cut-point never sees the observations it classifies. The apparent
+#' measures use the cut-point of `fit` on all data, as
+#' `bestCut(roc(fit))` returns it. A cut-point chosen on all data and then
+#' passed as a number would make the cross-validated accuracy, sensitivity
+#' and specificity optimistic. The cut-points are reported in `perFold` and
+#' `pred`; the pooled measures classify every prediction with the cut-point
+#' of its own fold. Ties of the criterion are resolved by the first
+#' cut-point that \pkg{pROC} reports.
+#'
 #' **Apparent, CV, pooled.** *Apparent* is the performance of `fit` on the
 #' data it was fitted to and therefore optimistic. *CV* is the unweighted mean
 #' of the fold results over all folds (and repeats): every fold counts
@@ -129,8 +144,16 @@
 #' observation was predicted, as an incomplete repetition would describe a
 #' different population; without such a repetition they are `NA`.
 #'
+#' For binary models, [plotCalibration()] and [roc()] accept the result
+#' and show the out-of-fold predictions, see [rocTest()] for comparing the
+#' cross-validated ROC curves of two models.
+#'
 #' The split is drawn from R's global random number generator; call
-#' [set.seed()] before the function for reproducible results. Survival models
+#' [set.seed()] before the function for reproducible results. Fit a model
+#' whose fitting draws random numbers itself (e.g. a random forest) before
+#' setting the seed: written as a call inside `crossVal()`, it is evaluated
+#' before the split and shifts the random stream, so that the folds no
+#' longer match those of another model cross-validated with the same seed. Survival models
 #' are not supported.
 #'
 #' For mixed models, observations of clusters absent from the training folds
@@ -147,15 +170,16 @@
 #'     `apparent`, `cv`, `sd`, `min`, `max`, `nFolds` (the number of folds
 #'     with a value for the measure), `pooled` and `optimism`.}
 #'   \item{perFold}{a data frame with one row per planned fold: `rep`,
-#'     `fold`, `nTrain`, `nTest`, `ok`, `error` and the measures (`NA` for
-#'     failed folds).}
+#'     `fold`, `nTrain`, `nTest`, `ok`, `error`, for binary models `cutoff`,
+#'     and the measures (`NA` for failed folds).}
 #'   \item{reps}{a data frame with one row per repetition: `rep`,
 #'     `nPredicted` and `coverage`, the share of observations with an
 #'     out-of-fold prediction.}
 #'   \item{pred}{the out-of-fold predictions as a data frame with `rep`,
 #'     `fold`, `row` (row in `data`), `obs` and `pred` (the probability of
 #'     the positive class, the predicted value, or for multiclass models the
-#'     predicted class).}
+#'     predicted class), for binary models followed by the `cutoff` it was
+#'     classified with.}
 #'   \item{prob}{for multiclass models a matrix of the predicted class
 #'     probabilities, one column per class, its rows matching `pred`; else
 #'     `NULL`.}
@@ -173,7 +197,9 @@
 #'     the message.}
 #' }
 #' and the settings `task`, `engine`, `formula`, `n`, `nDropped`, `k`,
-#' `repeats`, `stratified`, `cutoff`, `levels` and `call`.
+#' `repeats`, `stratified`, `cutoff` (the number or method given),
+#' `cutoffApparent` (the cut-point of the apparent measures), `levels` and
+#' `call`.
 #'
 #' @examples
 #' fit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
@@ -185,6 +211,12 @@
 #' # the measures of every fold, and the variability of the coefficients
 #' head(cv$perFold)
 #' apply(cv$coefs, 2, sd, na.rm = TRUE)
+#'
+#' # the Youden cut-point, determined on every training fold
+#' set.seed(1)
+#' cvY <- crossVal(fit, cutoff = "youden")
+#' cvY$cutoffApparent
+#' summary(cvY$perFold$cutoff)
 #'
 #' # repeated cross-validation, keeping the fold models
 #' set.seed(1)
@@ -271,8 +303,9 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     task <- if (length(lev) == 2L) "binary" else "multiclass"
   }
 
-  am <- .cvQuietly(.cvMetrics(obs, .cvPredValue(pa$value, task, lev, n),
-                              task, cutoff))
+  pApp <- .cvPredValue(pa$value, task, lev, n)
+  cutApp <- if (task == "binary") .cvFindCutoff(pApp, obs, cutoff)
+  am <- .cvQuietly(.cvMetrics(obs, pApp, task, cutApp))
   if (inherits(am$value, "cvError"))
     stop("the measures of 'fit' cannot be computed: ", am$value)
   apparent <- am$value
@@ -317,7 +350,11 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     ok     = ok,
     error  = vapply(runs, function(z)
       if (is.null(z$error)) NA_character_ else z$error, character(1L)),
-    m, check.names = FALSE)
+    check.names = FALSE)
+  if (task == "binary")
+    perFold$cutoff <- vapply(runs, function(z)
+      if (is.null(z$cutoff)) NA_real_ else z$cutoff, numeric(1L))
+  perFold <- cbind(perFold, m)
 
   # --- out-of-fold predictions ---------------------------------------------
   okRuns <- runs[ok]
@@ -337,6 +374,8 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     row  = keep[idx],
     obs  = obs[idx],
     pred = if (task == "multiclass") .cvClass(prob, lev) else unlist(values))
+  if (task == "binary")
+    pred$cutoff <- rep(vapply(okRuns, `[[`, numeric(1L), "cutoff"), nTest)
 
   # --- pooled: complete repetitions only -----------------------------------
   nPred <- tabulate(pred$rep, repeats)
@@ -347,7 +386,7 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
   pooledRep <- lapply(complete, function(r) {
     i <- pred$rep == r
     v <- if (task == "multiclass") prob[i, , drop = FALSE] else pred$pred[i]
-    .cvQuietly(.cvMetrics(pred$obs[i], v, task, cutoff))
+    .cvQuietly(.cvMetrics(pred$obs[i], v, task, pred$cutoff[i]))
   })
   pooled <- if (length(pooledRep))
     colMeans(do.call(rbind, lapply(pooledRep, function(z)
@@ -412,6 +451,7 @@ crossVal <- function(fit, data = NULL, k = 10, repeats = 1, folds = NULL,
     repeats    = repeats,
     stratified = attr(foldId, "stratified"),
     cutoff     = if (task == "binary") cutoff else NULL,
+    cutoffApparent = cutApp,
     levels     = lev,
     call       = cl
   ), class = "CrossVal")
@@ -436,8 +476,12 @@ print.CrossVal <- function(x, digits = 3, ...) {
   cat("Obs:    ", x$n,
       if (x$nDropped > 0L) gettextf(" (%d removed)", x$nDropped), sep = "")
   if (x$task == "binary")
-    cat(gettextf(", positive class %s, cutoff %g",
-                 dQuote(x$levels[2L], FALSE), x$cutoff))
+    cat(gettextf(", positive class %s, cutoff %s",
+                 dQuote(x$levels[2L], FALSE),
+                 if (is.character(x$cutoff))
+                   gettextf("%s per training fold (%s on all data)", x$cutoff,
+                            format(x$cutoffApparent, digits = 3))
+                 else format(x$cutoff)))
   cat("\n\n")
 
   s <- x$summary
@@ -463,6 +507,32 @@ print.CrossVal <- function(x, digits = 3, ...) {
 # == internal helper functions ============================================
 
 
+# Out-of-fold predictions of a binary model, one per observation: with
+# repeats, the mean of its predictions over the repetitions (a single model
+# never made it, but every repetition held the observation out). Used by
+# plotCalibration() and roc(). Observations never predicted (failed folds)
+# are left out with a warning.
+#' @keywords internal
+.cvOutOfFold <- function(x) {
+
+  if (!identical(x$task, "binary"))
+    stop("this needs the cross-validation of a binary classification model, ",
+         "not of a ", x$task, " one.", call. = FALSE)
+
+  pr <- x$pred
+  row <- sort(unique(pr$row))
+  p <- as.vector(tapply(pr$pred, factor(pr$row, levels = row), mean))
+  obs <- pr$obs[match(row, pr$row)]
+
+  if (length(row) < x$n)
+    warning(gettextf("%d of %d observations have no out-of-fold prediction (failed folds) and are left out.",
+                     x$n - length(row), x$n), call. = FALSE, domain = NA)
+
+  list(p = p, y = as.integer(obs) - 1L, row = row, levels = x$levels)
+}
+
+
+
 .cvIsCount <- function(x, min = 1) {
   is.numeric(x) && length(x) == 1L && is.finite(x) && x >= min &&
     x == round(x)
@@ -473,8 +543,11 @@ print.CrossVal <- function(x, digits = 3, ...) {
   if (!.cvIsCount(repeats))
     stop("'repeats' must be a positive integer.")
   if (!(is.numeric(cutoff) && length(cutoff) == 1L && is.finite(cutoff) &&
-        cutoff >= 0 && cutoff <= 1))
-    stop("'cutoff' must be a single number in [0, 1].")
+        cutoff >= 0 && cutoff <= 1) &&
+      !(is.character(cutoff) && length(cutoff) == 1L &&
+        cutoff %in% c("youden", "closest.topleft")))
+    stop("'cutoff' must be a single number in [0, 1], \"youden\" or ",
+         "\"closest.topleft\".")
   if (!(is.logical(keepModels) && length(keepModels) == 1L &&
         !is.na(keepModels)))
     stop("'keepModels' must be TRUE or FALSE.")
@@ -722,8 +795,14 @@ print.CrossVal <- function(x, digits = 3, ...) {
     model <- .cvRefit(refit, data[train, , drop = FALSE], w[train], evalEnv)
     value <- .cvPredValue(.cvPredict(model, data[test, , drop = FALSE]),
                           task, lev, sum(test))
-    list(model = model, value = value,
-         metrics = .cvMetrics(obs[test], value, task, cutoff))
+    # a data-driven cut-point is found on the training fold only
+    cut <- if (task == "binary")
+      .cvFindCutoff(if (is.character(cutoff))
+                      .cvPredValue(.cvPredict(model, data[train, , drop = FALSE]),
+                                   task, lev, sum(train)),
+                    obs[train], cutoff)
+    list(model = model, value = value, cutoff = cut,
+         metrics = .cvMetrics(obs[test], value, task, cut))
   })
 
   out <- list(nTrain = sum(train), nTest = sum(test),
@@ -737,10 +816,28 @@ print.CrossVal <- function(x, digits = 3, ...) {
   out$test <- which(test)
   out$value <- res$value$value
   out$metrics <- res$value$metrics
+  out$cutoff <- res$value$cutoff
   out$coef <- tryCatch(stats::coef(res$value$model), error = function(e) NULL)
   if (keepModel) out$model <- res$value$model
 
   out
+}
+
+
+# The cut-point for a binary model: the number given, or the optimum of
+# bestCut() on the predictions p for the response obs (a two-level factor).
+# Levels and direction are fixed, as in roc(), so that pROC cannot turn the
+# curve; of tied optima the first is taken.
+.cvFindCutoff <- function(p, obs, cutoff) {
+
+  if (is.numeric(cutoff))
+    return(cutoff)
+
+  .require_pkg("pROC")
+  r <- pROC::roc(response = as.integer(obs) - 1L, predictor = p,
+                 levels = c(0, 1), direction = "<", quiet = TRUE)
+  bc <- bestCut(r, method = cutoff)
+  unname(if (is.matrix(bc)) bc["threshold", 1L] else bc[["threshold"]])
 }
 
 
@@ -810,7 +907,7 @@ print.CrossVal <- function(x, digits = 3, ...) {
   # AUC, scaled Brier score and calibration need both classes; a fold
   # holding a single class (always so in leave-one-out) has none of them
   both <- length(unique(y)) == 2L
-  cal <- if (both) .cvCalibration(pc, y) else c(NA_real_, NA_real_)
+  cal <- if (both) unlist(.calibrationCoefs(pc, y)) else c(NA_real_, NA_real_)
 
   c(auc          = if (both) .cvSafe(cStat(p, y)) else NA_real_,
     brier        = brierScore(p, y),
@@ -822,55 +919,6 @@ print.CrossVal <- function(x, digits = 3, ...) {
     accuracy     = mean(pos == (y == 1L)),
     sensitivity  = if (any(y == 1L)) mean(pos[y == 1L]) else NA_real_,
     specificity  = if (any(y == 0L)) mean(!pos[y == 0L]) else NA_real_)
-}
-
-
-# calibration-in-the-large (intercept with the logit of p as offset, slope
-# fixed at 1) and calibration slope (logistic regression on the logit of p).
-# The two fits are independent. The slope is NA if the logits of the two
-# classes do not overlap (complete or quasi-complete separation: the ML
-# estimate does not exist) or are constant (not identifiable); either fit is
-# NA if it fails or does not converge. Each case raises a warning, and the
-# warnings of glm.fit() are passed on, so that crossVal() reports them.
-.cvCalibration <- function(p, y) {
-
-  lp <- stats::qlogis(p)
-  one <- matrix(1, length(y))
-
-  calFit <- function(x, offset, coefIdx, what) {
-    fit <- tryCatch(
-      stats::glm.fit(x, y, offset = offset, family = stats::binomial()),
-      error = function(e) {
-        warning(gettextf("the %s fit failed: %s", what, conditionMessage(e)),
-                call. = FALSE)
-        NULL
-      })
-    if (is.null(fit))
-      return(NA_real_)
-    if (!fit$converged || fit$boundary) {
-      warning(gettextf("the %s fit did not converge; set to NA.", what),
-              call. = FALSE)
-      return(NA_real_)
-    }
-    unname(fit$coefficients[coefIdx])
-  }
-
-  a <- lp[y == 0L]
-  b <- lp[y == 1L]
-
-  slope <- if (diff(range(lp)) == 0) {
-    warning("constant predictions: the calibration slope is not ",
-            "identifiable; set to NA.", call. = FALSE)
-    NA_real_
-  } else if (max(a) <= min(b) || max(b) <= min(a)) {
-    warning("the predictions separate the classes: the calibration slope ",
-            "does not exist; set to NA.", call. = FALSE)
-    NA_real_
-  } else {
-    calFit(cbind(one, lp), NULL, 2L, "calibration slope")
-  }
-
-  c(calFit(one, lp, 1L, "calibration intercept"), slope)
 }
 
 

@@ -34,7 +34,7 @@
 #'
 #' @details
 #' As in \code{\link{roc}}, the second column of
-#' \code{predict(x, type = "prob")} is used as the predictor when \code{x} is
+#' \code{predict(x, output = "prob")} is used as the predictor when \code{x} is
 #' a \code{"FitMod"} object - the positive class is therefore the second
 #' factor level of the response.  For models with non-standard probability
 #' output, supply the predictor vector explicitly via \code{x} and
@@ -85,7 +85,7 @@
 lift <- function(x, ref = NULL, nBins = 10) {
 
   if (is.null(ref)) {
-    pred <- predict(x, type = "prob")[, 2]
+    pred <- predict(x, output = "prob")[, 2]
     ref <- response(x)
   } else {
     pred <- x
