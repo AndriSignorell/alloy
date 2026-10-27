@@ -20,6 +20,10 @@ Supported model families:
 
   `lm`, `lmrob`, `gamma`, `tobit`
 
+- Rate / proportion outcome:
+
+  `beta`
+
 - Binary outcome:
 
   `logit`
@@ -71,7 +75,8 @@ returns a numeric vector for regression and survival models, and a tidy
 
 - [`pseudoRSq`](https://andrisignorell.github.io/alloy/reference/pseudoRSq.md):
 
-  Pseudo-R\\^2\\ measures for GLMs.
+  Pseudo-R\\^2\\ measures for GLMs, ordinal, multinomial and beta
+  regressions.
 
 - [`vif`](https://andrisignorell.github.io/alloy/reference/vif.md):
 

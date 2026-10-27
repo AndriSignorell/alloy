@@ -141,10 +141,13 @@ of the linear predictor and the link-transformed response).
 [`predict.FitMod`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
 
 Other modelling:
+[`classification-metrics`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md),
 [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+[`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md),
 [`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
 [`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
-[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md)
+[`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
+[`regression-metrics`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
 
 ## Examples
 

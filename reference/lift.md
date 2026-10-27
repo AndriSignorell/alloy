@@ -96,7 +96,7 @@ overall figures.
 ## Details
 
 As in [`roc`](https://andrisignorell.github.io/alloy/reference/roc.md),
-the second column of `predict(x, type = "prob")` is used as the
+the second column of `predict(x, output = "prob")` is used as the
 predictor when `x` is a `"FitMod"` object - the positive class is
 therefore the second factor level of the response. For models with
 non-standard probability output, supply the predictor vector explicitly
@@ -133,14 +133,14 @@ probabilities are systematically biased.
 
 Other roc:
 [`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md),
-[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md)
+[`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md),
+[`rocTest()`](https://andrisignorell.github.io/alloy/reference/rocTest.md)
 
 ## Examples
 
 ``` r
 fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 lift(fitLogit)
-#> Warning: 'type' is ignored for classification models in predict.FitMod; use 'output' to control the return format.
 #> 
 #> Lift table (positive class: 1, base rate: 0.318)
 #> 
@@ -182,7 +182,6 @@ lift(p, ref = Admit$admit)
 
 # Coarser grouping
 lift(fitLogit, nBins = 5)
-#> Warning: 'type' is ignored for classification models in predict.FitMod; use 'output' to control the return format.
 #> 
 #> Lift table (positive class: 1, base rate: 0.318)
 #> 

@@ -791,7 +791,7 @@ fitLogitMixed |> print(output = "or")
 #> (Intercept)      0.495    0.419  0.585  < 0.001  ***
 #> age              1.009    0.998  1.020    0.095  .  
 #> urban  (ref: N)      .        .      .  < 0.001  ***
-#> urban Y          1.922    1.532  2.410  < 0.001  ***
+#> urban Y          1.922    1.532  2.411  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -805,12 +805,12 @@ fitLogitMixed |> print(output = "or")
 #> Log-lik: -1250.196   AIC: 2508.392
 head(predict(fitLogitMixed, output = "both"))
 #>           N         Y class
-#> 1 0.6193328 0.3806672     N
-#> 2 0.6688867 0.3311133     N
-#> 3 0.6547595 0.3452405     N
-#> 4 0.6403537 0.3596463     N
-#> 5 0.6846662 0.3153338     N
-#> 6 0.6807593 0.3192407     N
+#> 1 0.6193305 0.3806695     N
+#> 2 0.6688892 0.3311108     N
+#> 3 0.6547607 0.3452393     N
+#> 4 0.6403534 0.3596466     N
+#> 5 0.6846702 0.3153298     N
+#> 6 0.6807629 0.3192371     N
 ```
 
 ### Mixed Poisson regression (`poissonMixed`)
@@ -829,11 +829,11 @@ fitPoisMixed
 #> 
 #> Fixed effects:
 #>                   estimate  95%-lci     uci    p-val     
-#> (Intercept)          1.277    0.903   1.651  < 0.001  ***
+#> (Intercept)          1.276    0.899   1.653  < 0.001  ***
 #> period  (ref: 1)         .        .       .  < 0.001  ***
-#> period 2            -1.125   -1.663  -0.586  < 0.001  ***
-#> period 3            -1.319   -1.900  -0.738  < 0.001  ***
-#> period 4            -1.945   -2.723  -1.167  < 0.001  ***
+#> period 2            -1.125   -1.671  -0.579  < 0.001  ***
+#> period 3            -1.319   -1.908  -0.730  < 0.001  ***
+#> period 4            -1.945   -2.734  -1.156  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -844,7 +844,7 @@ fitPoisMixed
 #> ICC: 0.504
 #> 
 #> Obs: 56   Groups: herd: 15
-#> Log-lik: -96.692   AIC: 203.384
+#> Log-lik: -96.692   AIC: 203.383
 fitPoisMixed |> print(output = "irr")
 #> 
 #> Mixed Poisson regression
@@ -855,11 +855,11 @@ fitPoisMixed |> print(output = "irr")
 #> 
 #> Fixed effects (Incidence Rate Ratios):
 #>                     IRR  95%-lci    uci    p-val     
-#> (Intercept)       3.585    2.467  5.211  < 0.001  ***
+#> (Intercept)       3.583    2.457  5.225  < 0.001  ***
 #> period  (ref: 1)      .        .      .  < 0.001  ***
-#> period 2          0.325    0.189  0.556  < 0.001  ***
-#> period 3          0.267    0.150  0.478  < 0.001  ***
-#> period 4          0.143    0.066  0.311  < 0.001  ***
+#> period 2          0.325    0.188  0.561  < 0.001  ***
+#> period 3          0.267    0.148  0.482  < 0.001  ***
+#> period 4          0.143    0.065  0.315  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -870,7 +870,7 @@ fitPoisMixed |> print(output = "irr")
 #> ICC: 0.504
 #> 
 #> Obs: 56   Groups: herd: 15
-#> Log-lik: -96.692   AIC: 203.384
+#> Log-lik: -96.692   AIC: 203.383
 ```
 
 ### Mixed negative binomial regression (`negbinMixed`)
@@ -881,8 +881,6 @@ fitNegbinMixed <- fitMod(incidence ~ period + (1 | herd),
                          data = lme4::cbpp, engine = "negbinMixed")
 #> boundary (singular) fit: see help('isSingular')
 fitNegbinMixed
-#> Warning in checkConv(attr(opt, "derivs"), opt$par, ctrl = control$checkConv, : Model failed to converge with max|grad| = 0.00688859 (tol = 0.002, component 1)
-#>   See ?lme4::convergence and ?lme4::troubleshooting.
 #> 
 #> Mixed negative binomial regression
 #> 
@@ -902,7 +900,7 @@ fitNegbinMixed
 #> 
 #> Random effects:
 #>  Groups Variance  Std.Dev
-#>  herd   3.090e-10 0.000  
+#>  herd   8.584e-11 0.000  
 #> 
 #> Obs: 56   Groups: herd: 15
 #> Log-lik: -90.731   AIC: 193.462

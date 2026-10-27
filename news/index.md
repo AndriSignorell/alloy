@@ -30,6 +30,68 @@
   `?model-diagnostics-overview`.
 - [`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   compares several fitted models in a table or a plot.
+- [`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+  estimates the out-of-sample performance of a fitted model by
+  (repeated, stratified or grouped) k-fold cross-validation and reports
+  apparent, cross-validated and pooled measures with the optimism of the
+  apparent ones.
+- `fitMod(engine = "logitFirth")` fits Firth’s bias-reduced logistic
+  regression (via brglm2), with finite estimates under separation;
+  [`drop1()`](https://rdrr.io/r/stats/add1.html) and
+  [`confint()`](https://rdrr.io/r/stats/confint.html) give penalized
+  likelihood ratio tests and profile penalized likelihood intervals. A
+  Firth fit that does not converge from the default start values of
+  brglm2 (the diverging ML estimates under complete separation) is
+  repeated from 0.
+- [`update()`](https://rdrr.io/r/stats/update.html) on a
+  [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  result refits through
+  [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md),
+  so the `"FitMod"` class and its methods are kept; a different `engine`
+  may be given.
+- The metrics of DescToolsX get their methods for fitted models from
+  alloy, see
+  [`?"classification-metrics"`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  and
+  [`?"regression-metrics"`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md):
+  [`confusion()`](https://andrisignorell.github.io/DescToolsX/reference/confusion.html),
+  [`cStat()`](https://andrisignorell.github.io/DescToolsX/reference/cStat.html),
+  [`brierScore()`](https://andrisignorell.github.io/DescToolsX/reference/brierScore.html),
+  [`averagePrecision()`](https://andrisignorell.github.io/DescToolsX/reference/averagePrecision.html)
+  and
+  [`logLoss()`](https://andrisignorell.github.io/DescToolsX/reference/logLoss.html)
+  for
+  [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  classification models (on the training data or on `newdata`) and for
+  `glm` objects,
+  [`confusion()`](https://andrisignorell.github.io/DescToolsX/reference/confusion.html)
+  also for `multinom`, `rpart`, `randomForest`, `svm`, `lda` and `qda`;
+  [`mae()`](https://andrisignorell.github.io/DescToolsX/reference/mae.html),
+  [`mse()`](https://andrisignorell.github.io/DescToolsX/reference/mse.html),
+  [`rmse()`](https://andrisignorell.github.io/DescToolsX/reference/rmse.html),
+  [`mape()`](https://andrisignorell.github.io/DescToolsX/reference/mape.html)
+  and
+  [`smape()`](https://andrisignorell.github.io/DescToolsX/reference/smape.html)
+  for
+  [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  regression models and for `lm` objects. These methods used to live in
+  DescToolsX, which now works on vectors and tables only. The ten
+  metrics are re-exported.
+- [`tModSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
+  reported the MAPE relative to the predicted instead of the observed
+  values (prediction and observation were passed in swapped order); MAE,
+  MSE and RMSE were not affected.
+- [`predict()`](https://rdrr.io/r/stats/predict.html) on a logistic
+  [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  model (`"logit"`, `"logitFirth"`) passes an explicit `type = "link"`,
+  `"response"` or `"terms"` to
+  [`predict.glm()`](https://rdrr.io/r/stats/predict.glm.html), so
+  functions written for `glm` objects, such as
+  [`DescToolsX::brierScore()`](https://andrisignorell.github.io/DescToolsX/reference/brierScore.html),
+  work with these models.
+  [`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md) and
+  [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
+  request the probabilities with `output = "prob"`.
 - Bootstrap routines
   ([`coefCI()`](https://andrisignorell.github.io/alloy/reference/coefCI.md),
   [`rSq()`](https://andrisignorell.github.io/alloy/reference/rSq.md))

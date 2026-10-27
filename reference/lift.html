@@ -21,7 +21,7 @@ can be acted upon - direct marketing, fraud triage, churn prevention."><meta pro
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -136,7 +136,7 @@ group and the columns:</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>As in <code><a href="roc.html">roc</a></code>, the second column of
-<code>predict(x, type = "prob")</code> is used as the predictor when <code>x</code> is
+<code>predict(x, output = "prob")</code> is used as the predictor when <code>x</code> is
 a <code>"FitMod"</code> object - the positive class is therefore the second
 factor level of the response.  For models with non-standard probability
 output, supply the predictor vector explicitly via <code>x</code> and
@@ -164,14 +164,14 @@ probabilities are systematically biased.</p>
 <code><a href="https://andrisignorell.github.io/pharos/reference/plotLift.html" class="external-link">pharos::plotLift()</a></code></p>
 <p>Other roc:
 <code><a href="bestCut.html">bestCut()</a></code>,
-<code><a href="roc.html">roc()</a></code></p></div>
+<code><a href="roc.html">roc()</a></code>,
+<code><a href="rocTest.html">rocTest()</a></code></p></div>
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">fitLogit</span> <span class="op">&lt;-</span> <span class="fu"><a href="fitMod.html">fitMod</a></span><span class="op">(</span><span class="va">admit</span> <span class="op">~</span> <span class="va">gre</span> <span class="op">+</span> <span class="va">gpa</span> <span class="op">+</span> <span class="va">rank</span>, <span class="va">Admit</span>, engine <span class="op">=</span> <span class="st">"logit"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">lift</span><span class="op">(</span><span class="va">fitLogit</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'type' is ignored for classification models in predict.FitMod; use 'output' to control the return format.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Lift table (positive class: 1, base rate: 0.318)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
@@ -213,7 +213,6 @@ probabilities are systematically biased.</p>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Coarser grouping</span></span></span>
 <span class="r-in"><span><span class="fu">lift</span><span class="op">(</span><span class="va">fitLogit</span>, nBins <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'type' is ignored for classification models in predict.FitMod; use 'output' to control the return format.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Lift table (positive class: 1, base rate: 0.318)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>

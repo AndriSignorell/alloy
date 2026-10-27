@@ -17,7 +17,7 @@ sensitivity and specificity."><meta property="og:image" content="https://andrisi
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.922</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,15 +78,16 @@ top-left corner \((0, 1)\) of the ROC space.</p></dd>
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
     <p>A named numeric vector with elements <code>threshold</code>,
 <code>specificity</code>, and <code>sensitivity</code> at the optimal cut-point.
-When ties exist, <code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">coords</a></code> may return multiple columns;
-the result is then a matrix (one column per tied optimum).</p>
+When ties exist, <code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">coords</a></code> may return several
+optima; the result is then a matrix with one row per tied optimum.</p>
     </div>
     <div class="section level2">
     <h2 id="see-also">See also<a class="anchor" aria-label="anchor" href="#see-also"></a></h2>
     <div class="dont-index"><p><code><a href="https://rdrr.io/pkg/pROC/man/coords.html" class="external-link">coords</a></code>, <code><a href="https://rdrr.io/pkg/pROC/man/roc.html" class="external-link">roc</a></code></p>
 <p>Other roc:
 <code><a href="lift.html">lift()</a></code>,
-<code><a href="roc.html">roc()</a></code></p></div>
+<code><a href="roc.html">roc()</a></code>,
+<code><a href="rocTest.html">rocTest()</a></code></p></div>
     </div>
 
     <div class="section level2">
@@ -107,11 +108,9 @@ the result is then a matrix (one column per tied optimum).</p>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> Setting direction: controls &lt; cases</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">bestCut</span><span class="op">(</span><span class="va">r</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'transpose=TRUE' is deprecated. Only 'transpose=FALSE' will be allowed in a future version.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   threshold specificity sensitivity </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0.2050000   0.8055556   0.6341463 </span>
 <span class="r-in"><span><span class="fu">bestCut</span><span class="op">(</span><span class="va">r</span>, method <span class="op">=</span> <span class="st">"closest.topleft"</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>'transpose=TRUE' is deprecated. Only 'transpose=FALSE' will be allowed in a future version.</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   threshold specificity sensitivity </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   0.2050000   0.8055556   0.6341463 </span>
 <span class="r-in"><span></span></span>

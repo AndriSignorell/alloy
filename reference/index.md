@@ -6,6 +6,7 @@ The unified fitting function and the methods that behave the same way
 whatever model was fitted underneath.
 
 - [`fitMod()`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
+  [`update(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/fitMod.md)
   : Fit a statistical or machine-learning model with automatic method
   selection
 - [`print(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/print.FitMod.md)
@@ -20,6 +21,12 @@ whatever model was fitted underneath.
   : Extract the response variable from a fitted model
 - [`refLevel()`](https://andrisignorell.github.io/alloy/reference/refLevel.md)
   : Reference level of factor predictors in a model
+- [`crossVal()`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+  [`print(`*`<CrossVal>`*`)`](https://andrisignorell.github.io/alloy/reference/crossVal.md)
+  : k-Fold Cross-Validation of a Fitted Model
+- [`drop1(`*`<logitFirth>`*`)`](https://andrisignorell.github.io/alloy/reference/logitFirth.md)
+  [`confint(`*`<logitFirth>`*`)`](https://andrisignorell.github.io/alloy/reference/logitFirth.md)
+  : Penalized Likelihood Inference for Firth Logistic Regression
 
 ## Diagnostics for Binary Responses
 
@@ -51,7 +58,7 @@ ROC curves, optimal cut-points, and the decile view used wherever only a
 fraction of the cases can be acted upon.
 
 - [`roc()`](https://andrisignorell.github.io/alloy/reference/roc.md) :
-  ROC curve for a fitted model or predictor vector
+  ROC curve for a fitted model, a cross-validation or a predictor vector
 - [`confint(`*`<roc>`*`)`](https://andrisignorell.github.io/alloy/reference/confint.roc.md)
   : Confidence intervals for ROC curve coordinates
 - [`bestCut()`](https://andrisignorell.github.io/alloy/reference/bestCut.md)
@@ -59,6 +66,36 @@ fraction of the cases can be acted upon.
 - [`lift()`](https://andrisignorell.github.io/alloy/reference/lift.md)
   [`print(`*`<Lift>`*`)`](https://andrisignorell.github.io/alloy/reference/lift.md)
   : Lift and gain table for a fitted model or predictor vector
+- [`confusion(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`cStat(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`brierScore(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`averagePrecision(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`logLoss(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<glm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`cStat(`*`<glm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`brierScore(`*`<glm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`averagePrecision(`*`<glm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`logLoss(`*`<glm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<multinom>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<rpart>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<randomForest>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<svm>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<lda>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  [`confusion(`*`<qda>`*`)`](https://andrisignorell.github.io/alloy/reference/classification-metrics.md)
+  : Classification Metrics of Fitted Models
+- [`mae(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`mse(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`rmse(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`mape(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`smape(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`mae(`*`<lm>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`mse(`*`<lm>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`rmse(`*`<lm>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`mape(`*`<lm>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  [`smape(`*`<lm>`*`)`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
+  : Prediction Errors of Fitted Regression Models
+- [`rocTest()`](https://andrisignorell.github.io/alloy/reference/rocTest.md)
+  : Test for the Difference of Two ROC Curves
 
 ## Model Fit & Coefficients
 
@@ -106,6 +143,7 @@ Several fitted models side by side, in a table or a plot.
 
 - [`tMod()`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   [`print(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
+  [`format(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   [`plot(`*`<TMod>`*`)`](https://andrisignorell.github.io/alloy/reference/tMod.md)
   : Compare multiple statistical models
 - [`tModSummary()`](https://andrisignorell.github.io/alloy/reference/tmodSummary.md)
