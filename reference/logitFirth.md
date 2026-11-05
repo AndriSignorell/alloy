@@ -80,6 +80,18 @@ A bound that cannot be found within a wide search range (the profile
 does not reach the critical value) is returned as `-Inf` or `Inf` with a
 warning.
 
+The profile intervals are computed once per model and confidence level
+and reused by later calls of
+[`confint()`](https://rdrr.io/r/stats/confint.html) and
+[`print()`](https://rdrr.io/r/base/print.html) in the same session. The
+stored results are identified by a SHA-256 hash of the content of the
+model (design matrix, response, weights, offset, estimates and level),
+not by the object, so a modified or refitted model does not get the
+results of another.
+
+A bound or test whose restricted fits do not converge is returned as
+`NA` with a warning, never from a fit that failed.
+
 ## References
 
 Firth, D. (1993) Bias reduction of maximum likelihood estimates.
@@ -109,10 +121,10 @@ if (requireNamespace("brglm2", quietly = TRUE)) {
   confint(fit)
 }
 #>                     2.5 %       97.5 %
-#> (Intercept) -6.1654650411 -1.733021721
-#> gre          0.0001124749  0.004365933
-#> gpa          0.1504196393  1.440833495
-#> rank2       -1.2847644285 -0.053262453
-#> rank3       -1.9975621774 -0.655065307
-#> rank4       -2.3448074019 -0.725328933
+#> (Intercept) -6.1654650253 -1.733021720
+#> gre          0.0001124756  0.004365933
+#> gpa          0.1504196325  1.440833492
+#> rank2       -1.2847644519 -0.053262454
+#> rank3       -1.9975621730 -0.655065299
+#> rank4       -2.3448073565 -0.725328931
 ```

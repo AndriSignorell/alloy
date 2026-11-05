@@ -17,7 +17,7 @@ fitMod(..., engine = "logitFirth").'><meta property="og:image" content="https://
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.927</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -123,6 +123,14 @@ are used.</p>
 <p>A bound that cannot be found within a wide search range (the profile
 does not reach the critical value) is returned as <code>-Inf</code> or <code>Inf</code> with
 a warning.</p>
+<p>The profile intervals are computed once per model and confidence level
+and reused by later calls of <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code> and <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> in the same
+session. The stored results are identified by a SHA-256 hash of the
+content of the model (design matrix, response, weights, offset,
+estimates and level), not by the object, so a modified or refitted
+model does not get the results of another.</p>
+<p>A bound or test whose restricted fits do not converge is returned as
+<code>NA</code> with a warning, never from a fit that failed.</p>
     </div>
     <div class="section level2">
     <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a></h2>
@@ -152,12 +160,12 @@ separation in logistic regression. <em>Statistics in Medicine</em> 21,
 <span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></span><span class="op">(</span><span class="va">fit</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>                     2.5 %       97.5 %</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) -6.1654650411 -1.733021721</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gre          0.0001124749  0.004365933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gpa          0.1504196393  1.440833495</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rank2       -1.2847644285 -0.053262453</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rank3       -1.9975621774 -0.655065307</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> rank4       -2.3448074019 -0.725328933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept) -6.1654650253 -1.733021720</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gre          0.0001124756  0.004365933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gpa          0.1504196325  1.440833492</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank2       -1.2847644519 -0.053262454</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank3       -1.9975621730 -0.655065299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> rank4       -2.3448073565 -0.725328931</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

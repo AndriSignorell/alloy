@@ -256,9 +256,9 @@ if (requireNamespace("betareg", quietly = TRUE)) {
 #> temp            0.009    0.007   0.011  < 0.001  ***
 #> 
 #> Precision model (log link):
-#>              estimate  95%-lci     uci  p-val     
-#> (Intercept)     3.710    1.302   6.118  0.003  ** 
-#> temp            0.001   -0.006   0.008  0.869     
+#>              estimate  95%-lci    uci  p-val     
+#> (Intercept)     3.710    1.302  6.118  0.003  ** 
+#> temp            0.001   -0.006  0.008  0.869     
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 
@@ -276,15 +276,16 @@ if (requireNamespace("brglm2", quietly = TRUE)) {
 #> 
 #> Coefficients:
 #>                 estimate  95%-lci     uci    p-val     
-#> (Intercept)       -3.908   -6.131  -1.685  < 0.001  ***
-#> gre                0.002    0.000   0.004    0.042  *  
-#> gpa                0.788    0.140   1.435    0.017  *  
+#> (Intercept)       -3.908   -6.165  -1.733  < 0.001  ***
+#> gre                0.002    0.000   0.004    0.039  *  
+#> gpa                0.788    0.150   1.441    0.015  *  
 #> rank  (ref: 1)         .        .       .  < 0.001  ***
-#> rank 2            -0.666   -1.285  -0.046    0.035  *  
-#> rank 3            -1.318   -1.993  -0.643  < 0.001  ***
-#> rank 4            -1.511   -2.324  -0.698  < 0.001  ***
+#> rank 2            -0.666   -1.285  -0.053    0.033  *  
+#> rank 3            -1.318   -1.998  -0.655  < 0.001  ***
+#> rank 4            -1.511   -2.345  -0.725  < 0.001  ***
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> CI: profile penalized likelihood, p: penalized likelihood ratio test 
 #> 
 #> Obs (NAs): 400 (0)   Pseudo R² (McFadden): 0.083   AIC: 470.547
 #> 

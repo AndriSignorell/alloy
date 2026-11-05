@@ -15,7 +15,7 @@ print(
   pdigits = 3,
   conf.level = 0.95,
   output = NULL,
-  useProfile = FALSE,
+  useProfile = NULL,
   vcov = NULL,
   ...
 )
@@ -88,10 +88,15 @@ print(
 
   Logical. If `TRUE` and the model is a `glm`, profile-likelihood
   confidence intervals are computed via
-  [`confint`](https://rdrr.io/r/stats/confint.html). Otherwise (default)
-  Wald intervals via
-  [`confint.default`](https://rdrr.io/r/stats/confint.html) are used.
-  Ignored for non-GLM models.
+  [`confint`](https://rdrr.io/r/stats/confint.html), otherwise Wald
+  intervals via
+  [`confint.default`](https://rdrr.io/r/stats/confint.html). For Firth
+  logistic regression (`engine = "logitFirth"`) the intervals are then
+  the profile penalized likelihood intervals and the p-values those of
+  the penalized likelihood ratio tests, see
+  [`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md).
+  If `NULL` (default), `TRUE` for Firth logistic regression and `FALSE`
+  for all other models. Ignored for non-GLM models.
 
 - vcov:
 
@@ -124,6 +129,13 @@ header row.
 For negative binomial models an additional overdispersion block is
 printed showing the parameter \\\alpha = 1/\theta\\ (Stata convention)
 with a one-sided likelihood-ratio test against the Poisson model.
+
+For Firth logistic regression the profile penalized likelihood intervals
+and tests are the default, as in logistf: the Wald intervals are
+unreliable for the sparse or separated data Firth's method is used for.
+They are computed once per model and confidence level and reused by
+later calls of [`print()`](https://rdrr.io/r/base/print.html) and
+[`confint()`](https://rdrr.io/r/stats/confint.html).
 
 For quasi-Poisson and quasi-binomial models, pseudo-R\\^2\\ and AIC are
 not available and a note is displayed instead.
@@ -318,10 +330,10 @@ print(fitWei)
 #>     age, data = Whas100, dist = "weibull")
 #> 
 #> Time Ratios:
-#>                       TR      95%-lci          uci    p-val     
-#> (Intercept)   187314.776    16083.711  2181513.001  < 0.001  ***
-#> gender             0.746        0.350        1.591    0.449     
-#> age                0.946        0.915        0.978    0.001  ** 
+#>                      TR    95%-lci          uci    p-val     
+#> (Intercept)  187314.776  16083.711  2181513.001  < 0.001  ***
+#> gender            0.746      0.350        1.591    0.449     
+#> age               0.946      0.915        0.978    0.001  ** 
 #> ---
 #> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 #> 

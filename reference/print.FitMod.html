@@ -19,7 +19,7 @@ across all supported model types and loosely follows Stata conventions.'><meta p
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.926</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.927</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@ across all supported model types and loosely follows Stata conventions.</p>
 <span>  pdigits <span class="op">=</span> <span class="fl">3</span>,</span>
 <span>  conf.level <span class="op">=</span> <span class="fl">0.95</span>,</span>
 <span>  output <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  useProfile <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  useProfile <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  vcov <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -130,9 +130,13 @@ based on the model class.</p></dd>
 <dt id="arg-useprofile">useProfile<a class="anchor" aria-label="anchor" href="#arg-useprofile"></a></dt>
 <dd><p>Logical.  If <code>TRUE</code> and the model is a
 <code>glm</code>, profile-likelihood confidence intervals are computed via
-<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></code>.  Otherwise (default) Wald intervals via
-<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint.default</a></code> are used.  Ignored for non-GLM
-models.</p></dd>
+<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint</a></code>, otherwise Wald intervals via
+<code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint.default</a></code>.  For Firth logistic regression
+(<code>engine = "logitFirth"</code>) the intervals are then the profile
+penalized likelihood intervals and the p-values those of the
+penalized likelihood ratio tests, see <code><a href="logitFirth.html">logitFirth</a></code>.
+If <code>NULL</code> (default), <code>TRUE</code> for Firth logistic regression
+and <code>FALSE</code> for all other models.  Ignored for non-GLM models.</p></dd>
 
 
 <dt id="arg-vcov">vcov<a class="anchor" aria-label="anchor" href="#arg-vcov"></a></dt>
@@ -165,6 +169,11 @@ category and are printed without a header row.</p>
 printed showing the parameter \(\alpha = 1/\theta\) (Stata
 convention) with a one-sided likelihood-ratio test against the Poisson
 model.</p>
+<p>For Firth logistic regression the profile penalized likelihood
+intervals and tests are the default, as in <span class="pkg">logistf</span>: the Wald
+intervals are unreliable for the sparse or separated data Firth's method
+is used for.  They are computed once per model and confidence level and
+reused by later calls of <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code> and <code><a href="https://rdrr.io/r/stats/confint.html" class="external-link">confint()</a></code>.</p>
 <p>For quasi-Poisson and quasi-binomial models, pseudo-R\(^2\) and AIC
 are not available and a note is displayed instead.</p>
 <p>For beta regressions the mean model and the precision model are printed
@@ -354,10 +363,10 @@ predictor and the link-transformed response).</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     age, data = Whas100, dist = "weibull")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Time Ratios:</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>                       TR      95%-lci          uci    p-val     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)   187314.776    16083.711  2181513.001  &lt; 0.001  ***</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> gender             0.746        0.350        1.591    0.449     </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> age                0.946        0.915        0.978    0.001  ** </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                      TR    95%-lci          uci    p-val     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> (Intercept)  187314.776  16083.711  2181513.001  &lt; 0.001  ***</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> gender            0.746      0.350        1.591    0.449     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> age               0.946      0.915        0.978    0.001  ** </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> ---</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
