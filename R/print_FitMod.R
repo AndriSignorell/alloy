@@ -34,9 +34,13 @@
 #'   based on the model class.
 #' @param useProfile Logical.  If \code{TRUE} and the model is a
 #'   \code{glm}, profile-likelihood confidence intervals are computed via
-#'   \code{\link[stats]{confint}}.  Otherwise (default) Wald intervals via
-#'   \code{\link[stats]{confint.default}} are used.  Ignored for non-GLM
-#'   models.
+#'   \code{\link[stats]{confint}}, otherwise Wald intervals via
+#'   \code{\link[stats]{confint.default}}.  For Firth logistic regression
+#'   (\code{engine = "logitFirth"}) the intervals are then the profile
+#'   penalized likelihood intervals and the p-values those of the
+#'   penalized likelihood ratio tests, see \code{\link{logitFirth}}.
+#'   If \code{NULL} (default), \code{TRUE} for Firth logistic regression
+#'   and \code{FALSE} for all other models.  Ignored for non-GLM models.
 #' @param vcov Character string specifying the type of
 #'   heteroscedasticity-consistent covariance matrix to use for standard
 #'   errors, e.g. \code{"HC3"} (recommended), \code{"HC0"}, \code{"HC1"}.
@@ -60,6 +64,12 @@
 #' printed showing the parameter \eqn{\alpha = 1/\theta} (Stata
 #' convention) with a one-sided likelihood-ratio test against the Poisson
 #' model.
+#'
+#' For Firth logistic regression the profile penalized likelihood
+#' intervals and tests are the default, as in \pkg{logistf}: the Wald
+#' intervals are unreliable for the sparse or separated data Firth's method
+#' is used for.  They are computed once per model and confidence level and
+#' reused by later calls of \code{print()} and \code{confint()}.
 #'
 #' For quasi-Poisson and quasi-binomial models, pseudo-R\eqn{^2} and AIC
 #' are not available and a note is displayed instead.
@@ -107,9 +117,12 @@
 print.FitMod <- function(x, digits = 3, pdigits = 3,
                          conf.level = 0.95,
                          output = NULL,
-                         useProfile = FALSE,
+                         useProfile = NULL,
                          vcov = NULL,
                          ...) {
+  
+  if (is.null(useProfile))
+    useProfile <- inherits(x, "logitFirth")
   
   # Determine model-appropriate default if output not specified
   if (is.null(output)) {
@@ -182,8 +195,11 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
   isGLM   <- inherits(x, "glm")
   isLMROB <- inherits(x, "lmrob")
   xx      <- summary(x)
+  ciNote  <- NULL
   
   # --- override SE/CI/p-values with sandwich estimator if requested ---
+  # (if vcovHC() fails, V stays NULL and the standard CI below apply)
+  V <- NULL
   if (!is.null(vcov)) {
     if (!requireNamespace("sandwich", quietly = TRUE))
       stop("Package 'sandwich' must be installed for robust standard errors")
@@ -216,23 +232,41 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
       xx$coefficients[, if (isGLM) "z value" else "t value"] <- tval
       xx$coefficients[, 4L]                               <- pval
     }
-  } else {
-    ci <- if (useProfile && isGLM)
-      confint(x, level = conf.level)
-    else
-      confint.default(x, level = conf.level)
+  }
+
+  if (is.null(V)) {
+    if (useProfile && inherits(x, "logitFirth") &&
+        .isJeffreysLogit(x) && !anyNA(coef(x))) {
+      # profile penalized likelihood intervals and the coefficient-wise
+      # penalized LR tests - the test consistent with the interval
+      inf <- .firthInference(x, level = conf.level,
+                             ci = seq_along(coef(x)), pval = TRUE)
+      ci  <- inf$ci
+      xx$coefficients[, 4L] <- inf$p
+      ciNote <- paste("CI: profile penalized likelihood,",
+                      "p: penalized likelihood ratio test")
+    } else if (useProfile && isGLM) {
+      ci     <- confint(x, level = conf.level)
+      ciNote <- "CI: profile likelihood, p: Wald test"
+    } else {
+      ci <- confint.default(x, level = conf.level)
+    }
   }
   
   ref <- .refLevels(x, strict = FALSE)
   
   # --- overall p-values per predictor via drop1 ---
+  # only for the factors (header rows) that drop1() would test anyway
+  # (marginality), each test is a refit; the others stay NA
   # lmrob has no drop1 method: robust Wald test per factor
+  sc <- intersect(names(ref), drop.scope(x))
   anova_p <- if (isLMROB) {
     .wald_terms(x, names(ref))
-  } else if (isGLM) {
-    drop1(x, test = "Chisq")[names(ref), "Pr(>Chi)"]
+  } else if (length(sc) == 0L) {
+    rep(NA_real_, length(ref))
   } else {
-    drop1(x, test = "F")[names(ref), "Pr(>F)"]
+    tab <- drop1(x, scope = sc, test = if (isGLM) "Chisq" else "F")
+    tab[names(ref), if (isGLM) "Pr(>Chi)" else "Pr(>F)"]
   }
   
   # --- header ---
@@ -300,6 +334,8 @@ print.FitMod <- function(x, digits = 3, pdigits = 3,
     
     print(out, quote = FALSE, right = TRUE, print.gap = 2L)
     cat("---\nSignif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1\n")
+    if (!is.null(ciNote))
+      cat(ciNote, "\n")
   }
   
   

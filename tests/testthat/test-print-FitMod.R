@@ -125,3 +125,37 @@ test_that("polr intervals follow conf.level", {
   expect_equal(xx$coefficients$uci,
                unname(exp(confint.default(fit, level = 0.8)[, 2L])))
 })
+
+
+test_that("header tests come from drop1() restricted to the factors", {
+  # drop1() is called with scope = the factors only; the p-value must be
+  # the one of the full drop1() table
+  fit <- fitMod(Sepal.Length ~ Species + Petal.Width * Sepal.Width,
+                data = iris, engine = "lm")
+  hdr <- headerRow(capture.output(print(fit)), "Species")
+  expect_length(hdr, 1L)
+  expect_true(grepl(
+    pharos::fm(drop1(fit, test = "F")["Species", "Pr(>F)"], fmt = "p",
+               pThreshold = 1e-3, digits = 3),
+    hdr, fixed = TRUE
+  ))
+
+  # a factor inside an interaction is not tested (marginality), as before
+  fit <- fitMod(Sepal.Length ~ Species * Petal.Width, data = iris,
+                engine = "lm")
+  expect_no_error(out <- capture.output(print(fit)))
+  expect_length(headerRow(out, "Species"), 1L)
+})
+
+
+test_that("a failing vcovHC() falls back to the standard intervals", {
+  skip_if_not_installed("sandwich")
+  local_mocked_bindings(vcovHC = function(...) stop("not for this class"),
+                        .package = "sandwich")
+
+  fit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
+  expect_warning(out <- capture.output(print(fit, vcov = "HC3")),
+                 "falling back to standard SE")
+  expect_true(grepl(pharos::fm(confint.default(fit)["gpa", 2L], digits = 3),
+                    grep("^gpa ", out, value = TRUE), fixed = TRUE))
+})

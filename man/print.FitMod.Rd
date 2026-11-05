@@ -10,7 +10,7 @@
   pdigits = 3,
   conf.level = 0.95,
   output = NULL,
-  useProfile = FALSE,
+  useProfile = NULL,
   vcov = NULL,
   ...
 )
@@ -49,9 +49,13 @@ based on the model class.}
 
 \item{useProfile}{Logical.  If \code{TRUE} and the model is a
 \code{glm}, profile-likelihood confidence intervals are computed via
-\code{\link[stats]{confint}}.  Otherwise (default) Wald intervals via
-\code{\link[stats]{confint.default}} are used.  Ignored for non-GLM
-models.}
+\code{\link[stats]{confint}}, otherwise Wald intervals via
+\code{\link[stats]{confint.default}}.  For Firth logistic regression
+(\code{engine = "logitFirth"}) the intervals are then the profile
+penalized likelihood intervals and the p-values those of the
+penalized likelihood ratio tests, see \code{\link{logitFirth}}.
+If \code{NULL} (default), \code{TRUE} for Firth logistic regression
+and \code{FALSE} for all other models.  Ignored for non-GLM models.}
 
 \item{vcov}{Character string specifying the type of
 heteroscedasticity-consistent covariance matrix to use for standard
@@ -84,6 +88,12 @@ For negative binomial models an additional overdispersion block is
 printed showing the parameter \eqn{\alpha = 1/\theta} (Stata
 convention) with a one-sided likelihood-ratio test against the Poisson
 model.
+
+For Firth logistic regression the profile penalized likelihood
+intervals and tests are the default, as in \pkg{logistf}: the Wald
+intervals are unreliable for the sparse or separated data Firth's method
+is used for.  They are computed once per model and confidence level and
+reused by later calls of \code{print()} and \code{confint()}.
 
 For quasi-Poisson and quasi-binomial models, pseudo-R\eqn{^2} and AIC
 are not available and a note is displayed instead.

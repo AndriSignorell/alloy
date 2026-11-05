@@ -18,6 +18,10 @@
 # removed - as drop1.brglmFit() does - is not the same test. brglm2's own
 # confint() method gives Wald intervals, which fail exactly where Firth's
 # method is needed: near separation.
+#
+# The profile intervals and the coefficient-wise tests are memoized in
+# .firthCache, keyed by the content of the model (see .firthKey), so that
+# print() and confint() of the same fit compute them only once.
 
 
 #' Penalized Likelihood Inference for Firth Logistic Regression
@@ -63,6 +67,16 @@
 #' does not reach the critical value) is returned as `-Inf` or `Inf` with
 #' a warning.
 #'
+#' The profile intervals are computed once per model and confidence level
+#' and reused by later calls of `confint()` and `print()` in the same
+#' session. The stored results are identified by a SHA-256 hash of the
+#' content of the model (design matrix, response, weights, offset,
+#' estimates and level), not by the object, so a modified or refitted
+#' model does not get the results of another.
+#'
+#' A bound or test whose restricted fits do not converge is returned as
+#' `NA` with a warning, never from a fit that failed.
+#'
 #' @return `drop1()` returns an object of class `"anova"` with the columns
 #' `Df`, `PLR` (the penalized likelihood ratio statistic) and, for
 #' `test = "Chisq"`, `Pr(>Chi)`. `confint()` returns a matrix with one row
@@ -99,10 +113,8 @@ drop1.logitFirth <- function(object, scope, test = c("Chisq", "none"), ...) {
   if (!.isJeffreysLogit(object))
     return(NextMethod())
 
-  d <- .firthData(object)
-  full <- .firthFit(d, start = d$coef)
-
-  asgn <- attr(d$X, "assign")
+  inf  <- .firthInference(object)
+  asgn <- attr(inf$d$X, "assign")
   labs <- attr(stats::terms(object), "term.labels")
 
   if (missing(scope))
@@ -115,16 +127,11 @@ drop1.logitFirth <- function(object, scope, test = c("Chisq", "none"), ...) {
       stop("'scope' is not a subset of the term labels.")
   }
 
-  df <- plr <- numeric(length(scope))
-
-  for (i in seq_along(scope)) {
-    drop <- asgn == match(scope[i], labs)
-    start <- full$coef
-    start[drop] <- 0
-    red <- .firthFit(d, start = start, free = !drop)
-    df[i] <- sum(drop)
-    plr[i] <- max(0, 2 * (full$loglik - red$loglik))
-  }
+  drops <- lapply(scope, function(s) asgn == match(s, labs))
+  df    <- vapply(drops, sum, numeric(1L))
+  plr   <- vapply(drops, function(drop) .firthPLR(inf$d, inf$full, drop),
+                  numeric(1L))
+  .firthWarnFailed(scope[is.na(plr)], "penalized LR test")
 
   res <- data.frame(Df = c(NA, df), PLR = c(NA, plr),
                     row.names = c("<none>", scope), check.names = FALSE)
@@ -145,10 +152,7 @@ confint.logitFirth <- function(object, parm, level = 0.95, ...) {
   if (!.isJeffreysLogit(object))
     return(NextMethod())
 
-  d <- .firthData(object)
-  full <- .firthFit(d, start = d$coef)
-  cf <- full$coef
-
+  cf <- stats::coef(object)
   if (missing(parm))
     parm <- seq_along(cf)
   else if (is.character(parm))
@@ -156,18 +160,11 @@ confint.logitFirth <- function(object, parm, level = 0.95, ...) {
   if (anyNA(parm) || any(parm < 1L | parm > length(cf)))
     stop("'parm' does not match the coefficients.")
 
-  crit <- stats::qchisq(level, 1)
-  se <- sqrt(diag(solve(full$info)))
-
-  ci <- t(vapply(parm, function(j)
-    c(.firthProfileBound(d, full, j, -1, crit, se[j]),
-      .firthProfileBound(d, full, j,  1, crit, se[j])),
-    numeric(2L)))
-
+  ci <- .firthInference(object, level = level, ci = parm)$ci[parm, ,
+                                                             drop = FALSE]
   a <- (1 - level) / 2
-  dimnames(ci) <- list(names(cf)[parm],
-                       paste(format(100 * c(a, 1 - a), trim = TRUE,
-                                    scientific = FALSE, digits = 3), "%"))
+  colnames(ci) <- paste(format(100 * c(a, 1 - a), trim = TRUE,
+                               scientific = FALSE, digits = 3), "%")
   ci
 }
 
@@ -208,8 +205,149 @@ confint.logitFirth <- function(object, parm, level = 0.95, ...) {
        y      = as.numeric(object$y),
        w      = if (is.null(w)) rep(1, n) else as.numeric(w),
        offset = if (is.null(off)) rep(0, n) else as.numeric(off),
-       coef   = cf,
-       ctrl   = object$control)
+       coef   = cf)
+}
+
+
+# -------------------------------------------------------------------------
+# Memoized inference
+# -------------------------------------------------------------------------
+
+# Results per model and confidence level. The key is a hash of the
+# content of the model, so there is nothing to invalidate: a model that
+# differs in data, weights, offset or estimates gets a different key, and
+# copies of an object share results only as long as they are equal. Only
+# converged results are reused; failed bounds and tests are stored as NA
+# and computed again on the next request. The store is bounded, the least
+# recently used entry is dropped first.
+.firthCache    <- new.env(parent = emptyenv())
+.firthCacheMax <- 20L
+
+
+# SHA-256 of the complete content that determines the results: design
+# matrix (with its names and term assignment), response, weights, offset,
+# estimates and confidence level. Equal keys mean equal input, up to a
+# hash collision.
+.firthKey <- function(d, level) {
+  tools::sha256sum(bytes = serialize(
+    list(d$X, d$y, d$w, d$offset, d$coef, level), connection = NULL))
+}
+
+
+# A Firth fit that failed (singular information, no convergence): the
+# inference that needs it is set to NA instead of using an invalid fit
+.firthFail <- function(msg)
+  stop(errorCondition(msg, class = "firthFailure"))
+
+
+# Full fit, profile intervals and coefficient-wise penalized LR tests of a
+# Firth model. Intervals are computed for the coefficients in 'ci' and
+# p-values if 'pval' is TRUE, both only where they are not stored yet.
+# drop1() needs neither, only d and full.
+.firthInference <- function(object, level = 0.95, ci = integer(0L),
+                            pval = FALSE) {
+
+  d   <- .firthData(object)
+  key <- .firthKey(d, level)
+  inf <- .firthCache[[key]]
+
+  if (is.null(inf)) {
+    full <- .firthFit(d, start = d$coef)
+    if (!full$converged)
+      stop("the Firth fit does not converge from its own estimates; no ",
+           "penalized likelihood inference.", call. = FALSE)
+    k    <- length(full$coef)
+    inf  <- list(full = full,
+                 ci = matrix(NA_real_, k, 2L,
+                             dimnames = list(names(full$coef), NULL)),
+                 p  = stats::setNames(rep(NA_real_, k), names(full$coef)))
+  }
+
+  nms  <- names(inf$full$coef)
+  todo <- ci[rowSums(is.na(inf$ci[ci, , drop = FALSE])) > 0L]
+  if (length(todo)) {
+    crit <- stats::qchisq(level, 1)
+    se   <- sqrt(diag(solve(inf$full$info)))
+    for (j in todo)
+      inf$ci[j, ] <- vapply(c(-1, 1), function(dir) tryCatch(
+        .firthProfileBound(d, inf$full, j, dir, crit, se[j]),
+        firthFailure = function(e) NA_real_), numeric(1L))
+    .firthWarnFailed(nms[todo][rowSums(is.na(inf$ci[todo, , drop = FALSE])) >
+                                 0L], "profile interval")
+  }
+
+  if (pval && anyNA(inf$p)) {
+    todo <- which(is.na(inf$p))
+    for (j in todo)
+      inf$p[j] <- stats::pchisq(.firthPLR(d, inf$full, seq_along(nms) == j),
+                                1, lower.tail = FALSE)
+    .firthWarnFailed(nms[todo][is.na(inf$p[todo])], "penalized LR test")
+  }
+
+  .firthStore(key, inf)
+
+  # the data are not stored (n x p), the caller gets them along
+  c(list(d = d), inf)
+}
+
+
+# Store an entry as the most recently used one; beyond .firthCacheMax
+# entries the least recently used is dropped. The order is kept in
+# .firthCache$.keys (a dot name, not one of the keys).
+.firthStore <- function(key, inf) {
+  keys <- c(setdiff(.firthCache$.keys, key), key)
+  if (length(keys) > .firthCacheMax) {
+    rm(list = keys[1L], envir = .firthCache)
+    keys <- keys[-1L]
+  }
+  .firthCache$.keys <- keys
+  assign(key, inf, envir = .firthCache)
+}
+
+
+.firthWarnFailed <- function(what, kind) {
+  if (length(what))
+    warning("the restricted Firth fit failed, no ", kind, " for: ",
+            paste(what, collapse = ", "), ".", call. = FALSE)
+}
+
+
+# Coefficient-wise (or term-wise, for a logical 'drop' with several TRUE)
+# penalized likelihood ratio statistic for beta[drop] = 0; NA if the
+# restricted fit fails
+.firthPLR <- function(d, full, drop) {
+  start <- full$coef
+  start[drop] <- 0
+  red <- tryCatch(.firthFit(d, start = start, free = !drop),
+                  firthFailure = function(e) NULL)
+  if (is.null(red) || !red$converged)
+    return(NA_real_)
+  max(0, 2 * (full$loglik - red$loglik))
+}
+
+
+# -------------------------------------------------------------------------
+# Fitting
+# -------------------------------------------------------------------------
+
+# Penalized log-likelihood at beta, with what the Newton step needs.
+# The information X'WX is factored by Cholesky (C'C = X'WX): its log
+# determinant gives the penalty, and the leverages h follow from the same
+# factor - one O(n p^2) cross product instead of two QR decompositions.
+.firthEval <- function(d, beta) {
+
+  eta <- drop(d$X %*% beta) + d$offset
+  p   <- stats::plogis(eta)
+  XW  <- d$X * sqrt(d$w * p * (1 - p))
+  C   <- tryCatch(chol(crossprod(XW)), error = function(e) NULL)
+
+  if (is.null(C))
+    return(list(beta = beta, loglik = -Inf))
+
+  list(beta = beta, p = p, XW = XW, C = C,
+       loglik = sum(d$w * (d$y * stats::plogis(eta, log.p = TRUE) +
+                             (1 - d$y) * stats::plogis(-eta, log.p = TRUE))) +
+         sum(log(diag(C))))    # 1/2 log|X'WX|
 }
 
 
@@ -217,94 +355,139 @@ confint.logitFirth <- function(object, parm, level = 0.95, ...) {
 # the score is modified by the leverages h of the FULL design, only the
 # coefficients flagged 'free' are updated, the others stay at 'start'.
 # Steps are capped and halved until the penalized log-likelihood rises.
+# The result carries 'converged'; a fit that did not converge must not be
+# used for inference.
 .firthFit <- function(d, start, free = rep(TRUE, length(start)),
                       maxit = 100L, tol = 1e-8, maxStep = 5) {
 
-  X <- d$X
-  beta <- stats::setNames(as.numeric(start), colnames(X))
+  cur <- .firthEval(d, stats::setNames(as.numeric(start), colnames(d$X)))
+  if (!is.finite(cur$loglik))
+    .firthFail("the information matrix is singular at the start values.")
 
-  lstar <- function(beta) {
-    eta <- drop(X %*% beta) + d$offset
-    p <- stats::plogis(eta)
-    W <- d$w * p * (1 - p)
-    R <- qr.R(qr(X * sqrt(W)))
-    list(p = p, W = W,
-         loglik = sum(d$w * (d$y * stats::plogis(eta, log.p = TRUE) +
-                             (1 - d$y) * stats::plogis(-eta, log.p = TRUE))) +
-           sum(log(abs(diag(R)))))    # 1/2 log|X'WX|
-  }
-
-  cur <- lstar(beta)
   converged <- !any(free)
 
   for (it in seq_len(maxit)) {
 
-    if (!any(free)) break
+    if (converged) break
 
-    XW <- X * sqrt(cur$W)
-    Q <- qr.Q(qr(XW))
-    h <- rowSums(Q^2)
-    U <- drop(crossprod(X, d$w * (d$y - cur$p) + h * (0.5 - cur$p)))
-    info <- crossprod(XW)
+    # h_i = ||C'^-1 xw_i||^2, the diagonal of XW (X'WX)^-1 XW'
+    h <- colSums(backsolve(cur$C, t(cur$XW), transpose = TRUE)^2)
+    U <- drop(crossprod(d$X, d$w * (d$y - cur$p) + h * (0.5 - cur$p)))
 
     if (max(abs(U[free])) < tol) {
       converged <- TRUE
       break
     }
 
-    delta <- numeric(length(beta))
-    delta[free] <- solve(info[free, free, drop = FALSE], U[free])
+    delta <- numeric(length(U))
+    delta[free] <- solve(crossprod(cur$C)[free, free, drop = FALSE],
+                         U[free])
     if ((mx <- max(abs(delta))) > maxStep)
       delta <- delta * maxStep / mx
 
     for (k in 0:25) {
-      new <- lstar(beta + delta)
-      if (is.finite(new$loglik) && new$loglik >= cur$loglik - 1e-10) break
+      new <- .firthEval(d, cur$beta + delta)
+      if (new$loglik >= cur$loglik - 1e-10) break
       delta <- delta / 2
     }
-
-    beta <- beta + delta
-    cur <- new
+    if (is.finite(new$loglik))
+      cur <- new
   }
 
-  if (!converged)
-    warning("the Firth fit did not converge in ", maxit, " iterations.",
-            call. = FALSE)
-
-  list(coef = beta, loglik = cur$loglik,
-       info = crossprod(X * sqrt(cur$W)), converged = converged)
+  # no warning here: the callers decide what a failed fit means
+  list(coef = cur$beta, loglik = cur$loglik,
+       info = crossprod(cur$C), converged = converged)
 }
 
 
 # One bound of the profile penalized likelihood interval of coefficient j:
-# the root of 2 * (l*max - l*(beta_j = b)) - crit on the side 'dir'
+# the value b on the side 'dir' with 2 * (l*max - l*(beta_j = b)) = crit.
+#
+# The root is searched on the signed root scale,
+# sqrt(2 * (l*max - l*(b))) - sqrt(crit), which is close to linear in b
+# (exactly so for a quadratic profile), so a secant search needs only a
+# few profile fits. The bracket starts at the Wald bound, which is usually
+# close, and is widened by linear extrapolation on this scale until the
+# profile crosses the critical value. Every profile fit starts from the solution
+# of the previous one (warm start), which saves most of the Newton
+# iterations.
 .firthProfileBound <- function(d, full, j, dir, crit, se) {
 
-  est <- full$coef[j]
+  est  <- full$coef[[j]]
   free <- seq_along(full$coef) != j
+  last <- full$coef
+  rc   <- sqrt(crit)
 
+  # first-order shift of the other coefficients when beta_j moves by 1:
+  # -I_ff^-1 I_fj (the slope of the profile path at the estimate)
+  # (empty for a model with a single coefficient, e.g. y ~ 1)
+  slope <- if (any(free))
+    -solve(full$info[free, free, drop = FALSE], full$info[free, j])
+  else
+    numeric(0L)
+
+  # profile fits that do not converge make the bound fail (NA), they are
+  # never used as a point of the profile
   dev <- function(b) {
-    start <- full$coef
-    start[j] <- b
-    fit <- .firthFit(d, start = start, free = free)
-    2 * (full$loglik - fit$loglik) - crit
+    start       <- last
+    start[free] <- last[free] + slope * (b - last[[j]])
+    start[j]    <- b
+    fit  <- .firthFit(d, start = start, free = free)
+    if (!fit$converged)
+      .firthFail("a profile fit did not converge.")
+    last <<- fit$coef
+    sqrt(max(0, 2 * (full$loglik - fit$loglik))) - rc
   }
 
-  # bracket the root by doubling the distance from the estimate
-  step <- max(se, 1e-4) * 2
-  b <- est + dir * step
+  inner  <- est
+  fInner <- -rc
+  step   <- max(se, 1e-4) * rc
+
   for (k in 1:30) {
-    if (dev(b) > 0) break
-    step <- step * 2
-    b <- est + dir * step
+    outer  <- est + dir * step
+    fOuter <- dev(outer)
+    if (fOuter > 0) break
+    inner  <- outer
+    fInner <- fOuter
+    # extrapolate linearly on the root scale (from the estimate, where it
+    # is -rc) with a 5% overshoot to get past the root; at most a factor
+    # of 4, the profile may flatten (near separation)
+    step   <- step * min(4, 1.05 * rc / (fOuter + rc))
     if (k == 30L) {
       warning(gettextf(
         "the profile of '%s' does not reach the critical value; ",
-        names(est)), "the bound is set to ", if (dir < 0) "-Inf" else "Inf",
-        ".", call. = FALSE)
+        names(full$coef)[j]), "the bound is set to ",
+        if (dir < 0) "-Inf" else "Inf", ".", call. = FALSE)
       return(dir * Inf)
     }
   }
 
-  stats::uniroot(dev, sort(c(est, b)), tol = 1e-7)$root
+  # Illinois variant of regula falsi: on the near-linear root scale the
+  # secant lands close to the root at once. The value at the retained end
+  # is halved only when the same end is kept twice in a row, which keeps
+  # the convergence superlinear and the bracket shrinking from both sides.
+  side <- 0
+  b    <- outer
+  for (k in 1:50) {
+    bOld <- b
+    b    <- outer - fOuter * (outer - inner) / (fOuter - fInner)
+    # converged when the secant step itself is below the tolerance: the
+    # step overestimates the remaining error, no further fit is needed
+    if (k > 1L && abs(b - bOld) < 1e-7)
+      return(b)
+    fb   <- dev(b)
+    if (fb > 0) {
+      outer  <- b
+      fOuter <- fb
+      if (side > 0) fInner <- fInner / 2
+      side <- 1
+    } else {
+      inner  <- b
+      fInner <- fb
+      if (side < 0) fOuter <- fOuter / 2
+      side <- -1
+    }
+  }
+
+  .firthFail("the profile root search did not converge.")
 }

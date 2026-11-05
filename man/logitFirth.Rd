@@ -63,6 +63,16 @@ are used.
 A bound that cannot be found within a wide search range (the profile
 does not reach the critical value) is returned as \code{-Inf} or \code{Inf} with
 a warning.
+
+The profile intervals are computed once per model and confidence level
+and reused by later calls of \code{confint()} and \code{print()} in the same
+session. The stored results are identified by a SHA-256 hash of the
+content of the model (design matrix, response, weights, offset,
+estimates and level), not by the object, so a modified or refitted
+model does not get the results of another.
+
+A bound or test whose restricted fits do not converge is returned as
+\code{NA} with a warning, never from a fit that failed.
 }
 \examples{
 if (requireNamespace("brglm2", quietly = TRUE)) {
