@@ -156,6 +156,7 @@ Other modelling:
 \code{\link[=fitMod]{fitMod()}},
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
+\code{\link[=predictSql]{predictSql()}},
 \code{\link[=predictors]{predictors()}},
 \code{\link[=print.FitMod]{print.FitMod()}},
 \code{\link{regression-metrics}}

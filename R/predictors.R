@@ -1,3 +1,4 @@
+
 #' Predictors of a Fitted Model
 #'
 #' Returns the names of the terms on the right hand side of a fitted
@@ -45,20 +46,21 @@
 #'
 #' @export
 predictors <- function(fit, numeric = FALSE) {
-
+  
   fit <- .stripFitMod(fit)
-
+  
   labs <- attr(stats::terms(fit), "term.labels")
-
+  
   if (is.null(labs))
     return(character(0))
-
+  
   if (!numeric)
     return(labs)
-
+  
   mf <- stats::model.frame(fit)
-
+  
   labs[vapply(labs,
               function(nm) !is.null(mf[[nm]]) && is.numeric(mf[[nm]]),
               logical(1L))]
 }
+

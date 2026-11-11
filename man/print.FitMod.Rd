@@ -139,6 +139,7 @@ Other modelling:
 \code{\link{logitFirth}},
 \code{\link[=plot.FitMod]{plot.FitMod()}},
 \code{\link[=predict.FitMod]{predict.FitMod()}},
+\code{\link[=predictSql]{predictSql()}},
 \code{\link[=predictors]{predictors()}},
 \code{\link{regression-metrics}}
 }

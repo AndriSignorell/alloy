@@ -37,6 +37,7 @@ reference:
   - fitMod
   - print.FitMod
   - predict.FitMod
+  - predictSql
   - plot.FitMod
   - predictors
   - response

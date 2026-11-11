@@ -41,6 +41,7 @@ S3method(print,CP)
 S3method(print,CrossVal)
 S3method(print,FitMod)
 S3method(print,Lift)
+S3method(print,PredictSql)
 S3method(print,TMod)
 S3method(print,leafRates)
 S3method(print,node)
@@ -82,6 +83,7 @@ export(plotCalibration)
 export(plotInfluence)
 export(plotPartialResid)
 export(plotSeparation)
+export(predictSql)
 export(predictors)
 export(pseudoRSq)
 export(quantileResid)
@@ -99,6 +101,7 @@ export(tMod)
 export(tModSummary)
 export(varImp)
 export(vif)
+exportClasses(PredictSql)
 importFrom(DescToolsX,
   averagePrecision,
   brierScore,
@@ -131,6 +134,7 @@ importFrom(graphics,
   hist,
   par
 )
+importFrom(methods,setOldClass)
 importFrom(nnet,
   multinom,
   nnet

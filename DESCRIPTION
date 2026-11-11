@@ -1,7 +1,7 @@
 Package: alloy
 Type: Package
 Title: Unified Modeling Framework for Regression and Classification
-Version: 0.0.0.927
+Version: 0.0.0.928
 Authors@R: c(
   person("Andri", "Signorell", email = "andri@signorell.net", role = c("aut", "cre"))
   )
@@ -25,14 +25,15 @@ LinkingTo: Rcpp, RcppParallel, RcppArmadillo
 Roxygen: list(markdown = TRUE)
 Config/testthat/edition: 3
 Imports:
-    stats, MASS, survival, nnet, bedrock, pharos, DescToolsX
+    stats, MASS, survival, nnet, bedrock, pharos, DescToolsX, methods
 Suggests: 
     e1071, sandwich, C50, rpart, randomForest,
     naivebayes, glmnet, xgboost, robustbase, AER, pscl,
     rpart.plot, relaimpo, NeuralNetTools, pROC, boot, VGAM,
     MuMIn, lme4, haven, foreign, 
     R.rsp, testthat, knitr, rmarkdown,
-    betareg (>= 3.2-0), statmod, numDeriv, brglm2
+    betareg (>= 3.2-0), statmod, numDeriv, brglm2, 
+    DBI, RSQLite, duckdb
 Remotes: 
     AndriSignorell/pharos, AndriSignorell/DescToolsX
 VignetteBuilder: R.rsp, knitr
