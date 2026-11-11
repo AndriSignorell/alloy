@@ -13,6 +13,9 @@ whatever model was fitted underneath.
   : Print method for FitMod objects
 - [`predict(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md)
   : Predict method for FitMod objects
+- [`predictSql()`](https://andrisignorell.github.io/alloy/reference/predictSql.md)
+  [`print(`*`<PredictSql>`*`)`](https://andrisignorell.github.io/alloy/reference/predictSql.md)
+  : Translate the predictions of a model into SQL
 - [`plot(`*`<FitMod>`*`)`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md)
   : Diagnostic Plots for FitMod Models
 - [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md)

@@ -158,6 +158,7 @@ Other modelling:
 [`logitFirth`](https://andrisignorell.github.io/alloy/reference/logitFirth.md),
 [`plot.FitMod()`](https://andrisignorell.github.io/alloy/reference/plot.FitMod.md),
 [`predict.FitMod()`](https://andrisignorell.github.io/alloy/reference/predict.FitMod.md),
+[`predictSql()`](https://andrisignorell.github.io/alloy/reference/predictSql.md),
 [`predictors()`](https://andrisignorell.github.io/alloy/reference/predictors.md),
 [`regression-metrics`](https://andrisignorell.github.io/alloy/reference/regression-metrics.md)
 
