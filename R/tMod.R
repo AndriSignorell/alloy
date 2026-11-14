@@ -20,7 +20,14 @@
 #' the model object of the underlying fitting function.
 #'
 #' @param ... Fitted model objects
-#' @param FUN Formatting function applied to coefficients
+#' @param FUN Formatting function applied to the coefficients of each
+#'   model. It is called as
+#'   \code{FUN(est, se, tval, pval, lci, uci)} with six numeric vectors
+#'   of equal length (one element per coefficient: estimate, standard
+#'   error, test statistic, p-value, lower and upper confidence limit)
+#'   and must return a vector of the same length, typically character.
+#'   The arguments are matched by position. The default (\code{NULL})
+#'   shows the estimate followed by significance stars.
 #' @param order Optional ordering of models
 #' @param verbose Logical; if \code{TRUE}, show extended statistics
 #'
@@ -45,6 +52,19 @@
 #' g1 <- glm(am ~ wt, data = mtcars, family = binomial)
 #' g2 <- glm(am ~ wt + hp, data = mtcars, family = binomial)
 #' tMod(g1, g2)
+#'
+#' # --- Custom cell format: estimate with confidence interval ---
+#' # FUN receives the vectors est, se, tval, pval, lci, uci
+#' fci <- function(est, se, tval, pval, lci, uci)
+#'   pharos::fmCI(cbind(est, lci, uci), template = "%s (%s, %s)", digits = 3)
+#' tMod(m1, m2, FUN = fci)
+#'
+#' # odds ratios with confidence interval and significance stars
+#' forr <- function(est, se, tval, pval, lci, uci)
+#'   paste(pharos::fmCI(exp(cbind(est, lci, uci)),
+#'                      template = "%s (%s, %s)", digits = 2),
+#'         pharos::fm(pval, fmt = "*"))
+#' tMod(g1, g2, FUN = forr)
 #'
 #' # --- Survival models ---
 #' if(requireNamespace("survival", quietly = TRUE)){

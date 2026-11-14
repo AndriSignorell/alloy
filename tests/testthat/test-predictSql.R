@@ -440,3 +440,56 @@ test_that("beta regression", {
     expect_equal(sqlPredict(fit, dat, type = type)$PRED,
                  unname(predict(fit, newdata = dat, type = type)))
 })
+
+
+test_that("update by key is a MERGE with the predictor computed once", {
+  fit <- fitMod(am ~ wt + hp, cars, engine = "logit")
+  ref <- predict(fit, newdata = cars, output = "both")
+
+  mg <- predictSql(fit, "T1", output = "both", id = "ROW_ID")
+  expect_match(mg, "^MERGE INTO T1 t\nUSING \\(")
+  expect_match(mg, "ON (t.ROW_ID = q.ROW_ID)\nWHEN MATCHED THEN UPDATE SET",
+               fixed = TRUE)
+  expect_match(mg, "PRED_CLASS = q.PRED_CLASS;", fixed = TRUE)
+  expect_length(gregexpr("* wt", mg, fixed = TRUE)[[1L]], 1L)
+  expect_identical(attr(mg, "ddl"),
+                   attr(predictSql(fit, "T1", output = "both"), "ddl"))
+
+  # the source of the MERGE yields the predictions
+  src <- sub("\n\\) q\nON .*$", "", sub("^MERGE INTO T1 t\nUSING \\(\n", "",
+                                         as.character(mg)))
+  db  <- sqlTable(cars)
+  on.exit(DBI::dbDisconnect(db$con))
+  res <- DBI::dbGetQuery(db$con, db$fix(src))
+  res <- res[order(res$ROW_ID), ]
+  expect_equal(res$P_manual, ref$manual)
+  expect_identical(res$PRED_CLASS, as.character(ref$class))
+
+  # several key columns, qualified targets for Exasol
+  mg <- predictSql(fit, "T1", type = "response", id = c("A", "B"),
+                   dialect = "exasol")
+  expect_match(mg, "ON (t.A = q.A AND t.B = q.B)", fixed = TRUE)
+  expect_match(mg, "  t.PRED = q.PRED;", fixed = TRUE)
+})
+
+
+test_that("Exasol: update without a key merges on ROWID", {
+  fit <- fitMod(am ~ wt + hp, cars, engine = "logit")
+
+  mg <- predictSql(fit, "T1", type = "response", dialect = "exasol")
+  expect_match(mg, "SELECT ROWID AS ROW_ID_,", fixed = TRUE)
+  expect_match(mg, "ON (t.ROWID = q.ROW_ID_)", fixed = TRUE)
+  expect_length(gregexpr("* wt", mg, fixed = TRUE)[[1L]], 1L)
+
+  # a tree has a single stage per output: the key is renamed there too
+  skip_if_not_installed("rpart")
+  rp <- fitMod(mpg ~ wt + hp, cars, engine = "rpart")
+  expect_match(predictSql(rp, "T1", output = "leaf", dialect = "exasol"),
+               "SELECT ROWID AS ROW_ID_,", fixed = TRUE)
+
+  # the plain UPDATE on request, and always in the other dialects
+  expect_match(predictSql(fit, "T1", type = "response", dialect = "exasol",
+                          id = FALSE), "^UPDATE T1\nSET PRED =")
+  expect_match(predictSql(fit, "T1", type = "response"), "^UPDATE T1\nSET PRED =")
+  expect_error(predictSql(fit, "T1", id = 1), "'id' must be")
+})

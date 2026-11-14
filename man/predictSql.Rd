@@ -55,9 +55,14 @@ and survival models.}
 prediction, \code{P_<level>} for class probabilities and
 \code{PRED_CLASS} for the predicted class.}
 
-\item{id}{For \code{"select"} and \code{"create"}: the columns of
-\code{table} to return along with the predictions, typically the key.
-If \code{NULL} (default) all columns are returned.}
+\item{id}{The key of \code{table}, one or several column names.  For
+\code{"select"} and \code{"create"} these columns are returned along
+with the predictions (if \code{NULL}, the default, all columns are).
+For \code{"update"} a key turns the statement into a \code{MERGE}
+that computes the linear predictor only once, see Details; with
+\code{dialect = "exasol"} this is the default even without a key
+(the rows are then identified by \code{ROWID}), and
+\code{id = FALSE} asks for the plain \code{UPDATE}.}
 
 \item{target}{For \code{statement = "create"}: name of the new table.}
 
@@ -138,10 +143,22 @@ splits in SQL; a row whose split variable is \code{NULL} gets a
 existing columns of \code{table}; the columns must exist (the
 \code{ALTER TABLE} needed is in the attribute \code{"ddl"} of the
 result).  \code{"select"} and \code{"create"} return the predictions
-along with \code{id}; intermediate results that are needed more than
-once (the linear predictor, the leaf of a tree) are then computed in a
-subquery.  \code{"expr"} returns the bare expressions as a named
-character vector.
+along with \code{id}.  \code{"expr"} returns the bare expressions as a
+named character vector.
+
+\strong{Size of the SQL.}  Intermediate results - the linear predictor,
+the leaf of a tree - are needed several times: the inverse link refers
+to the linear predictor three times, a class probability of a
+multinomial model to all of them.  Without \code{id} each reference is
+written out, and the statement grows accordingly.  With \code{id} the
+intermediate results are computed once, in nested subqueries, and
+referred to by name.  For \code{"select"} and \code{"create"} the
+subqueries are the statement itself; for \code{"update"} they are the
+source of a \code{MERGE INTO table USING (...) ON (key)}, which
+requires \code{id} to identify the rows of \code{table} uniquely.  So
+give \code{id} whenever the table has a key.  In Exasol no key is
+needed: without \code{id} the \code{MERGE} joins on the pseudo column
+\code{ROWID}.
 
 \strong{Exasol.}  A logarithm of a value that is not positive, a square
 root of a negative value or a division by zero is an error in Exasol
@@ -166,6 +183,10 @@ fitLogit <- fitMod(admit ~ gre + gpa + rank, Admit, engine = "logit")
 # probability of the second class into an existing column
 predictSql(fitLogit, table = "LAB.ADMIT", type = "response",
            into = "P_ADMIT")
+
+# the same by key: a MERGE that computes the linear predictor once
+predictSql(fitLogit, table = "LAB.ADMIT", type = "response",
+           into = "P_ADMIT", id = "ID")
 
 # both class probabilities and the class, with the key
 predictSql(fitLogit, table = "LAB.ADMIT", output = "both",

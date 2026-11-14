@@ -32,9 +32,14 @@
 #'   \code{NULL} (default) they are \code{PRED} for a single numeric
 #'   prediction, \code{P_<level>} for class probabilities and
 #'   \code{PRED_CLASS} for the predicted class.
-#' @param id For \code{"select"} and \code{"create"}: the columns of
-#'   \code{table} to return along with the predictions, typically the key.
-#'   If \code{NULL} (default) all columns are returned.
+#' @param id The key of \code{table}, one or several column names.  For
+#'   \code{"select"} and \code{"create"} these columns are returned along
+#'   with the predictions (if \code{NULL}, the default, all columns are).
+#'   For \code{"update"} a key turns the statement into a \code{MERGE}
+#'   that computes the linear predictor only once, see Details; with
+#'   \code{dialect = "exasol"} this is the default even without a key
+#'   (the rows are then identified by \code{ROWID}), and
+#'   \code{id = FALSE} asks for the plain \code{UPDATE}.
 #' @param target For \code{statement = "create"}: name of the new table.
 #' @param vars Named character vector mapping variable names of the model
 #'   to column names of the database, e.g.
@@ -95,10 +100,22 @@
 #' existing columns of \code{table}; the columns must exist (the
 #' \code{ALTER TABLE} needed is in the attribute \code{"ddl"} of the
 #' result).  \code{"select"} and \code{"create"} return the predictions
-#' along with \code{id}; intermediate results that are needed more than
-#' once (the linear predictor, the leaf of a tree) are then computed in a
-#' subquery.  \code{"expr"} returns the bare expressions as a named
-#' character vector.
+#' along with \code{id}.  \code{"expr"} returns the bare expressions as a
+#' named character vector.
+#'
+#' \strong{Size of the SQL.}  Intermediate results - the linear predictor,
+#' the leaf of a tree - are needed several times: the inverse link refers
+#' to the linear predictor three times, a class probability of a
+#' multinomial model to all of them.  Without \code{id} each reference is
+#' written out, and the statement grows accordingly.  With \code{id} the
+#' intermediate results are computed once, in nested subqueries, and
+#' referred to by name.  For \code{"select"} and \code{"create"} the
+#' subqueries are the statement itself; for \code{"update"} they are the
+#' source of a \code{MERGE INTO table USING (...) ON (key)}, which
+#' requires \code{id} to identify the rows of \code{table} uniquely.  So
+#' give \code{id} whenever the table has a key.  In Exasol no key is
+#' needed: without \code{id} the \code{MERGE} joins on the pseudo column
+#' \code{ROWID}.
 #'
 #' \strong{Exasol.}  A logarithm of a value that is not positive, a square
 #' root of a negative value or a division by zero is an error in Exasol
@@ -128,6 +145,10 @@
 #' # probability of the second class into an existing column
 #' predictSql(fitLogit, table = "LAB.ADMIT", type = "response",
 #'            into = "P_ADMIT")
+#'
+#' # the same by key: a MERGE that computes the linear predictor once
+#' predictSql(fitLogit, table = "LAB.ADMIT", type = "response",
+#'            into = "P_ADMIT", id = "ID")
 #'
 #' # both class probabilities and the class, with the key
 #' predictSql(fitLogit, table = "LAB.ADMIT", output = "both",
@@ -165,6 +186,10 @@ predictSql <- function(object, table,
     stop("'table' must be the name of the database table.")
   if (statement == "create" && is.null(target))
     stop("statement = 'create' needs the name of the new table in 'target'.")
+  if (isFALSE(id) && statement != "update")
+    id <- NULL
+  if (!is.null(id) && !isFALSE(id) && !is.character(id))
+    stop("'id' must be a character vector of column names.")
   if (!is.null(vars) && (!is.character(vars) || is.null(names(vars))))
     stop("'vars' must be a named character vector (model name = column).")
 
@@ -199,7 +224,9 @@ predictSql <- function(object, table,
 
   res <- switch(statement,
     expr   = exprs,
-    update = .sqlUpdate(exprs, table),
+    update = if (isFALSE(id) || (is.null(id) && dialect != "exasol"))
+               .sqlUpdate(exprs, table)
+             else .sqlMerge(spec, exprs, table, id, dialect),
     select = .sqlSelect(spec, exprs, table, id),
     create = {
       sel <- .sqlSelect(spec, exprs, table, id, into =
@@ -1057,6 +1084,11 @@ print.PredictSql <- function(x, ...) {
   x
 }
 
+# Continuation lines indented by two spaces, but not within a literal
+#' @keywords internal
+.sqlIndent <- function(x)
+  .sqlOutside(x, function(piece) gsub("\n", "\n  ", piece, fixed = TRUE))
+
 .sqlRefPattern <- "\\{[A-Za-z0-9_]+\\}"
 
 # Names of the definitions an expression refers to
@@ -1099,6 +1131,32 @@ print.PredictSql <- function(x, ...) {
 }
 
 
+# UPDATE by key as a MERGE of the table with its own predictions: the
+# source is the staged SELECT of .sqlSelect(), so every intermediate
+# result is computed once.  Without a key (Exasol only) the rows are
+# identified by the pseudo column ROWID, which the source hands on under
+# the name ROW_ID_.  The target columns are qualified for Exasol, as in
+# its documentation, and bare elsewhere (PostgreSQL and DuckDB reject a
+# qualified target).
+#' @keywords internal
+.sqlMerge <- function(spec, exprs, table, id, dialect) {
+
+  key <- id
+  if (is.null(id)) {
+    key <- "ROWID"
+    id  <- "ROW_ID_"
+  }
+
+  out <- names(spec$out)
+  tgt <- if (dialect == "exasol") paste0("t.", out) else out
+  paste0("MERGE INTO ", table, " t\nUSING (\n  ",
+         .sqlIndent(.sqlSelect(spec, exprs, table, id, key = key)),
+         "\n) q\nON (", paste0("t.", key, " = q.", id, collapse = " AND "),
+         ")\nWHEN MATCHED THEN UPDATE SET\n  ",
+         paste0(tgt, " = q.", out, collapse = ",\n  "))
+}
+
+
 # ALTER TABLE for the columns of an UPDATE: floating point numbers, a
 # string for the predicted class
 #' @keywords internal
@@ -1113,9 +1171,10 @@ print.PredictSql <- function(x, ...) {
 
 # SELECT of the predictions.  Without 'id' all columns of the table are
 # returned and the expressions are inlined.  With 'id' the definitions are
-# computed stage by stage in nested subqueries, each one once.
+# computed stage by stage in nested subqueries, each one once.  'key' are
+# the columns of the table behind 'id', if they are named differently.
 #' @keywords internal
-.sqlSelect <- function(spec, exprs, table, id, into = NULL) {
+.sqlSelect <- function(spec, exprs, table, id, into = NULL, key = id) {
 
   into <- if (is.null(into)) "" else paste0("\nINTO ", into)
 
@@ -1144,23 +1203,25 @@ print.PredictSql <- function(x, ...) {
   body  <- vapply(defs, .sqlReplaceRefs, character(1L),
                   to = function(r) alias[[r]])
 
+  # the key is read, and renamed if need be, in the innermost stage
+  src <- ifelse(key == id, id, paste0(key, " AS ", id))
+
   query <- table
   for (d in seq_len(D)) {
     cur  <- names(defs)[depth == d]
+    ids  <- if (d == 1L) src else id
     cols <- if (d < D) {
-      c(id, alias[depth < d], paste0(body[cur], " AS ", alias[cur]))
+      c(ids, alias[depth < d], paste0(body[cur], " AS ", alias[cur]))
     } else {
       # last stage: the outputs under their names
-      c(id, vapply(names(spec$out), function(o) {
+      c(ids, vapply(names(spec$out), function(o) {
         nm <- spec$out[[o]]
         paste0(if (depth[[nm]] == D) body[[nm]] else alias[[nm]], " AS ", o)
       }, character(1L)))
     }
     from  <- if (d == 1L) query
              else paste0("(\n  ",
-                         # indented, but not within a literal
-                         .sqlOutside(query, function(piece)
-                           gsub("\n", "\n  ", piece, fixed = TRUE)),
+                         .sqlIndent(query),
                          "\n) q", d - 1L)
     query <- paste0("SELECT ", paste(cols, collapse = ",\n  "),
                     if (d == D) into, "\nFROM ", from)
