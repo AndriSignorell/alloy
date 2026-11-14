@@ -23,7 +23,7 @@ they have in predict.FitMod."><meta property="og:image" content="https://andrisi
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.928</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.930</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -132,9 +132,14 @@ prediction, <code>P_&lt;level&gt;</code> for class probabilities and
 
 
 <dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
-<dd><p>For <code>"select"</code> and <code>"create"</code>: the columns of
-<code>table</code> to return along with the predictions, typically the key.
-If <code>NULL</code> (default) all columns are returned.</p></dd>
+<dd><p>The key of <code>table</code>, one or several column names.  For
+<code>"select"</code> and <code>"create"</code> these columns are returned along
+with the predictions (if <code>NULL</code>, the default, all columns are).
+For <code>"update"</code> a key turns the statement into a <code>MERGE</code>
+that computes the linear predictor only once, see Details; with
+<code>dialect = "exasol"</code> this is the default even without a key
+(the rows are then identified by <code>ROWID</code>), and
+<code>id = FALSE</code> asks for the plain <code>UPDATE</code>.</p></dd>
 
 
 <dt id="arg-target">target<a class="anchor" aria-label="anchor" href="#arg-target"></a></dt>
@@ -216,10 +221,21 @@ splits in SQL; a row whose split variable is <code>NULL</code> gets a
 existing columns of <code>table</code>; the columns must exist (the
 <code>ALTER TABLE</code> needed is in the attribute <code>"ddl"</code> of the
 result).  <code>"select"</code> and <code>"create"</code> return the predictions
-along with <code>id</code>; intermediate results that are needed more than
-once (the linear predictor, the leaf of a tree) are then computed in a
-subquery.  <code>"expr"</code> returns the bare expressions as a named
-character vector.</p>
+along with <code>id</code>.  <code>"expr"</code> returns the bare expressions as a
+named character vector.</p>
+<p><strong>Size of the SQL.</strong>  Intermediate results - the linear predictor,
+the leaf of a tree - are needed several times: the inverse link refers
+to the linear predictor three times, a class probability of a
+multinomial model to all of them.  Without <code>id</code> each reference is
+written out, and the statement grows accordingly.  With <code>id</code> the
+intermediate results are computed once, in nested subqueries, and
+referred to by name.  For <code>"select"</code> and <code>"create"</code> the
+subqueries are the statement itself; for <code>"update"</code> they are the
+source of a <code>MERGE INTO table USING (...) ON (key)</code>, which
+requires <code>id</code> to identify the rows of <code>table</code> uniquely.  So
+give <code>id</code> whenever the table has a key.  In Exasol no key is
+needed: without <code>id</code> the <code>MERGE</code> joins on the pseudo column
+<code>ROWID</code>.</p>
 <p><strong>Exasol.</strong>  A logarithm of a value that is not positive, a square
 root of a negative value or a division by zero is an error in Exasol
 and aborts the whole statement, where R returns <code>-Inf</code>,
@@ -259,31 +275,56 @@ database treats them as floating point numbers.</p>
 <span class="r-in"><span>           into <span class="op">=</span> <span class="st">"P_ADMIT"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> UPDATE LAB.ADMIT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> SET P_ADMIT =</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   CASE WHEN (-3.989979073331031e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791526e-03 * gre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022142e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   CASE WHEN (-3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022186e-01 * gpa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   + CASE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '1' THEN 0e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '2' THEN -6.7544292796356076e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678867e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.55146367691807e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   END) &gt; 7e2 THEN 1e0 WHEN (-3.989979073331031e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791526e-03 * gre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022142e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.5514636769180703e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   END) &gt; 7e2 THEN 1e0 WHEN (-3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022186e-01 * gpa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   + CASE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '1' THEN 0e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '2' THEN -6.7544292796356076e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678867e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.55146367691807e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   END) &lt; -7e2 THEN 0e0 ELSE 1e0 / (1e0 + EXP(-(-3.989979073331031e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791526e-03 * gre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022142e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.5514636769180703e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   END) &lt; -7e2 THEN 0e0 ELSE 1e0 / (1e0 + EXP(-(-3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022186e-01 * gpa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   + CASE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '1' THEN 0e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '2' THEN -6.7544292796356076e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678867e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.55146367691807e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.5514636769180703e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   END))) END;</span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># the same by key: a MERGE that computes the linear predictor once</span></span></span>
+<span class="r-in"><span><span class="fu">predictSql</span><span class="op">(</span><span class="va">fitLogit</span>, table <span class="op">=</span> <span class="st">"LAB.ADMIT"</span>, type <span class="op">=</span> <span class="st">"response"</span>,</span></span>
+<span class="r-in"><span>           into <span class="op">=</span> <span class="st">"P_ADMIT"</span>, id <span class="op">=</span> <span class="st">"ID"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> MERGE INTO LAB.ADMIT t</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> USING (</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   SELECT ID,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN ETA_ &gt; 7e2 THEN 1e0 WHEN ETA_ &lt; -7e2 THEN 0e0 ELSE 1e0 / (1e0 + EXP(-ETA_)) END AS P_ADMIT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   FROM (</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     SELECT ID,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       -3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       + 8.0403754928022186e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       + CASE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '1' THEN 0e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '2' THEN -6.7544292796356076e-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '4' THEN -1.5514636769180703e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       END AS ETA_</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     FROM LAB.ADMIT</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   ) q1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ) q</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> ON (t.ID = q.ID)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> WHEN MATCHED THEN UPDATE SET</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   P_ADMIT = q.P_ADMIT;</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># both class probabilities and the class, with the key</span></span></span>
 <span class="r-in"><span><span class="fu">predictSql</span><span class="op">(</span><span class="va">fitLogit</span>, table <span class="op">=</span> <span class="st">"LAB.ADMIT"</span>, output <span class="op">=</span> <span class="st">"both"</span>,</span></span>
@@ -298,14 +339,14 @@ database treats them as floating point numbers.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     CASE WHEN ETA_ &gt; 7e2 THEN 1e0 WHEN ETA_ &lt; -7e2 THEN 0e0 ELSE 1e0 / (1e0 + EXP(-ETA_)) END AS P_</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   FROM (</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     SELECT ID,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       -3.989979073331031e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       + 2.2644257861791526e-03 * gre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>       + 8.0403754928022142e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       -3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>       + 8.0403754928022186e-01 * gpa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       + CASE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '1' THEN 0e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '2' THEN -6.7544292796356076e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '3' THEN -1.3402039164678867e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '4' THEN -1.55146367691807e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>         WHEN rank = '4' THEN -1.5514636769180703e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       END AS ETA_</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     FROM LAB.ADMIT</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ) q1</span>
@@ -314,14 +355,14 @@ database treats them as floating point numbers.</p>
 <span class="r-in"><span><span class="co"># the linear predictor as a bare expression</span></span></span>
 <span class="r-in"><span><span class="fu">predictSql</span><span class="op">(</span><span class="va">fitLogit</span>, type <span class="op">=</span> <span class="st">"link"</span>, statement <span class="op">=</span> <span class="st">"expr"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> -- PRED</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> -3.989979073331031e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791526e-03 * gre</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022142e-01 * gpa</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> -3.9899790733310319e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 2.2644257861791518e-03 * gre</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   + 8.0403754928022186e-01 * gpa</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   + CASE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '1' THEN 0e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '2' THEN -6.7544292796356076e-01</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678867e+00</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.55146367691807e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '3' THEN -1.3402039164678872e+00</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     WHEN rank = '4' THEN -1.5514636769180703e+00</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   END</span>
 <span class="r-in"><span></span></span>
 </code></pre></div>

@@ -15,7 +15,7 @@ extracting coefficients, confidence intervals, and model statistics."><meta prop
 
     <a class="navbar-brand me-2" href="../index.html">alloy</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.928</small>
+    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.930</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,7 +72,14 @@ extracting coefficients, confidence intervals, and model statistics.</p>
 
 
 <dt id="arg-fun">FUN<a class="anchor" aria-label="anchor" href="#arg-fun"></a></dt>
-<dd><p>Formatting function applied to coefficients</p></dd>
+<dd><p>Formatting function applied to the coefficients of each
+model. It is called as
+<code>FUN(est, se, tval, pval, lci, uci)</code> with six numeric vectors
+of equal length (one element per coefficient: estimate, standard
+error, test statistic, p-value, lower and upper confidence limit)
+and must return a vector of the same length, typically character.
+The arguments are matched by position. The default (<code>NULL</code>)
+shows the estimate followed by significance stars.</p></dd>
 
 
 <dt id="arg-order">order<a class="anchor" aria-label="anchor" href="#arg-order"></a></dt>
@@ -187,6 +194,83 @@ the model object of the underlying fitting function.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 8       n vars          1                2      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 9       n coef          2                3      </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 10    McFadden         0.556            0.767   </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># --- Custom cell format: estimate with confidence interval ---</span></span></span>
+<span class="r-in"><span><span class="co"># FUN receives the vectors est, se, tval, pval, lci, uci</span></span></span>
+<span class="r-in"><span><span class="va">fci</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span>, <span class="va">se</span>, <span class="va">tval</span>, <span class="va">pval</span>, <span class="va">lci</span>, <span class="va">uci</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu">pharos</span><span class="fu">::</span><span class="fu"><a href="https://andrisignorell.github.io/pharos/reference/fmCI.html" class="external-link">fmCI</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">lci</span>, <span class="va">uci</span><span class="op">)</span>, template <span class="op">=</span> <span class="st">"%s (%s, %s)"</span>, digits <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tMod</span><span class="op">(</span><span class="va">m1</span>, <span class="va">m2</span>, FUN <span class="op">=</span> <span class="va">fci</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>             coef                                      m1    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    (Intercept)                     37.285 (33.450, 41.120)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2             wt                     -5.344 (-6.486, -4.203)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3             hp                       -                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4            ---                                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  adj.r.squared                      0.745                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6            AIC                    166.029                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7              N                      32                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8            NAs                       0                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9         n vars                       1                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10        n coef                       2                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11           MAE                      2.341                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12          RMSE                      2.949                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                         m2    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                      37.227 (33.957, 40.497)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                      -3.878 (-5.172, -2.584)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                      -0.032 (-0.050, -0.013)</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                             </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                       0.815                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                     156.652                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                       32                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                        0                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                        2                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                       3                    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 11                      1.901                 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 12                      2.469                 </span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># odds ratios with confidence interval and significance stars</span></span></span>
+<span class="r-in"><span><span class="va">forr</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">est</span>, <span class="va">se</span>, <span class="va">tval</span>, <span class="va">pval</span>, <span class="va">lci</span>, <span class="va">uci</span><span class="op">)</span></span></span>
+<span class="r-in"><span>  <span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste</a></span><span class="op">(</span><span class="fu">pharos</span><span class="fu">::</span><span class="fu"><a href="https://andrisignorell.github.io/pharos/reference/fmCI.html" class="external-link">fmCI</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">exp</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">cbind</a></span><span class="op">(</span><span class="va">est</span>, <span class="va">lci</span>, <span class="va">uci</span><span class="op">)</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                     template <span class="op">=</span> <span class="st">"%s (%s, %s)"</span>, digits <span class="op">=</span> <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>        <span class="fu">pharos</span><span class="fu">::</span><span class="fu"><a href="https://andrisignorell.github.io/pharos/reference/fm.html" class="external-link">fm</a></span><span class="op">(</span><span class="va">pval</span>, fmt <span class="op">=</span> <span class="st">"*"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tMod</span><span class="op">(</span><span class="va">g1</span>, <span class="va">g2</span>, FUN <span class="op">=</span> <span class="va">forr</span><span class="op">)</span></span></span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>glm.fit: fitted probabilities numerically 0 or 1 occurred</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>           coef                                                   g1    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  (Intercept)                          169459.57 (183.79, 1.83e+10) **</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           wt                               0.02 (0.00, 0.16) **      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           hp                                -                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4          ---                                                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5          AIC                              23.176                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6            N                               32                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7          NAs                                0                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8       n vars                                1                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9       n coef                                2                        </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10    McFadden                               0.556                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                                                          g2    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                1.56e+08 (4342.77, 4.08e+17) *</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                0.00 (3.36e-08, 0.02) **      </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                                1.04 (1.01, 1.09) *           </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                                                              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                               16.059                         </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                                32                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                 0                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                                 2                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 9                                 3                            </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 10                               0.767                         </span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># --- Survival models ---</span></span></span>
 <span class="r-in"><span><span class="kw">if</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/ns-load.html" class="external-link">requireNamespace</a></span><span class="op">(</span><span class="st">"survival"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span></span>

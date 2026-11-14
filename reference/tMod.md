@@ -26,7 +26,13 @@ plot(x, terms = NULL, intercept = FALSE, ...)
 
 - FUN:
 
-  Formatting function applied to coefficients
+  Formatting function applied to the coefficients of each model. It is
+  called as `FUN(est, se, tval, pval, lci, uci)` with six numeric
+  vectors of equal length (one element per coefficient: estimate,
+  standard error, test statistic, p-value, lower and upper confidence
+  limit) and must return a vector of the same length, typically
+  character. The arguments are matched by position. The default (`NULL`)
+  shows the estimate followed by significance stars.
 
 - order:
 
@@ -151,6 +157,83 @@ tMod(g1, g2)
 #> 8       n vars          1                2      
 #> 9       n coef          2                3      
 #> 10    McFadden         0.556            0.767   
+
+# --- Custom cell format: estimate with confidence interval ---
+# FUN receives the vectors est, se, tval, pval, lci, uci
+fci <- function(est, se, tval, pval, lci, uci)
+  pharos::fmCI(cbind(est, lci, uci), template = "%s (%s, %s)", digits = 3)
+tMod(m1, m2, FUN = fci)
+#>             coef                                      m1    
+#> 1    (Intercept)                     37.285 (33.450, 41.120)
+#> 2             wt                     -5.344 (-6.486, -4.203)
+#> 3             hp                       -                    
+#> 4            ---                                            
+#> 5  adj.r.squared                      0.745                 
+#> 6            AIC                    166.029                 
+#> 7              N                      32                    
+#> 8            NAs                       0                    
+#> 9         n vars                       1                    
+#> 10        n coef                       2                    
+#> 11           MAE                      2.341                 
+#> 12          RMSE                      2.949                 
+#>                                         m2    
+#> 1                      37.227 (33.957, 40.497)
+#> 2                      -3.878 (-5.172, -2.584)
+#> 3                      -0.032 (-0.050, -0.013)
+#> 4                                             
+#> 5                       0.815                 
+#> 6                     156.652                 
+#> 7                       32                    
+#> 8                        0                    
+#> 9                        2                    
+#> 10                       3                    
+#> 11                      1.901                 
+#> 12                      2.469                 
+
+# odds ratios with confidence interval and significance stars
+forr <- function(est, se, tval, pval, lci, uci)
+  paste(pharos::fmCI(exp(cbind(est, lci, uci)),
+                     template = "%s (%s, %s)", digits = 2),
+        pharos::fm(pval, fmt = "*"))
+tMod(g1, g2, FUN = forr)
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#> Warning: glm.fit: fitted probabilities numerically 0 or 1 occurred
+#>           coef                                                   g1    
+#> 1  (Intercept)                          169459.57 (183.79, 1.83e+10) **
+#> 2           wt                               0.02 (0.00, 0.16) **      
+#> 3           hp                                -                        
+#> 4          ---                                                         
+#> 5          AIC                              23.176                     
+#> 6            N                               32                        
+#> 7          NAs                                0                        
+#> 8       n vars                                1                        
+#> 9       n coef                                2                        
+#> 10    McFadden                               0.556                     
+#>                                                          g2    
+#> 1                                1.56e+08 (4342.77, 4.08e+17) *
+#> 2                                0.00 (3.36e-08, 0.02) **      
+#> 3                                1.04 (1.01, 1.09) *           
+#> 4                                                              
+#> 5                               16.059                         
+#> 6                                32                            
+#> 7                                 0                            
+#> 8                                 2                            
+#> 9                                 3                            
+#> 10                               0.767                         
 
 # --- Survival models ---
 if(requireNamespace("survival", quietly = TRUE)){
